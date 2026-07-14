@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "ID Card Template 13 Configuration Schema",
+  "description": "Schema for configuring ID card template variables - Oakwood High yellow/orange style",
+  "properties": {
+    "colors": {
+      "type": "object",
+      "properties": {
+        "primaryColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Primary Color",
+          "description": "Primary color used for top border, text highlights, and footer",
+          "default": "#F59E0B"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Secondary Color",
+          "description": "Secondary color used for photo placeholder background",
+          "default": "#FEF3C7"
+        },
+        "accentColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Accent Color",
+          "description": "Accent color used for blood group badge and academic year",
+          "default": "#EA580C"
+        }
+      },
+      "required": ["primaryColor", "secondaryColor", "accentColor"],
+      "additionalProperties": false
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "textColorForHeaderAndFooter": {
+          "type": "string",
+          "format": "color",
+          "title": "Text Color for Header and Footer",
+          "description": "Text color used for footer text",
+          "default": "#FFFFFF"
+        },
+        "defaultTextColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Default Text Color",
+          "description": "Default text color used for main content values",
+          "default": "#1F2937"
+        },
+        "defaultLabelColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Default Label Color",
+          "description": "Default label color used for field labels",
+          "default": "#6B7280"
+        },
+        "bloodGroupTextColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Blood Group Text Color",
+          "description": "Text color for blood group badge",
+          "default": "#FFFFFF"
+        }
+      },
+      "required": [
+        "textColorForHeaderAndFooter",
+        "defaultTextColor",
+        "defaultLabelColor",
+        "bloodGroupTextColor"
+      ],
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "object",
+      "properties": {
+        "footerText": {
+          "type": "string",
+          "title": "Footer Text",
+          "description": "Footer text to be displayed at the bottom of the card",
+          "default": "Valid Until: 2030"
+        }
+      },
+      "required": ["footerText"],
+      "additionalProperties": false
+    },
+    "schoolLogoFileId": {
+      "type": "string",
+      "title": "School Logo for ID Card",
+      "description": "File ID for the school logo image displayed in the header"
+    }
+  },
+  "required": ["colors", "typography", "text"],
+  "additionalProperties": false
+}

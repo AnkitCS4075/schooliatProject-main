@@ -1,0 +1,3520 @@
+{
+	"info": {
+		"_postman_id": "schooliat-mobile-api-v1",
+		"name": "SchooliAt Mobile API",
+		"description": "Complete API collection for SchooliAt Mobile Application (Android/iOS)\n\nSupports three user types:\n- TEACHER: Manage classes, students, attendance, homework, and marks\n- STUDENT: View attendance, homework, results, timetable, and fees\n- EMPLOYEE: Manage schools, vendors, licenses, and system administration\n\nBase URL: https://api.schooliat.com\nNote: Auth endpoints are at root level (/auth/*), other endpoints support both legacy (/endpoint) and versioned (/api/v1/endpoint) routes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "schooliat-api"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android",
+								"description": "Platform: android | ios"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"email\": \"teacher1@gis001.edu\",\n    \"password\": \"Teacher@123\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/authenticate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"authenticate"
+							]
+						},
+						"description": "Authenticate user and receive JWT token. Roles allowed: TEACHER, STUDENT, EMPLOYEE"
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"email\": \"user@example.com\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Request password reset OTP"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"email\": \"user@example.com\",\n    \"otp\": \"123456\",\n    \"newPassword\": \"newPassword123\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": "Reset password using OTP"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"currentPassword\": \"oldPassword123\",\n    \"newPassword\": \"newPassword123\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						},
+						"description": "Change password for authenticated users"
+					},
+					"response": []
+				},
+				{
+					"name": "Request OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"email\": \"user@example.com\",\n    \"purpose\": \"verification\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/request-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"request-otp"
+							]
+						},
+						"description": "Request OTP for various purposes: verification, password-reset, login, deletion"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"email\": \"user@example.com\",\n    \"otp\": \"123456\",\n    \"purpose\": \"verification\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"verify-otp"
+							]
+						},
+						"description": "Verify OTP code"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Teacher",
+			"item": [
+				{
+					"name": "Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/statistics/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"dashboard"
+							]
+						},
+						"description": "Get teacher dashboard statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Students",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "classId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get list of students filtered by teacher's classes"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "student-id"
+								}
+							]
+						},
+						"description": "Get student details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Attendance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"studentId\": \"student-id\",\n    \"classId\": \"class-id\",\n    \"date\": \"2026-02-09\",\n    \"status\": \"PRESENT\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/mark",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"mark"
+							]
+						},
+						"description": "Mark daily attendance for a student. Status: PRESENT, ABSENT, LATE, HALF_DAY"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Bulk Attendance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"classId\": \"class-id\",\n    \"date\": \"2026-02-09\",\n    \"attendance\": [\n      {\n        \"studentId\": \"student-id-1\",\n        \"status\": \"PRESENT\"\n      },\n      {\n        \"studentId\": \"student-id-2\",\n        \"status\": \"ABSENT\",\n        \"absenceReason\": \"Sick\"\n      }\n    ]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/mark-bulk",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"mark-bulk"
+							]
+						},
+						"description": "Mark attendance for multiple students at once"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "classId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get attendance records with filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance Statistics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/statistics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"statistics"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "classId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get attendance statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Homework",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"title\": \"Math Assignment 1\",\n    \"description\": \"Complete exercises 1-10\",\n    \"classIds\": [\"class-id-1\", \"class-id-2\"],\n    \"subjectId\": \"subject-id\",\n    \"dueDate\": \"2026-02-15T23:59:59Z\",\n    \"isMCQ\": false,\n    \"attachments\": [\"file-id-1\"],\n    \"mcqQuestions\": []\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/homework",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"homework"
+							]
+						},
+						"description": "Create a new homework assignment"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Homework",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/homework",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"homework"
+							],
+							"query": [
+								{
+									"key": "studentId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "classId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true,
+									"description": "PENDING, SUBMITTED, GRADED"
+								}
+							]
+						},
+						"description": "Get homework assignments"
+					},
+					"response": []
+				},
+				{
+					"name": "Grade Homework",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"submissionId\": \"submission-id\",\n    \"grade\": \"A+\",\n    \"feedback\": \"Excellent work!\",\n    \"marksObtained\": 95,\n    \"maxMarks\": 100\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/homework/:id/grade",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"homework",
+								":id",
+								"grade"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "homework-id"
+								}
+							]
+						},
+						"description": "Grade a homework submission"
+					},
+					"response": []
+				},
+				{
+					"name": "Enter Marks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"examId\": \"exam-id\",\n    \"studentId\": \"student-id\",\n    \"subjectId\": \"subject-id\",\n    \"classId\": \"class-id\",\n    \"marksObtained\": 85,\n    \"maxMarks\": 100\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/marks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"marks"
+							]
+						},
+						"description": "Enter marks for a student in an exam"
+					},
+					"response": []
+				},
+				{
+					"name": "Enter Bulk Marks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"examId\": \"exam-id\",\n    \"classId\": \"class-id\",\n    \"subjectId\": \"subject-id\",\n    \"maxMarks\": 100,\n    \"marks\": [\n      {\n        \"studentId\": \"student-id-1\",\n        \"marksObtained\": 85\n      },\n      {\n        \"studentId\": \"student-id-2\",\n        \"marksObtained\": 90\n      }\n    ]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/marks/bulk",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"marks",
+								"bulk"
+							]
+						},
+						"description": "Enter marks for multiple students"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Marks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/marks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"marks"
+							],
+							"query": [
+								{
+									"key": "examId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "studentId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "classId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "subjectId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get marks with filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Calculate Result",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"examId\": \"exam-id\",\n    \"classId\": \"class-id\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/marks/calculate-result",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"marks",
+								"calculate-result"
+							]
+						},
+						"description": "Calculate and generate results for an exam"
+					},
+					"response": []
+				},
+				{
+					"name": "Publish Results",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"resultIds\": [\"result-id-1\", \"result-id-2\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/marks/publish-results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"marks",
+								"publish-results"
+							]
+						},
+						"description": "Publish results for students"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Timetables",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/timetables",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"timetables"
+							],
+							"query": [
+								{
+									"key": "classId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "teacherId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "subjectId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "isActive",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get timetables for teacher"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Timetable By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/timetables/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"timetables",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "timetable-id"
+								}
+							]
+						},
+						"description": "Get timetable details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Note",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"title\": \"Chapter 1 Notes\",\n    \"subjectId\": \"subject-id\",\n    \"classId\": \"class-id\",\n    \"chapter\": \"Chapter 1\",\n    \"fileId\": \"file-id\",\n    \"description\": \"Introduction to Algebra\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/notes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notes"
+							]
+						},
+						"description": "Upload a note/document"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notes"
+							],
+							"query": [
+								{
+									"key": "subjectId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "classId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "chapter",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get notes with filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Note",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"title\": \"Updated Chapter 1 Notes\",\n    \"description\": \"Updated description\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/notes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "note-id"
+								}
+							]
+						},
+						"description": "Update note information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Note",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notes/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "note-id"
+								}
+							]
+						},
+						"description": "Delete a note"
+					},
+					"response": []
+				},
+				{
+					"name": "Request Leave",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"leaveTypeId\": \"leave-type-id\",\n    \"startDate\": \"2026-02-15\",\n    \"endDate\": \"2026-02-17\",\n    \"reason\": \"Personal work\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/leave/request",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"leave",
+								"request"
+							]
+						},
+						"description": "Create a leave request"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leave Requests",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave/requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"leave",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true,
+									"description": "PENDING, APPROVED, REJECTED"
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get leave requests"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leave Balance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave/balance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"leave",
+								"balance"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get leave balance"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Student",
+			"item": [
+				{
+					"name": "Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/statistics/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"dashboard"
+							]
+						},
+						"description": "Get student dashboard statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{student_id}}",
+									"description": "Current student's ID"
+								}
+							]
+						},
+						"description": "Get student profile (use own ID)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true,
+									"description": "PRESENT, ABSENT, LATE, HALF_DAY"
+								}
+							]
+						},
+						"description": "Get own attendance records"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance Statistics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/statistics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"statistics"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get own attendance statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Homework",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/homework",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"homework"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true,
+									"description": "PENDING, SUBMITTED, GRADED"
+								}
+							]
+						},
+						"description": "Get homework assignments for student"
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Homework",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"files\": [\"file-id-1\", \"file-id-2\"],\n    \"answers\": []\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/homework/:id/submit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"homework",
+								":id",
+								"submit"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "homework-id"
+								}
+							]
+						},
+						"description": "Submit homework"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Marks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/marks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"marks"
+							],
+							"query": [
+								{
+									"key": "examId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "subjectId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get own marks"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Results",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/marks/results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"marks",
+								"results"
+							],
+							"query": [
+								{
+									"key": "examId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get published results"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Timetable",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/timetables",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"timetables"
+							],
+							"query": [
+								{
+									"key": "classId",
+									"value": "",
+									"disabled": true,
+									"description": "Defaults to student's class"
+								}
+							]
+						},
+						"description": "Get class timetable"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notes"
+							],
+							"query": [
+								{
+									"key": "subjectId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "chapter",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get notes for student's class and subjects"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Syllabus",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/syllabus",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"syllabus"
+							],
+							"query": [
+								{
+									"key": "subjectId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "academicYear",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get syllabus for student's class and subjects"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Fees",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/fees",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"fees"
+							],
+							"query": [
+								{
+									"key": "year",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get fee records for student"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Fee Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/fees/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"fees",
+								"status"
+							]
+						},
+						"description": "Get fee status summary"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employee",
+			"item": [
+				{
+					"name": "Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/statistics/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"dashboard"
+							]
+						},
+						"description": "Get employee dashboard statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Schools",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/schools?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"schools"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get list of schools"
+					},
+					"response": []
+				},
+				{
+					"name": "Get School By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/schools/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"schools",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "school-id"
+								}
+							]
+						},
+						"description": "Get school details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create School",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"name\": \"School Name\",\n    \"code\": \"SCH001\",\n    \"email\": \"school@example.com\",\n    \"phone\": \"1234567890\",\n    \"address\": \"School Address\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/schools",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"schools"
+							]
+						},
+						"description": "Create a new school"
+					},
+					"response": []
+				},
+				{
+					"name": "Update School",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"name\": \"Updated School Name\",\n    \"phone\": \"9876543210\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/schools/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"schools",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "school-id"
+								}
+							]
+						},
+						"description": "Update school information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete School",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/schools/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"schools",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "school-id"
+								}
+							]
+						},
+						"description": "Delete a school (soft delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employees",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/employees?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"employees"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get list of SchooliAt employees"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/employees/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"employees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "employee-id"
+								}
+							]
+						},
+						"description": "Get employee details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Employee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"email\": \"employee@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"roleId\": \"role-id\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/employees",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"employees"
+							]
+						},
+						"description": "Create a new employee"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"firstName\": \"Updated John\",\n    \"lastName\": \"Updated Doe\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/employees/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"employees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "employee-id"
+								}
+							]
+						},
+						"description": "Update employee information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/employees/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"employees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "employee-id"
+								}
+							]
+						},
+						"description": "Delete an employee (soft delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vendors",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vendors?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "employeeId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get list of vendors"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Vendor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"name\": \"Vendor Name\",\n    \"contactPerson\": \"Contact Person\",\n    \"email\": \"vendor@example.com\",\n    \"phone\": \"1234567890\",\n    \"address\": \"Vendor Address\",\n    \"employeeId\": \"employee-id\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/vendors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors"
+							]
+						},
+						"description": "Create a new vendor"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vendor By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vendors/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "vendor-id"
+								}
+							]
+						},
+						"description": "Get vendor details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Vendor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"name\": \"Updated Vendor Name\",\n    \"phone\": \"9876543210\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/vendors/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "vendor-id"
+								}
+							]
+						},
+						"description": "Update vendor information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Vendor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vendors/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vendors",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "vendor-id"
+								}
+							]
+						},
+						"description": "Delete a vendor"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Licenses",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/licenses?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"licenses"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "schoolId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true,
+									"description": "ACTIVE, EXPIRED, PENDING"
+								}
+							]
+						},
+						"description": "Get list of school licenses"
+					},
+					"response": []
+				},
+				{
+					"name": "Create License",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"schoolId\": \"school-id\",\n    \"startDate\": \"2026-01-01\",\n    \"endDate\": \"2026-12-31\",\n    \"maxStudents\": 1000,\n    \"maxStaff\": 100\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/licenses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"licenses"
+							]
+						},
+						"description": "Create a new license"
+					},
+					"response": []
+				},
+				{
+					"name": "Get License By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/licenses/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"licenses",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "license-id"
+								}
+							]
+						},
+						"description": "Get license details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update License",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"maxStudents\": 1500,\n    \"maxStaff\": 150\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/licenses/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"licenses",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "license-id"
+								}
+							]
+						},
+						"description": "Update license information"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Receipts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/receipts?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"receipts"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "schoolId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get list of receipts"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Receipt",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"schoolId\": \"school-id\",\n    \"amount\": 50000,\n    \"paymentDate\": \"2026-02-09\",\n    \"paymentMethod\": \"BANK_TRANSFER\",\n    \"transactionId\": \"TXN123456\",\n    \"remarks\": \"License renewal payment\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/receipts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"receipts"
+							]
+						},
+						"description": "Create a new receipt"
+					},
+					"response": []
+				},
+				{
+					"name": "Get School Statistics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/statistics/schools",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"schools"
+							]
+						},
+						"description": "Get statistics for all schools"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Shared",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/files",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"files"
+							]
+						},
+						"description": "Upload a file (multipart/form-data)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get File",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/files/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"files",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "file-id"
+								}
+							]
+						},
+						"description": "Get file by ID (returns file URL or metadata)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Conversation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"participants\": [\"user-id-1\", \"user-id-2\"],\n    \"type\": \"DIRECT\",\n    \"title\": \"Group Chat\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communication/conversations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communication",
+								"conversations"
+							]
+						},
+						"description": "Create a new conversation. Type: DIRECT, GROUP, CLASS, SCHOOL"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Conversations",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communication/conversations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communication",
+								"conversations"
+							]
+						},
+						"description": "Get user conversations"
+					},
+					"response": []
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"content\": \"Hello, how are you?\",\n    \"attachments\": [\"file-id-1\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communication/conversations/:id/messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communication",
+								"conversations",
+								":id",
+								"messages"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "conversation-id"
+								}
+							]
+						},
+						"description": "Send a message in a conversation"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Messages",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communication/conversations/:id/messages?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communication",
+								"conversations",
+								":id",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "conversation-id"
+								}
+							]
+						},
+						"description": "Get messages in a conversation"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notifications?page=1&limit=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "isRead",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get user notifications"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notifications/:id/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								":id",
+								"read"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "notification-id"
+								}
+							]
+						},
+						"description": "Mark a notification as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Announcements",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communication/announcements",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communication",
+								"announcements"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get announcements"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Circulars",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/circulars",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"circulars"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "",
+									"disabled": true,
+									"description": "ANNOUNCEMENT, NOTICE, CIRCULAR"
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true,
+									"description": "DRAFT, PUBLISHED, ARCHIVED"
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get circulars"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Events",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/calendar/events",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"calendar",
+								"events"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "",
+									"disabled": true,
+									"description": "HOLIDAY, EXAM, FUNCTION, OTHER"
+								}
+							]
+						},
+						"description": "Get calendar events"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Calendar",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/calendar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"calendar"
+							]
+						},
+						"description": "Get calendar view with events and holidays"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Galleries",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-platform",
+								"value": "android"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gallery",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gallery"
+							],
+							"query": [
+								{
+									"key": "eventId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "privacy",
+									"value": "",
+									"disabled": true,
+									"description": "PUBLIC, PRIVATE, SCHOOL_ONLY"
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get galleries"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://api.schooliat.com",
+			"type": "string",
+			"description": "Base URL without /api/v1 - auth endpoints are at root level"
+		},
+		{
+			"key": "api_base_url",
+			"value": "https://api.schooliat.com/api/v1",
+			"type": "string",
+			"description": "Versioned API base URL for non-auth endpoints"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "student_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

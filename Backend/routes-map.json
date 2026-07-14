@@ -1,0 +1,389 @@
+{
+  "auth": [
+    { "method": "POST", "path": "/authenticate" },
+    { "method": "POST", "path": "/request-otp" },
+    { "method": "POST", "path": "/verify-otp" },
+    { "method": "POST", "path": "/forgot-password" },
+    { "method": "POST", "path": "/reset-password" },
+    { "method": "POST", "path": "/change-password" },
+    { "method": "GET", "path": "/roles" },
+    { "method": "GET", "path": "/me" },
+    { "method": "PATCH", "path": "/me" }
+  ],
+  "users": [
+    { "method": "POST", "path": "/teachers" },
+    { "method": "GET", "path": "/teachers" },
+    { "method": "GET", "path": "/teachers/:id" },
+    { "method": "PATCH", "path": "/teachers/:id" },
+    { "method": "DELETE", "path": "/teachers/:id" },
+    { "method": "POST", "path": "/staff" },
+    { "method": "GET", "path": "/staff" },
+    { "method": "GET", "path": "/staff/:id" },
+    { "method": "PATCH", "path": "/staff/:id" },
+    { "method": "DELETE", "path": "/staff/:id" },
+    { "method": "POST", "path": "/students" },
+    { "method": "GET", "path": "/students" },
+    { "method": "GET", "path": "/students/:id" },
+    { "method": "PATCH", "path": "/students/:id" },
+    { "method": "DELETE", "path": "/students/:id" },
+    { "method": "PATCH", "path": "/students/bulk-assign-class" },
+    { "method": "POST", "path": "/teachers/bulk" },
+    { "method": "POST", "path": "/students/bulk" },
+    { "method": "GET", "path": "/students/export" },
+    { "method": "GET", "path": "/teachers/export" },
+    { "method": "POST", "path": "/employees" },
+    { "method": "GET", "path": "/employees" },
+    { "method": "GET", "path": "/employees/:id" },
+    { "method": "PATCH", "path": "/employees/:id" },
+    { "method": "DELETE", "path": "/employees/:id" },
+    { "method": "PATCH", "path": "/employees/:id/permissions" }
+  ],
+  "students": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" }
+  ],
+  "employees": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "POST", "path": "/" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "PUT", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "schools": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/my-school" },
+    { "method": "GET", "path": "/classes" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "PATCH", "path": "/my-school" },
+    { "method": "POST", "path": "/classes" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "PATCH", "path": "/classes/:id" },
+    { "method": "DELETE", "path": "/:id" },
+    { "method": "DELETE", "path": "/classes/:id" },
+    { "method": "GET", "path": "/classes/:id/students/export" }
+  ],
+  "regions": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "vendors": [
+    { "method": "GET", "path": "/stats" },
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "transports": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" },
+    { "method": "POST", "path": "/routes" },
+    { "method": "GET", "path": "/routes" },
+    { "method": "PUT", "path": "/routes/:id" },
+    { "method": "DELETE", "path": "/routes/:id" },
+    { "method": "POST", "path": "/routes/stops" },
+    { "method": "PUT", "path": "/routes/stops/:id" },
+    { "method": "DELETE", "path": "/routes/stops/:id" },
+    { "method": "POST", "path": "/routes/:routeId/students/:studentId" },
+    { "method": "GET", "path": "/routes/:routeId/students" },
+    { "method": "POST", "path": "/:transportId/maintenance" },
+    { "method": "GET", "path": "/:transportId/maintenance" }
+  ],
+  "files": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/:id" }
+  ],
+  "licenses": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "PUT", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "receipts": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" },
+    { "method": "POST", "path": "/:id/generate" }
+  ],
+  "invoices": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" },
+    { "method": "POST", "path": "/:id/generate" }
+  ],
+  "statistics": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/schools" },
+    { "method": "GET", "path": "/schools/:id/revenue" },
+    { "method": "GET", "path": "/dashboard" }
+  ],
+  "locations": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "letterhead": [
+    { "method": "GET", "path": "/" },
+    { "method": "POST", "path": "/generate" }
+  ],
+  "calendar": [
+    { "method": "GET", "path": "/" },
+    { "method": "POST", "path": "/events" },
+    { "method": "GET", "path": "/events" },
+    { "method": "PATCH", "path": "/events/:id" },
+    { "method": "DELETE", "path": "/events/:id" },
+    { "method": "POST", "path": "/holidays" },
+    { "method": "GET", "path": "/holidays" },
+    { "method": "PATCH", "path": "/holidays/:id" },
+    { "method": "DELETE", "path": "/holidays/:id" },
+    { "method": "POST", "path": "/exam-calendars" },
+    { "method": "GET", "path": "/exam-calendars" },
+    { "method": "PATCH", "path": "/exam-calendars/:id" },
+    { "method": "DELETE", "path": "/exam-calendars/:id" },
+    { "method": "POST", "path": "/notices" },
+    { "method": "GET", "path": "/notices" },
+    { "method": "PATCH", "path": "/notices/:id" },
+    { "method": "DELETE", "path": "/notices/:id" },
+    { "method": "GET", "path": "/:date" }
+  ],
+  "exams": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "id-cards": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/status" },
+    { "method": "GET", "path": "/config" },
+    { "method": "POST", "path": "/config" },
+    { "method": "POST", "path": "/classes/:classId/generate" }
+  ],
+  "templates": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:templateId/default" }
+  ],
+  "settings": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/platform-bank" },
+    { "method": "GET", "path": "/content/:slug" },
+    { "method": "PATCH", "path": "/" }
+  ],
+  "fees": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/status" },
+    { "method": "GET", "path": "/installments/:installmentNumber" },
+    { "method": "GET", "path": "/student/:studentId" },
+    { "method": "PATCH", "path": "/installments/:id/payment" },
+    { "method": "PATCH", "path": "/installments/:id/cancel" },
+    { "method": "GET", "path": "/export" }
+  ],
+  "grievances": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/my" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "POST", "path": "/:id/comments" }
+  ],
+  "salary-structures": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "POST", "path": "/" },
+    { "method": "PATCH", "path": "/:id" }
+  ],
+  "salary-payments": [
+    { "method": "GET", "path": "/" },
+    { "method": "POST", "path": "/generate" }
+  ],
+  "salaries": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "POST", "path": "/" },
+    { "method": "PATCH", "path": "/:id" }
+  ],
+  "attendance": [
+    { "method": "POST", "path": "/mark" },
+    { "method": "POST", "path": "/mark-bulk" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/statistics" },
+    { "method": "GET", "path": "/report" },
+    { "method": "POST", "path": "/periods" },
+    { "method": "GET", "path": "/periods" }
+  ],
+  "timetables": [
+    { "method": "POST", "path": "/" },
+    { "method": "PUT", "path": "/:timetableId" },
+    { "method": "GET", "path": "/my-classes" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "GET", "path": "/" },
+    { "method": "POST", "path": "/check-conflicts" },
+    { "method": "GET", "path": "/:timetableId/print" },
+    { "method": "DELETE", "path": "/:timetableId" }
+  ],
+  "homework": [
+    { "method": "POST", "path": "/" },
+    { "method": "POST", "path": "/submit" },
+    { "method": "POST", "path": "/:id/submit" },
+    { "method": "POST", "path": "/grade" },
+    { "method": "POST", "path": "/:id/grade" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:homeworkId/mcq-results" }
+  ],
+  "marks": [
+    { "method": "POST", "path": "/" },
+    { "method": "POST", "path": "/bulk" },
+    { "method": "POST", "path": "/calculate-result" },
+    { "method": "POST", "path": "/publish" },
+    { "method": "POST", "path": "/publish-results" },
+    { "method": "GET", "path": "/my-summary" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/results" },
+    { "method": "GET", "path": "/results/export" }
+  ],
+  "leave": [
+    { "method": "POST", "path": "/request" },
+    { "method": "POST", "path": "/approve" },
+    { "method": "POST", "path": "/reject" },
+    { "method": "GET", "path": "/balance" },
+    { "method": "GET", "path": "/requests" },
+    { "method": "GET", "path": "/history" },
+    { "method": "GET", "path": "/calendar" },
+    { "method": "POST", "path": "/types" },
+    { "method": "GET", "path": "/types" },
+    { "method": "PATCH", "path": "/types/:id" },
+    { "method": "DELETE", "path": "/types/:id" }
+  ],
+  "communication": [
+    { "method": "POST", "path": "/conversations" },
+    { "method": "GET", "path": "/conversations" },
+    { "method": "POST", "path": "/messages" },
+    { "method": "POST", "path": "/conversations/:id/messages" },
+    { "method": "GET", "path": "/conversations/:conversationId/messages" },
+    { "method": "POST", "path": "/announcements" },
+    { "method": "GET", "path": "/announcements" },
+    { "method": "GET", "path": "/notifications" },
+    { "method": "PUT", "path": "/notifications/:notificationId/read" },
+    { "method": "PUT", "path": "/notifications/read-all" },
+    { "method": "GET", "path": "/notifications/unread-count" }
+  ],
+  "notifications": [
+    { "method": "GET", "path": "/" },
+    { "method": "PUT", "path": "/:id/read" }
+  ],
+  "library": [
+    { "method": "POST", "path": "/books" },
+    { "method": "POST", "path": "/books/bulk" },
+    { "method": "PUT", "path": "/books/:id" },
+    { "method": "GET", "path": "/books/:id" },
+    { "method": "GET", "path": "/books" },
+    { "method": "DELETE", "path": "/books/:id" },
+    { "method": "POST", "path": "/issues" },
+    { "method": "POST", "path": "/issues/:id/return" },
+    { "method": "POST", "path": "/reservations" },
+    { "method": "GET", "path": "/history" },
+    { "method": "GET", "path": "/pending-returns" },
+    { "method": "GET", "path": "/dashboard" },
+    { "method": "POST", "path": "/calculate-fines" }
+  ],
+  "notes": [
+    { "method": "POST", "path": "/notes" },
+    { "method": "PUT", "path": "/notes/:id" },
+    { "method": "GET", "path": "/notes" },
+    { "method": "DELETE", "path": "/notes/:id" },
+    { "method": "POST", "path": "/syllabus" },
+    { "method": "PUT", "path": "/syllabus/:id" },
+    { "method": "GET", "path": "/syllabus" },
+    { "method": "DELETE", "path": "/syllabus/:id" },
+    { "method": "GET", "path": "/" },
+    { "method": "POST", "path": "/" },
+    { "method": "PUT", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "syllabus": [
+    { "method": "GET", "path": "/" }
+  ],
+  "gallery": [
+    { "method": "POST", "path": "/" },
+    { "method": "PUT", "path": "/:id" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" },
+    { "method": "POST", "path": "/images" },
+    { "method": "DELETE", "path": "/images/:id" }
+  ],
+  "circulars": [
+    { "method": "POST", "path": "/" },
+    { "method": "PUT", "path": "/:id" },
+    { "method": "POST", "path": "/:id/publish" },
+    { "method": "GET", "path": "/" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "parent": [
+    { "method": "GET", "path": "/children" },
+    { "method": "GET", "path": "/children/:childId" },
+    { "method": "GET", "path": "/dashboard" },
+    { "method": "POST", "path": "/children/:childId/link" }
+  ],
+  "reports": [
+    { "method": "GET", "path": "/dashboard-summary" },
+    { "method": "GET", "path": "/attendance" },
+    { "method": "GET", "path": "/fees" },
+    { "method": "GET", "path": "/academic" },
+    { "method": "GET", "path": "/salary" }
+  ],
+  "ai": [
+    { "method": "POST", "path": "/chat" },
+    { "method": "GET", "path": "/conversations" },
+    { "method": "GET", "path": "/conversations/:id" },
+    { "method": "POST", "path": "/faqs" },
+    { "method": "GET", "path": "/faqs" },
+    { "method": "PUT", "path": "/faqs/:id" },
+    { "method": "DELETE", "path": "/faqs/:id" }
+  ],
+  "audit": [
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" }
+  ],
+  "deletion-otp": [
+    { "method": "POST", "path": "/request" }
+  ],
+  "transfer-certificates": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "GET", "path": "/:id/download" },
+    { "method": "PATCH", "path": "/:id/status" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "emergency-contacts": [
+    { "method": "POST", "path": "/" },
+    { "method": "GET", "path": "/student/:studentId" },
+    { "method": "GET", "path": "/:id" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "subjects": [
+    { "method": "GET", "path": "/" },
+    { "method": "POST", "path": "/" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ],
+  "inventory": [
+    { "method": "GET", "path": "/" },
+    { "method": "POST", "path": "/" },
+    { "method": "PATCH", "path": "/:id" },
+    { "method": "DELETE", "path": "/:id" }
+  ]
+}

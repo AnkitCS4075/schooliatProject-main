@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "ID Card Template 5 Configuration Schema",
+  "description": "Schema for configuring ID card template variables - Nova Institute dark gradient style",
+  "properties": {
+    "colors": {
+      "type": "object",
+      "properties": {
+        "primaryColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Primary Color",
+          "description": "Primary dark color for card background gradient start",
+          "default": "#1E1B4B"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Secondary Color",
+          "description": "Secondary color for card background gradient end",
+          "default": "#312E81"
+        },
+        "accentGradientStart": {
+          "type": "string",
+          "format": "color",
+          "title": "Accent Gradient Start",
+          "description": "Start color for accent gradients (name pill, photo border)",
+          "default": "#EC4899"
+        },
+        "accentGradientEnd": {
+          "type": "string",
+          "format": "color",
+          "title": "Accent Gradient End",
+          "description": "End color for accent gradients (name pill, photo border)",
+          "default": "#8B5CF6"
+        }
+      },
+      "required": [
+        "primaryColor",
+        "secondaryColor",
+        "accentGradientStart",
+        "accentGradientEnd"
+      ],
+      "additionalProperties": false
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "textColorForHeaderAndFooter": {
+          "type": "string",
+          "format": "color",
+          "title": "Text Color for Header and Footer",
+          "description": "Text color used for header text and name pill",
+          "default": "#FFFFFF"
+        },
+        "defaultTextColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Default Text Color",
+          "description": "Default text color used for main content values",
+          "default": "#E0E7FF"
+        },
+        "defaultLabelColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Default Label Color",
+          "description": "Default label color used for field labels",
+          "default": "#A5B4FC"
+        },
+        "bloodGroupTextColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Blood Group Text Color",
+          "description": "Text color specifically for blood group value",
+          "default": "#F472B6"
+        }
+      },
+      "required": [
+        "textColorForHeaderAndFooter",
+        "defaultTextColor",
+        "defaultLabelColor",
+        "bloodGroupTextColor"
+      ],
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "object",
+      "properties": {
+        "footerText": {
+          "type": "string",
+          "title": "Footer Text",
+          "description": "Footer text to be displayed at the bottom of the card",
+          "default": "Valid Until: 2030"
+        }
+      },
+      "required": ["footerText"],
+      "additionalProperties": false
+    },
+    "schoolLogoFileId": {
+      "type": "string",
+      "title": "School Logo for ID Card",
+      "description": "File ID for the school logo image displayed in the header"
+    }
+  },
+  "required": ["colors", "typography", "text"],
+  "additionalProperties": false
+}

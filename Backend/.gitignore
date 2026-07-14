@@ -1,0 +1,22 @@
+# Node JS
+node_modules/
+package-lock.json
+
+# Typescript
+build/
+
+# VS Code
+.vscode/**
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/requests.json
+
+# Environment
+.env**
+!.env.sample
+
+# Prisma
+src/prisma/generated/
+
+# Local File Uploads
+files/

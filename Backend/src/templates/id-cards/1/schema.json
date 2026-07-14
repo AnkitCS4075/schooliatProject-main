@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "ID Card Template Configuration Schema",
+  "description": "Schema for configuring ID card template variables",
+  "properties": {
+    "colors": {
+      "type": "object",
+      "properties": {
+        "primaryColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Primary Color",
+          "description": "Primary color used for header, footer, photo border, and photo placeholder icon/text",
+          "default": "#2176FF"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Secondary Color",
+          "description": "Secondary color used for photo placeholder background",
+          "default": "#E0F2FF"
+        }
+      },
+      "required": ["primaryColor", "secondaryColor"],
+      "additionalProperties": false
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "textColorForHeaderAndFooter": {
+          "type": "string",
+          "format": "color",
+          "title": "Text Color for Header and Footer",
+          "description": "Text color used for header and footer text, and body background",
+          "default": "#FFFFFF"
+        },
+        "defaultTextColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Default Text Color",
+          "description": "Default text color used for main content text (name, ID, class, etc.)",
+          "default": "#000000"
+        },
+        "defaultLabelColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Default Label Color",
+          "description": "Default label color used for field labels (NAME, ID Number, Class, etc.)",
+          "default": "#9CA3AF"
+        },
+        "bloodGroupTextColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Blood Group Text Color",
+          "description": "Text color specifically for blood group value",
+          "default": "#EF4444"
+        }
+      },
+      "required": [
+        "textColorForHeaderAndFooter",
+        "defaultTextColor",
+        "defaultLabelColor",
+        "bloodGroupTextColor"
+      ],
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "object",
+      "properties": {
+        "footerText": {
+          "type": "string",
+          "title": "Footer Text",
+          "description": "Footer text to be displayed at the bottom of the card",
+          "default": "Valid Until: 2030"
+        }
+      },
+      "required": ["footerText"],
+      "additionalProperties": false
+    },
+    "schoolLogoFileId": {
+      "type": "string",
+      "title": "School Logo for ID Card",
+      "description": "File for the school logo image displayed in the header"
+    }
+  },
+  "required": ["colors", "typography", "text"],
+  "additionalProperties": false
+}

@@ -1,0 +1,281 @@
+/* CSS Variables */
+:root {
+    /* Color Variables */
+    --primary-color: #0D9488;
+    --secondary-color: #F0FDFA;
+    --accent-color: #14B8A6;
+    --background-color: #FFFFFF;
+    --text-color-for-header-and-footer: #FFFFFF;
+    --default-text-color: #1F2937;
+    --default-label-color: #6B7280;
+    --blood-group-text-color: #FFFFFF;
+    
+    /* Font Variables */
+    --font-family: 'Arial', 'Helvetica', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: #F3F4F6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.id-card-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.id-card {
+    width: 100%;
+    background-color: var(--background-color);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 130px;
+    background: linear-gradient(180deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-container {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 8px;
+}
+
+.logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.logo-icon-fallback {
+    width: 100%;
+    height: 100%;
+    color: var(--text-color-for-header-and-footer);
+}
+
+.school-name {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-color-for-header-and-footer);
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.photo-container {
+    width: 100%;
+}
+
+.photo-placeholder {
+    width: 100%;
+    height: 110px;
+    background-color: var(--secondary-color);
+    border: 3px solid var(--background-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.student-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-fallback {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.photo-icon {
+    width: 35px;
+    height: 35px;
+    color: var(--primary-color);
+}
+
+.photo-text {
+    font-family: var(--font-family);
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--primary-color);
+    text-transform: uppercase;
+}
+
+.blood-group-badge {
+    background-color: var(--background-color);
+    padding: 8px 20px;
+    border-radius: 20px;
+}
+
+.blood-group-badge span {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Student Info */
+.student-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.student-name {
+    font-family: var(--font-family);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--default-text-color);
+    margin: 0;
+}
+
+.tags {
+    display: flex;
+    gap: 8px;
+}
+
+.tag {
+    font-family: var(--font-family);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    padding: 5px 12px;
+    border-radius: 15px;
+    border: 1px solid var(--accent-color);
+}
+
+/* Details Grid */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.detail-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.detail-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.detail-content .label {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--default-label-color);
+}
+
+.detail-content .value {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--default-text-color);
+}
+
+/* Validity Section */
+.validity-section {
+    margin-top: auto;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.validity-text {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-color-for-header-and-footer);
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background-color: white;
+        padding: 0;
+    }
+    
+    .id-card-container {
+        max-width: 100%;
+    }
+    
+    .id-card {
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+    
+    @page {
+        margin: 0;
+        size: auto;
+    }
+}

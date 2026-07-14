@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience Certificate</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            border: 4px double #333;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+            min-height: 90vh;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .school-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .school-info {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            text-decoration: underline;
+            margin: 30px 0;
+            text-transform: uppercase;
+        }
+        .ref-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .content {
+            line-height: 2.2;
+            font-size: 16px;
+            text-align: justify;
+        }
+        .content p {
+            margin: 15px 0;
+        }
+        .highlight {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        .wishes {
+            margin-top: 30px;
+            font-size: 16px;
+            line-height: 2;
+        }
+        .footer {
+            margin-top: 100px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature {
+            text-align: center;
+            width: 200px;
+        }
+        .sig-line {
+            border-top: 1px solid #333;
+            margin-top: 50px;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(0, 0, 0, 0.04);
+            z-index: -1;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="watermark">EXPERIENCE CERTIFICATE</div>
+
+        <div class="header">
+            <h1 class="school-name">{{schoolName}}</h1>
+            <p class="school-info">{{schoolAddress}}</p>
+            <p class="school-info">Phone: {{schoolPhone}} | Email: {{schoolEmail}}</p>
+            {{#if schoolAffiliation}}
+            <p class="school-info">Affiliation No: {{schoolAffiliation}}</p>
+            {{/if}}
+        </div>
+
+        <div class="title">Experience Certificate</div>
+
+        <div class="ref-line">
+            <span>Ref No: {{refNumber}}</span>
+            <span>Date: {{date}}</span>
+        </div>
+
+        <div class="content">
+            <p><strong>To Whom It May Concern,</strong></p>
+
+            <p>
+                This is to certify that <span class="highlight">{{employeeName}}</span>
+                (Employee ID: <span class="highlight">{{employeeId}}</span>)
+                has worked at <span class="highlight">{{schoolName}}</span>
+                as a <span class="highlight">{{designation}}</span>
+                from <span class="highlight">{{joiningDate}}</span>
+                to <span class="highlight">{{relievingDate}}</span>.
+            </p>
+
+            <p>
+                During {{genderPronoun}} tenure, {{genderPronounLower}} was responsible for
+                {{#if subjects}}
+                teaching <span class="highlight">{{subjects}}</span>
+                {{#if classes}}
+                to classes <span class="highlight">{{classes}}</span>
+                {{/if}}.
+                {{else}}
+                performing {{genderPossessive}} duties and responsibilities with dedication and sincerity.
+                {{/if}}
+            </p>
+
+            <p>
+                {{genderPronounTitle}} highest qualification is <span class="highlight">{{qualification}}</span>
+                from <span class="highlight">{{university}}</span>
+                (Year of Passing: <span class="highlight">{{yearOfPassing}}</span>).
+            </p>
+
+            <p>
+                We found {{genderPronounObject}} to be hardworking, sincere, and dedicated during {{genderPossessive}}
+                association with the school. {{genderPronounTitle}} conduct and character have been satisfactory.
+            </p>
+        </div>
+
+        <div class="wishes">
+            <p>We wish {{genderPronounObject}} all the best for {{genderPossessive}} future endeavours.</p>
+        </div>
+
+        <div class="footer">
+            <div class="signature">
+                <div class="sig-line">Authorized Signatory</div>
+            </div>
+            <div class="signature">
+                <div class="sig-line">Principal (Seal)</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

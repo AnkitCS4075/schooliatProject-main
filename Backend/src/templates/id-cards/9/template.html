@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="id-card-container">
+        <div class="id-card">
+            <!-- Left Sidebar -->
+            <div class="sidebar">
+                <div class="logo-container">
+                    <img src="{{school.logoSrc}}" alt="School Logo" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <svg class="logo-icon-fallback" style="display: none;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h1 class="school-name">{{school.name}}</h1>
+                
+                <!-- Photo Section -->
+                <div class="photo-container">
+                    <div class="photo-placeholder">
+                        <img src="{{student.idPhotoSrc}}" alt="Student Photo" class="student-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="photo-fallback" style="display: none;">
+                            <svg class="photo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="photo-text">PHOTO</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="blood-group-badge">
+                    <span>{{student.studentProfile.bloodGroup}}</span>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Student Info -->
+                <div class="student-info">
+                    <h2 class="student-name">{{student.name}}</h2>
+                    <div class="tags">
+                        <span class="tag">{{class.grade}}</span>
+                        <span class="tag">Section {{class.division}}</span>
+                    </div>
+                </div>
+                
+                <!-- Details Grid -->
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <span class="label">Student ID</span>
+                            <span class="value">{{student.publicId}}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 5v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2zm12 4c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm-9 8c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1H6v-1z"/>
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <span class="label">Roll Number</span>
+                            <span class="value">{{rollNumber}}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <span class="label">Date of Birth</span>
+                            <span class="value">{{dateOfBirth}}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <span class="label">Emergency</span>
+                            <span class="value">{{student.contact}}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Validity -->
+                <div class="validity-section">
+                    <span class="validity-text">Valid Until: {{config.text.footerText}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

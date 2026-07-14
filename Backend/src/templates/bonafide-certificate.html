@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bonafide Certificate</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', Times, serif; background: #fff; color: #222; }
+    .page { width: 210mm; min-height: 297mm; padding: 20mm 25mm; margin: 0 auto; position: relative; }
+    .border-box { border: 3px double #333; padding: 15mm 10mm; min-height: 257mm; }
+    .header { text-align: center; margin-bottom: 8mm; }
+    .school-name { font-size: 22pt; font-weight: bold; color: #1a3c6e; text-transform: uppercase; letter-spacing: 1px; }
+    .school-address { font-size: 9pt; color: #555; margin-top: 2mm; }
+    .divider { border-top: 2px solid #1a3c6e; margin: 4mm 0; }
+    .title { text-align: center; font-size: 16pt; font-weight: bold; margin: 8mm 0 6mm; text-decoration: underline; color: #1a3c6e; }
+    .cert-number { text-align: right; font-size: 10pt; margin-bottom: 4mm; }
+    .body { font-size: 11pt; line-height: 1.8; text-align: justify; margin-bottom: 6mm; }
+    .body p { margin-bottom: 4mm; }
+    .details-table { width: 100%; border-collapse: collapse; margin: 5mm 0; font-size: 11pt; }
+    .details-table td { padding: 2mm 4mm; vertical-align: top; }
+    .details-table .label { font-weight: bold; width: 40%; white-space: nowrap; }
+    .details-table .value { border-bottom: 1px dotted #999; }
+    .purpose-section { background: #f5f7fa; border: 1px solid #ddd; padding: 3mm 5mm; margin: 5mm 0; border-radius: 2mm; }
+    .purpose-label { font-weight: bold; color: #1a3c6e; }
+    .footer { margin-top: 15mm; display: flex; justify-content: space-between; align-items: flex-end; }
+    .signature-block { text-align: center; width: 200px; }
+    .signature-line { border-top: 1px solid #333; margin-top: 15mm; padding-top: 2mm; font-size: 10pt; }
+    .principal-name { font-weight: bold; font-size: 10pt; }
+    .stamp-area { text-align: center; width: 120px; height: 80px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 8pt; color: #aaa; }
+    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 60pt; color: rgba(26, 60, 110, 0.04); font-weight: bold; text-transform: uppercase; pointer-events: none; white-space: nowrap; }
+    .date-line { text-align: right; font-size: 10pt; margin-bottom: 5mm; }
+    @media print { .page { margin: 0; padding: 0; } .border-box { border: 3px double #333; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="watermark">{{schoolName}}</div>
+    <div class="border-box">
+      <div class="header">
+        <div class="school-name">{{schoolName}}</div>
+        <div class="school-address">{{schoolAddress}}</div>
+      </div>
+      <div class="divider"></div>
+      <div class="title">BONAFIDE CERTIFICATE</div>
+      <div class="cert-number">Certificate No: {{certificateNumber}}</div>
+      <div class="date-line">Date of Issue: {{issueDate}}</div>
+      <div class="body">
+        <p>This is to certify that <strong>{{studentName}}</strong> is a bonafide student of this institution.</p>
+      </div>
+      <table class="details-table">
+        <tr>
+          <td class="label">Student Name:</td>
+          <td class="value">{{studentName}}</td>
+        </tr>
+        <tr>
+          <td class="label">Date of Birth:</td>
+          <td class="value">{{dateOfBirth}}</td>
+        </tr>
+        <tr>
+          <td class="label">Admission / Roll No:</td>
+          <td class="value">{{admissionNo}}</td>
+        </tr>
+        <tr>
+          <td class="label">Class &amp; Section:</td>
+          <td class="value">{{className}}</td>
+        </tr>
+        <tr>
+          <td class="label">Academic Year:</td>
+          <td class="value">{{academicYear}}</td>
+        </tr>
+        <tr>
+          <td class="label">Father's / Guardian's Name:</td>
+          <td class="value">{{fatherName}}</td>
+        </tr>
+        <tr>
+          <td class="label">Mother's Name:</td>
+          <td class="value">{{motherName}}</td>
+        </tr>
+      </table>
+      <div class="purpose-section">
+        <span class="purpose-label">Purpose:</span> This certificate is issued for the purpose of <strong>{{purpose}}</strong>.
+      </div>
+      <div class="body" style="margin-top: 8mm;">
+        <p>All the particular mentioned above are true to the best of my knowledge and belief.</p>
+      </div>
+      <div class="footer">
+        <div class="stamp-area">School Seal</div>
+        <div class="signature-block">
+          <div class="signature-line">
+            <div class="principal-name">{{principalName}}</div>
+            <div>Principal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

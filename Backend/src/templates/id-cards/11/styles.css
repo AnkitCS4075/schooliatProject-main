@@ -1,0 +1,323 @@
+/* CSS Variables */
+:root {
+    /* Color Variables */
+    --primary-color: #059669;
+    --secondary-color: #D1FAE5;
+    --accent-color: #10B981;
+    --background-color: #FFFFFF;
+    --text-color-for-header-and-footer: #FFFFFF;
+    --default-text-color: #1F2937;
+    --default-label-color: #6B7280;
+    --blood-group-text-color: #EF4444;
+    
+    /* Font Variables */
+    --font-family: 'Arial', 'Helvetica', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: #F3F4F6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.id-card-container {
+    width: 100%;
+    max-width: 550px;
+}
+
+.id-card {
+    width: 100%;
+    background-color: var(--background-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header Section */
+.header {
+    background-color: var(--primary-color);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-container {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 5px;
+}
+
+.logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.logo-icon-fallback {
+    width: 100%;
+    height: 100%;
+    color: var(--text-color-for-header-and-footer);
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.school-name {
+    font-family: var(--font-family);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-color-for-header-and-footer);
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.card-title {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* Body Section */
+.body {
+    background-color: var(--background-color);
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+/* Photo Section */
+.photo-section {
+    flex-shrink: 0;
+}
+
+.photo-container {
+    position: relative;
+}
+
+.photo-placeholder {
+    width: 90px;
+    height: 110px;
+    background-color: var(--secondary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.student-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-fallback {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.photo-icon {
+    width: 35px;
+    height: 35px;
+    color: var(--primary-color);
+}
+
+.photo-text {
+    font-family: var(--font-family);
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--primary-color);
+    text-transform: uppercase;
+}
+
+/* Details Section */
+.details-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.student-name {
+    font-family: var(--font-family);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--default-text-color);
+    margin: 0;
+}
+
+.class-info {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.detail-item .label {
+    font-family: var(--font-family);
+    font-size: 9px;
+    font-weight: 400;
+    color: var(--default-label-color);
+}
+
+.detail-item .value {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--default-text-color);
+}
+
+.blood-group {
+    color: var(--blood-group-text-color) !important;
+}
+
+/* Emergency Section */
+.emergency-section {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 140px;
+}
+
+.emergency-card {
+    background-color: var(--secondary-color);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.emergency-icon {
+    display: none;
+}
+
+.emergency-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.emergency-label {
+    font-family: var(--font-family);
+    font-size: 9px;
+    font-weight: 400;
+    color: var(--primary-color);
+}
+
+.emergency-value {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--default-text-color);
+}
+
+.validity-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.validity-label {
+    font-family: var(--font-family);
+    font-size: 9px;
+    font-weight: 400;
+    color: var(--default-label-color);
+}
+
+.validity-value {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--default-text-color);
+}
+
+/* Footer Section */
+.footer {
+    background-color: var(--primary-color);
+    padding: 10px 20px;
+    text-align: center;
+}
+
+.footer-text {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-color-for-header-and-footer);
+    margin: 0;
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background-color: white;
+        padding: 0;
+    }
+    
+    .id-card-container {
+        max-width: 100%;
+    }
+    
+    .id-card {
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+    
+    @page {
+        margin: 0;
+        size: auto;
+    }
+}

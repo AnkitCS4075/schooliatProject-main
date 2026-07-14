@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Certificate</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            border: 4px double #333;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .school-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .school-info {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+        .content {
+            line-height: 2;
+            font-size: 16px;
+        }
+        .row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .label {
+            font-weight: bold;
+            width: 250px;
+        }
+        .value {
+            border-bottom: 1px dotted #333;
+            flex: 1;
+            padding-left: 10px;
+        }
+        .footer {
+            margin-top: 80px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature {
+            text-align: center;
+            width: 200px;
+        }
+        .sig-line {
+            border-top: 1px solid #333;
+            margin-top: 50px;
+            padding-top: 5px;
+        }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            color: rgba(0, 0, 0, 0.05);
+            z-index: -1;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="watermark">TRANSFER CERTIFICATE</div>
+        
+        <div class="header">
+            <h1 class="school-name">{{schoolName}}</h1>
+            <p class="school-info">{{schoolAddress}}</p>
+            <p class="school-info">Phone: {{schoolPhone}} | Email: {{schoolEmail}}</p>
+            <p class="school-info">Affiliation No: {{schoolAffiliation}}</p>
+        </div>
+
+        <div class="title">Transfer Certificate</div>
+
+        <div class="content">
+            <div class="row">
+                <div class="label">TC Number:</div>
+                <div class="value">{{tcNumber}}</div>
+                <div class="label" style="width: 100px; padding-left: 20px;">Date:</div>
+                <div class="value">{{date}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">Name of Student:</div>
+                <div class="value">{{studentName}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">Father's Name:</div>
+                <div class="value">{{fatherName}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">Mother's Name:</div>
+                <div class="value">{{motherName}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">Date of Birth:</div>
+                <div class="value">{{dob}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">Admission Number:</div>
+                <div class="value">{{admissionNumber}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">Class/Grade:</div>
+                <div class="value">{{class}} {{division}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">Date of Leaving:</div>
+                <div class="value">{{transferDate}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">Reason for Leaving:</div>
+                <div class="value">{{reason}}</div>
+            </div>
+
+            <div class="row">
+                <div class="label">School to which joining:</div>
+                <div class="value">{{destinationSchool}}</div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <p>Certified that the above information is in accordance with the school records.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="signature">
+                <div class="sig-line">Class Teacher</div>
+            </div>
+            <div class="signature">
+                <div class="sig-line">Checked By</div>
+            </div>
+            <div class="signature">
+                <div class="sig-line">Principal (Seal)</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

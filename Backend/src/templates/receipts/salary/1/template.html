@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Slip</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="receipt-container">
+        <div class="receipt">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="logo-container">
+                    <img src="{{school.logoSrc}}" alt="School Logo" class="logo-image"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="logo-fallback" style="display: none;">
+                        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="school-info">
+                    <h1 class="school-name">{{school.name}}</h1>
+                    <p class="school-address">{{school.address}}</p>
+                </div>
+            </div>
+
+            <!-- Receipt Title -->
+            <div class="receipt-title-section">
+                <h2 class="receipt-title">SALARY SLIP</h2>
+                <p class="receipt-number">Slip Month: {{salary.month}}</p>
+            </div>
+
+            <!-- Receipt Details -->
+            <div class="receipt-details">
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <span class="label">Date Generated:</span>
+                        <span class="value">{{receipt.date}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee Information -->
+            <div class="student-section">
+                <h3 class="section-title">Employee Details</h3>
+                <div class="student-details">
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="label">Employee Name:</span>
+                            <span class="value">{{employee.name}}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Role:</span>
+                            <span class="value">{{employee.role}}</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="label">Employee ID:</span>
+                            <span class="value">{{employee.publicId}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="payment-section">
+                <h3 class="section-title">Salary Breakdown</h3>
+                <table class="payment-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-right">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Gross Salary Amount</td>
+                            <td class="text-right">{{salary.grossAmount}}</td>
+                        </tr>
+                        <tr class="payment-row">
+                            <td><strong>Total Final Amount Paid</strong></td>
+                            <td class="text-right"><strong>{{salary.amountPaid}}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Payment Summary -->
+            <div class="summary-section">
+                <div class="summary-row total">
+                    <span class="summary-label">Status:</span>
+                    <span class="summary-value status-{{salary.statusClass}}">{{salary.status}}</span>
+                </div>
+            </div>
+
+            <!-- Amount in Words -->
+            <div class="amount-words">
+                <span class="label">Amount in Words:</span>
+                <span class="value">{{salary.amountInWords}}</span>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p class="signature-label">Authorized Signature</p>
+                    </div>
+                </div>
+                <div class="footer-note">
+                    <p>This is a computer-generated salary slip.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

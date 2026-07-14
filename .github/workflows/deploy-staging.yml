@@ -1,0 +1,95 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      # Deploy Backend Staging
+      - name: Deploy Backend Staging
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 15m
+          debug: true
+          script: |
+            set -e
+            echo "Deploying Backend Staging..."
+            cd /opt/schooliat/repo
+            echo "Pulling latest code from develop branch..."
+            git fetch origin develop
+            git checkout develop
+            git reset --hard origin/develop
+            git clean -fd
+            echo "Installing dependencies in repo (for migrations)..."
+            cd Backend
+            npm ci
+            echo "Generating Prisma client..."
+            npm run prisma:generate
+            echo "Running database migrations..."
+            export DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}"
+            npm run prisma:migrate:deploy
+            echo "Copying code to deployment directory..."
+            mkdir -p /opt/schooliat/backend/staging/current
+            rsync -av --exclude 'node_modules' --exclude '.git' --exclude 'prisma/migrations' /opt/schooliat/repo/Backend/ /opt/schooliat/backend/staging/current/
+            echo "Installing dependencies in deployment directory (including devDependencies)..."
+            cd /opt/schooliat/backend/staging/current
+            npm ci
+            echo "Generating Prisma client in deployment directory..."
+            npm run prisma:generate
+            echo "Restarting PM2 process..."
+            pm2 restart schooliat-backend-staging --update-env
+            echo "Backend Staging deployment complete!"
+      
+      # Deploy Dashboard Staging
+      - name: Deploy Dashboard Staging
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 15m
+          debug: true
+          script: |
+            set -e
+            echo "Deploying Dashboard Staging..."
+            cd /opt/schooliat/repo
+            echo "Ensuring latest code from develop branch..."
+            git fetch origin develop
+            git checkout develop
+            cd dashboard
+            echo "Installing dependencies (including devDependencies for build)..."
+            npm ci
+            echo "Loading staging environment variables for build..."
+            cp /opt/schooliat/dashboard/staging/shared/.env .env.production
+            echo "Building dashboard with staging API URL..."
+            NODE_ENV=production npm run build
+            echo "Copying build to staging directory..."
+            rm -rf /opt/schooliat/dashboard/staging/.next
+            cp -r .next /opt/schooliat/dashboard/staging/
+            cp -r public /opt/schooliat/dashboard/staging/ 2>/dev/null || true
+            cp package.json /opt/schooliat/dashboard/staging/
+            echo "Restarting PM2 process..."
+            pm2 restart schooliat-dashboard-staging --update-env
+            echo "Dashboard Staging deployment complete!"

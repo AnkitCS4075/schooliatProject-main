@@ -1,0 +1,189 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: main
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      # Check SSH connectivity before deployment
+      - name: Check SSH Connectivity
+        id: ssh_check
+        uses: appleboy/ssh-action@master
+        continue-on-error: true
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 120s
+          command_timeout: 30s
+          debug: true
+          script: |
+            echo "Checking SSH connectivity..."
+            uptime
+            echo "SSH connection successful!"
+      
+      # Deploy Backend Production
+      - name: Deploy Backend Production
+        uses: appleboy/ssh-action@master
+        continue-on-error: false
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 180s
+          command_timeout: 25m
+          debug: true
+          script: |
+            set -e
+            echo "Deploying Backend Production..."
+            cd /opt/schooliat/repo
+            echo "Pulling latest code from main branch..."
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+            git clean -fd
+            echo "Installing dependencies in repo (for migrations)..."
+            cd Backend
+            npm ci
+            echo "Generating Prisma client..."
+            npm run prisma:generate
+            export DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}"
+            echo "Creating database backup (using DATABASE_URL for TCP auth)..."
+            mkdir -p /opt/schooliat/shared/backups
+            pg_dump -d "$DATABASE_URL" -F p -f /opt/schooliat/shared/backups/pre-migration-$(date +%Y%m%d-%H%M%S).sql 2>/dev/null || echo "WARNING: Backup failed, continuing..."
+            echo "Running database migrations..."
+            if ! npm run prisma:migrate:deploy; then
+              echo "Migration deploy failed. Attempting to resolve failed migration and retry (P3009 recovery)..."
+              npx prisma migrate resolve --rolled-back "20260221053404_add_missing_models" --schema=src/prisma/db/schema.prisma || true
+              if ! npm run prisma:migrate:deploy; then
+                echo "Migration still failed. On the server run: npx prisma migrate resolve --rolled-back 20260221053404_add_missing_models then re-deploy, or see https://pris.ly/d/migrate-resolve"
+                exit 1
+              fi
+            fi
+            echo "Copying code to deployment directory..."
+            mkdir -p /opt/schooliat/backend/production/current
+            rsync -av --exclude 'node_modules' --exclude '.git' --exclude 'prisma/migrations' /opt/schooliat/repo/Backend/ /opt/schooliat/backend/production/current/
+            echo "Installing dependencies in deployment directory (including devDependencies)..."
+            cd /opt/schooliat/backend/production/current
+            npm ci
+            echo "Generating Prisma client in deployment directory..."
+            npm run prisma:generate
+            echo "Restarting PM2 process..."
+            pm2 restart schooliat-backend-production --update-env
+            echo "Backend Production deployment complete!"
+      
+      # Deploy Dashboard Production
+      - name: Deploy Dashboard Production
+        uses: appleboy/ssh-action@master
+        continue-on-error: false
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 180s
+          command_timeout: 25m
+          debug: true
+          script: |
+            set -e
+            echo "Deploying Dashboard Production..."
+            cd /opt/schooliat/repo
+            echo "Ensuring latest code from main branch..."
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+            cd dashboard
+            
+            # Clean up any local environment pollution
+            rm -f .env.local
+            
+            echo "Installing dependencies..."
+            npm ci
+            
+            echo "Loading production environment variables for build..."
+            if [ -f /opt/schooliat/dashboard/production/shared/.env ]; then
+                cp /opt/schooliat/dashboard/production/shared/.env .env.production
+                echo "   ✓ Environment file loaded"
+            else
+                echo "   ⚠ Warning: .env file not found"
+            fi
+            
+            echo "Building dashboard..."
+            NODE_ENV=production npm run build
+            
+            echo "Copying build to production directory..."
+            mkdir -p /opt/schooliat/dashboard/production/current
+            rm -rf /opt/schooliat/dashboard/production/current/.next
+            cp -r .next /opt/schooliat/dashboard/production/current/
+            cp -r public /opt/schooliat/dashboard/production/current/ 2>/dev/null || true
+            cp package.json /opt/schooliat/dashboard/production/current/
+            
+            echo "Clearing Next.js cache..."
+            rm -rf /opt/schooliat/dashboard/production/current/.next/cache
+            
+            echo "Restarting PM2 process..."
+            pm2 restart schooliat-dashboard-production --update-env
+            sleep 5
+            pm2 status schooliat-dashboard-production
+            echo "Dashboard Production deployment complete!"
+      
+      # Deploy Landing
+      - name: Deploy Landing
+        uses: appleboy/ssh-action@master
+        continue-on-error: false
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          timeout: 180s
+          command_timeout: 25m
+          debug: true
+          script: |
+            set -e
+            echo "Deploying Landing Page..."
+            cd /opt/schooliat/repo
+            echo "Ensuring latest code from main branch..."
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+            cd landing
+            
+            echo "Installing dependencies..."
+            npm ci
+            
+            echo "Loading production environment variables for build..."
+            if [ -f /opt/schooliat/landing/production/shared/.env ]; then
+                cp /opt/schooliat/landing/production/shared/.env .env.production
+            fi
+            
+            echo "Building landing page..."
+            NODE_ENV=production npm run build
+            
+            echo "Copying files to web root..."
+            # Use sudo for web root directory operations if needed
+            sudo rm -rf /var/www/schooliat-landing/* || rm -rf /var/www/schooliat-landing/*
+            sudo cp -r out/* /var/www/schooliat-landing/ || cp -r out/* /var/www/schooliat-landing/
+            sudo chown -R www-data:www-data /var/www/schooliat-landing || chown -R www-data:www-data /var/www/schooliat-landing
+            
+            echo "Reloading Nginx..."
+            sudo systemctl reload nginx || systemctl reload nginx
+            echo "Landing Page deployment complete!"

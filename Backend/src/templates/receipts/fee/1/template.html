@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Receipt</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="receipt-container">
+        <div class="receipt">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="logo-container">
+                    <img src="{{school.logoSrc}}" alt="School Logo" class="logo-image"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="logo-fallback" style="display: none;">
+                        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="school-info">
+                    <h1 class="school-name">{{school.name}}</h1>
+                    <p class="school-address">{{school.address}}</p>
+                </div>
+            </div>
+
+            <!-- Receipt Title -->
+            <div class="receipt-title-section">
+                <h2 class="receipt-title">FEE RECEIPT</h2>
+                <p class="receipt-number">Receipt No: {{receipt.number}}</p>
+            </div>
+
+            <!-- Receipt Details -->
+            <div class="receipt-details">
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <span class="label">Date:</span>
+                        <span class="value">{{receipt.date}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Academic Year:</span>
+                        <span class="value">{{receipt.year}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Information -->
+            <div class="student-section">
+                <h3 class="section-title">Student Details</h3>
+                <div class="student-details">
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="label">Student ID:</span>
+                            <span class="value">{{student.publicId}}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Name:</span>
+                            <span class="value">{{student.name}}</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="label">Class:</span>
+                            <span class="value">{{student.class}}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Father's Name:</span>
+                            <span class="value">{{student.fatherName}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="payment-section">
+                <h3 class="section-title">Payment Details</h3>
+                <table class="payment-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-right">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Fee Installment {{payment.installmentNumber}}</td>
+                            <td class="text-right">{{payment.installmentAmount}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment Method</strong></td>
+                            <td class="text-right"><strong>{{payment.method}}</strong></td>
+                        </tr>
+                        <tr class="payment-row">
+                            <td><strong>Amount Paid</strong></td>
+                            <td class="text-right"><strong>{{payment.amountPaid}}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{receipt.gstSectionHtml}}
+
+            <!-- Payment Summary -->
+            <div class="summary-section">
+                <div class="summary-row">
+                    <span class="summary-label">Total Installment Amount:</span>
+                    <span class="summary-value">₹{{payment.installmentAmount}}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Previously Paid:</span>
+                    <span class="summary-value">₹{{payment.previouslyPaid}}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">This Payment:</span>
+                    <span class="summary-value highlight">₹{{payment.amountPaid}}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Remaining Balance:</span>
+                    <span class="summary-value">₹{{payment.remainingAmount}}</span>
+                </div>
+                <div class="summary-row total">
+                    <span class="summary-label">Payment Status:</span>
+                    <span class="summary-value status-{{payment.statusClass}}">{{payment.status}}</span>
+                </div>
+            </div>
+
+            <!-- Amount in Words -->
+            <div class="amount-words">
+                <span class="label">Amount in Words:</span>
+                <span class="value">{{payment.amountInWords}}</span>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p class="signature-label">Authorized Signature</p>
+                    </div>
+                </div>
+                <div class="footer-note">
+                    <p>This is a computer-generated receipt and does not require a physical signature.</p>
+                    <p class="thank-you">Thank you for your payment!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

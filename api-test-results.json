@@ -1,0 +1,2367 @@
+{
+  "baseUrl": "https://api.schooliat.com",
+  "testedAt": "2026-03-11T12:55:48.926Z",
+  "tokenUsed": false,
+  "results": [
+    {
+      "method": "POST",
+      "path": "/auth/authenticate",
+      "group": "authentication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA003\",\"message\":\"Invalid email or password.\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/auth/request-otp",
+      "group": "authentication",
+      "status": 200,
+      "responsePreview": "{\"status\":200,\"message\":\"OTP sent successfully. Please check your email.\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/auth/verify-otp",
+      "group": "authentication",
+      "status": 400,
+      "responsePreview": "{\"status\":400,\"errorCode\":\"SA004\",\"message\":\"Invalid OTP. 4 attempt(s) remaining.\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/auth/forgot-password",
+      "group": "authentication",
+      "status": 200,
+      "responsePreview": "{\"status\":200,\"message\":\"If an account exists with this email, a password reset link has been sent.\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/auth/reset-password",
+      "group": "authentication",
+      "status": 400,
+      "responsePreview": "{\"status\":400,\"errorCode\":\"VALIDATION_ERROR\",\"message\":\"Validation failed\",\"errors\":[{\"path\":\"request.token\",\"message\":\"Required\"},{\"path\":\"request.password\",\"message\":\"Required\"}]}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/auth/change-password",
+      "group": "authentication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/auth/roles",
+      "group": "authentication",
+      "status": 200,
+      "responsePreview": "{\"status\":200,\"message\":\"Roles fetched\",\"data\":[{\"id\":\"0484d428-a361-4c97-8d1f-df054d9e7b09\",\"name\":\"EMPLOYEE\"},{\"id\":\"52550c3f-5c17-4e21-b37f-0027c79f775b\",\"name\":\"STUDENT\"},{\"id\":\"ab0c7983-f570-4782 ...",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me",
+      "group": "authentication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/auth/me",
+      "group": "authentication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/students",
+      "group": "students",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/students/:id",
+      "group": "students",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/employees",
+      "group": "employees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/employees/:id",
+      "group": "employees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/employees",
+      "group": "employees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/employees/:id",
+      "group": "employees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/employees/:id",
+      "group": "employees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/employees/:id",
+      "group": "employees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/teachers",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/teachers",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/teachers/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/teachers/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/teachers/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/staff",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/staff",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/staff/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/staff/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/staff/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/students",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/students",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/students/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/students/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/students/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/students/bulk-assign-class",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/teachers/bulk",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/students/bulk",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/students/export",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/teachers/export",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/employees",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/employees",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/employees/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/employees/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/employees/:id",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/employees/:id/permissions",
+      "group": "users",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard",
+      "group": "statistics",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics",
+      "group": "statistics",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/schools",
+      "group": "statistics",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/schools/:id/revenue",
+      "group": "statistics",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/mark",
+      "group": "attendance",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/mark-bulk",
+      "group": "attendance",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance",
+      "group": "attendance",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance/statistics",
+      "group": "attendance",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance/report",
+      "group": "attendance",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/periods",
+      "group": "attendance",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance/periods",
+      "group": "attendance",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework",
+      "group": "homework",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework/submit",
+      "group": "homework",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework/:id/submit",
+      "group": "homework",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework/grade",
+      "group": "homework",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework/:id/grade",
+      "group": "homework",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/homework",
+      "group": "homework",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/homework/:homeworkId/mcq-results",
+      "group": "homework",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks/bulk",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks/calculate-result",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks/publish",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks/publish-results",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/marks/my-summary",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/marks",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/marks/results",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/marks/results/export",
+      "group": "marks",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/timetables/my-classes",
+      "group": "timetables",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/timetables/:id",
+      "group": "timetables",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/timetables",
+      "group": "timetables",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/timetables",
+      "group": "timetables",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/timetables/:timetableId",
+      "group": "timetables",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/timetables/check-conflicts",
+      "group": "timetables",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/timetables/:timetableId/print",
+      "group": "timetables",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/timetables/:timetableId",
+      "group": "timetables",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notes",
+      "group": "notes",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notes",
+      "group": "notes",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notes/:id",
+      "group": "notes",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/notes/:id",
+      "group": "notes",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notes/notes",
+      "group": "notes",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notes/notes",
+      "group": "notes",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notes/notes/:id",
+      "group": "notes",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/notes/notes/:id",
+      "group": "notes",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/syllabus",
+      "group": "syllabus",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notes/syllabus",
+      "group": "syllabus",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notes/syllabus/:id",
+      "group": "syllabus",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notes/syllabus",
+      "group": "syllabus",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/notes/syllabus/:id",
+      "group": "syllabus",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/leave/request",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/requests",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/balance",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/history",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/calendar",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/leave/approve",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/leave/reject",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/leave/types",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/types",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/leave/types/:id",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/leave/types/:id",
+      "group": "leave",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees",
+      "group": "fees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees/status",
+      "group": "fees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees/installments/:installmentNumber",
+      "group": "fees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees/student/:studentId",
+      "group": "fees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/fees/request-otp",
+      "group": "fees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/fees/installments/:id/payment",
+      "group": "fees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees/export",
+      "group": "fees",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/communication/conversations",
+      "group": "communication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/conversations",
+      "group": "communication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/communication/messages",
+      "group": "communication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/communication/conversations/:id/messages",
+      "group": "communication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/conversations/:conversationId/messages",
+      "group": "communication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/communication/announcements",
+      "group": "communication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/announcements",
+      "group": "communication",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/notifications",
+      "group": "notifications",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/communication/notifications/:notificationId/read",
+      "group": "notifications",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/communication/notifications/read-all",
+      "group": "notifications",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/notifications/unread-count",
+      "group": "notifications",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications",
+      "group": "notifications",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notifications/:id/read",
+      "group": "notifications",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/events",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calendar/events",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/calendar/events/:id",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/calendar/events/:id",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/holidays",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calendar/holidays",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/calendar/holidays/:id",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/calendar/holidays/:id",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/exam-calendars",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calendar/exam-calendars",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/calendar/exam-calendars/:id",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/calendar/exam-calendars/:id",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/notices",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calendar/notices",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/calendar/notices/:id",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/calendar/notices/:id",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/:date",
+      "group": "calendar",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/files",
+      "group": "files",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/files/:id",
+      "group": "files",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools/:id",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/schools",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/schools/:id",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/schools/:id",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools/my-school",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/schools/my-school",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools/classes",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/schools/classes",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/schools/classes/:id",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/schools/classes/:id",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools/classes/:id/students/export",
+      "group": "schools",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings/content/:slug",
+      "group": "settings",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings",
+      "group": "settings",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings/platform-bank",
+      "group": "settings",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/settings",
+      "group": "settings",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/exams",
+      "group": "exams",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/exams",
+      "group": "exams",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/exams/:id",
+      "group": "exams",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/exams/:id",
+      "group": "exams",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/subjects",
+      "group": "subjects",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/subjects",
+      "group": "subjects",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/subjects/:id",
+      "group": "subjects",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/subjects/:id",
+      "group": "subjects",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vendors",
+      "group": "vendors",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vendors/stats",
+      "group": "vendors",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vendors",
+      "group": "vendors",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vendors/:id",
+      "group": "vendors",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/vendors/:id",
+      "group": "vendors",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/vendors/:id",
+      "group": "vendors",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/licenses",
+      "group": "licenses",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/licenses",
+      "group": "licenses",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/licenses/:id",
+      "group": "licenses",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/licenses/:id",
+      "group": "licenses",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/licenses/:id",
+      "group": "licenses",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/receipts",
+      "group": "receipts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/receipts",
+      "group": "receipts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/receipts/:id",
+      "group": "receipts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/receipts/:id",
+      "group": "receipts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/receipts/:id",
+      "group": "receipts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/receipts/:id/generate",
+      "group": "receipts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gallery",
+      "group": "gallery",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gallery/:id",
+      "group": "gallery",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gallery",
+      "group": "gallery",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/gallery/:id",
+      "group": "gallery",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/gallery/:id",
+      "group": "gallery",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gallery/images",
+      "group": "gallery",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/gallery/images/:id",
+      "group": "gallery",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parent/children",
+      "group": "parent",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parent/children/:childId",
+      "group": "parent",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parent/dashboard",
+      "group": "parent",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/parent/children/:childId/link",
+      "group": "parent",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/books",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/books/:id",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/books",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/books/bulk",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/library/books/:id",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/library/books/:id",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/issues",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/issues/:id/return",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/reservations",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/history",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/pending-returns",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/dashboard",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/calculate-fines",
+      "group": "library",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/circulars",
+      "group": "circulars",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/circulars",
+      "group": "circulars",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/circulars/:id",
+      "group": "circulars",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/circulars/:id/publish",
+      "group": "circulars",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/circulars/:id",
+      "group": "circulars",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/dashboard-summary",
+      "group": "reports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/attendance",
+      "group": "reports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/fees",
+      "group": "reports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/academic",
+      "group": "reports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/salary",
+      "group": "reports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/regions",
+      "group": "regions",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/regions",
+      "group": "regions",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/regions/:id",
+      "group": "regions",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/regions/:id",
+      "group": "regions",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transports",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/transports/:id",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/transports/:id",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transports/routes",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports/routes",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/transports/routes/:id",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/transports/routes/:id",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports/routes/stops",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/transports/routes/stops/:id",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/transports/routes/stops/:id",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports/routes/:routeId/students/:studentId",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transports/routes/:routeId/students",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports/:transportId/maintenance",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transports/:transportId/maintenance",
+      "group": "transports",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/invoices",
+      "group": "invoices",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/invoices",
+      "group": "invoices",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/invoices/:id",
+      "group": "invoices",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/invoices/:id",
+      "group": "invoices",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/invoices/:id",
+      "group": "invoices",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/invoices/:id/generate",
+      "group": "invoices",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations",
+      "group": "locations",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/locations",
+      "group": "locations",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/locations/:id",
+      "group": "locations",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/letterhead",
+      "group": "letterhead",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/letterhead/generate",
+      "group": "letterhead",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/id-cards",
+      "group": "id-cards",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/id-cards/status",
+      "group": "id-cards",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/id-cards/config",
+      "group": "id-cards",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/id-cards/config",
+      "group": "id-cards",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/id-cards/classes/:classId/generate",
+      "group": "id-cards",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/templates",
+      "group": "templates",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/templates/:templateId/default",
+      "group": "templates",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/grievances",
+      "group": "grievances",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/grievances",
+      "group": "grievances",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/grievances/my",
+      "group": "grievances",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/grievances/:id",
+      "group": "grievances",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/grievances/:id",
+      "group": "grievances",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/grievances/:id/comments",
+      "group": "grievances",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salary-structures",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salary-structures/:id",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/salary-structures",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/salary-structures/:id",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salary-payments",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/salary-payments/generate",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salaries",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salaries/:id",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/salaries",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/salaries/:id",
+      "group": "salary",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ai/chat",
+      "group": "ai",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/conversations",
+      "group": "ai",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/conversations/:id",
+      "group": "ai",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ai/faqs",
+      "group": "ai",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/faqs",
+      "group": "ai",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/ai/faqs/:id",
+      "group": "ai",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/ai/faqs/:id",
+      "group": "ai",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/audit",
+      "group": "audit",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/audit/:id",
+      "group": "audit",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/deletion-otp/request",
+      "group": "deletion-otp",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transfer-certificates",
+      "group": "transfer-certificates",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transfer-certificates",
+      "group": "transfer-certificates",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transfer-certificates/:id",
+      "group": "transfer-certificates",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transfer-certificates/:id/download",
+      "group": "transfer-certificates",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/transfer-certificates/:id/status",
+      "group": "transfer-certificates",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/transfer-certificates/:id",
+      "group": "transfer-certificates",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/emergency-contacts",
+      "group": "emergency-contacts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/emergency-contacts/student/:studentId",
+      "group": "emergency-contacts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/emergency-contacts/:id",
+      "group": "emergency-contacts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/emergency-contacts/:id",
+      "group": "emergency-contacts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/emergency-contacts/:id",
+      "group": "emergency-contacts",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/inventory",
+      "group": "inventory",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/inventory",
+      "group": "inventory",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/inventory/:id",
+      "group": "inventory",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/inventory/:id",
+      "group": "inventory",
+      "status": 401,
+      "responsePreview": "{\"status\":401,\"errorCode\":\"SA001\",\"message\":\"Unauthorized\"}",
+      "errorType": ""
+    }
+  ]
+}

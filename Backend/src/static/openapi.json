@@ -1,0 +1,4223 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SchooliAT API",
+    "description": "School Management Application API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Gender": {
+        "type": "string",
+        "enum": ["MALE", "FEMALE"]
+      },
+      "BloodGroup": {
+        "type": "string",
+        "enum": [
+          "A_POSITIVE",
+          "A_NEGATIVE",
+          "B_POSITIVE",
+          "B_NEGATIVE",
+          "AB_POSITIVE",
+          "AB_NEGATIVE",
+          "O_POSITIVE",
+          "O_NEGATIVE"
+        ]
+      },
+      "AccommodationType": {
+        "type": "string",
+        "enum": ["DAY_SCHOLAR", "HOSTELLER"]
+      },
+      "TransportType": {
+        "type": "string",
+        "enum": ["BUS", "VAN", "CAR"]
+      },
+      "LeadStatus": {
+        "type": "string",
+        "enum": ["NEW", "HOT", "COLD", "FOLLOW_UP", "CONVERTED"]
+      },
+      "PaymentMethod": {
+        "type": "string",
+        "enum": [
+          "CASH",
+          "BANK_TRANSFER",
+          "CHEQUE",
+          "UPI",
+          "CREDIT_CARD",
+          "DEBIT_CARD"
+        ]
+      },
+      "ReceiptStatus": {
+        "type": "string",
+        "enum": ["GENERATED", "SENT", "PAID", "CANCELLED"]
+      },
+      "LicenseStatus": {
+        "type": "string",
+        "enum": ["ACTIVE", "EXPIRING_SOON", "EXPIRED"]
+      },
+      "DateType": {
+        "type": "string",
+        "enum": ["SINGLE_DATE", "DATE_RANGE"]
+      },
+      "TemplateType": {
+        "type": "string",
+        "enum": ["ID_CARD", "RESULT", "INVENTORY_RECEIPT", "FEE_RECEIPT"]
+      },
+      "IdCardCollectionStatus": {
+        "type": "string",
+        "enum": ["GENERATED", "NOT_GENERATED", "IN_PROGRESS"]
+      },
+      "ExamType": {
+        "type": "string",
+        "enum": ["UNIT_TEST", "SEMESTER", "FINAL"]
+      },
+      "FeePaymentStatus": {
+        "type": "string",
+        "enum": ["PENDING", "PARTIALLY_PAID", "PAID"]
+      },
+      "GrievanceStatus": {
+        "type": "string",
+        "enum": ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]
+      },
+      "GrievancePriority": {
+        "type": "string",
+        "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check endpoint",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "API is live",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "SchooliAT API is live!"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/authenticate": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Authenticate user",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["email", "password"],
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "password": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User authenticated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User authenticated!"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "JWT token for authorization"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/users/students": {
+      "post": {
+        "tags": ["Users - Students"],
+        "summary": "Create a student",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "firstName",
+                      "lastName",
+                      "email",
+                      "contact",
+                      "gender",
+                      "dateOfBirth",
+                      "address",
+                      "classId",
+                      "apaarId",
+                      "fatherName",
+                      "motherName",
+                      "fatherContact",
+                      "motherContact",
+                      "accommodationType",
+                      "bloodGroup"
+                    ],
+                    "properties": {
+                      "firstName": { "type": "string" },
+                      "lastName": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "contact": { "type": "string" },
+                      "gender": { "$ref": "#/components/schemas/Gender" },
+                      "dateOfBirth": { "type": "string", "format": "date" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "aadhaarId": { "type": "string" },
+                      "classId": { "type": "string", "format": "uuid" },
+                      "transportId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                      },
+                      "apaarId": { "type": "string" },
+                      "fatherName": { "type": "string" },
+                      "motherName": { "type": "string" },
+                      "fatherContact": { "type": "string" },
+                      "motherContact": { "type": "string" },
+                      "fatherOccupation": { "type": "string" },
+                      "annualIncome": { "type": "string", "nullable": true },
+                      "accommodationType": {
+                        "$ref": "#/components/schemas/AccommodationType"
+                      },
+                      "bloodGroup": {
+                        "$ref": "#/components/schemas/BloodGroup"
+                      },
+                      "registrationPhotoId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "idPhotoId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Student created"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Users - Students"],
+        "summary": "Get all students",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Students fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Students fetched!"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "registrationPhotoId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "idPhotoId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "registrationPhotoUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "nullable": true,
+                            "description": "URL of the registration photo"
+                          },
+                          "idPhotoUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "nullable": true,
+                            "description": "URL of the ID photo"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/students/{id}": {
+      "patch": {
+        "tags": ["Users - Students"],
+        "summary": "Update a student",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "firstName": { "type": "string" },
+                      "lastName": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "contact": { "type": "string" },
+                      "gender": { "$ref": "#/components/schemas/Gender" },
+                      "dateOfBirth": { "type": "string", "format": "date" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "aadhaarId": { "type": "string" },
+                      "classId": { "type": "string", "format": "uuid" },
+                      "transportId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                      },
+                      "apaarId": { "type": "string" },
+                      "fatherName": { "type": "string" },
+                      "motherName": { "type": "string" },
+                      "fatherContact": { "type": "string" },
+                      "motherContact": { "type": "string" },
+                      "fatherOccupation": { "type": "string" },
+                      "annualIncome": { "type": "string", "nullable": true },
+                      "accommodationType": {
+                        "$ref": "#/components/schemas/AccommodationType"
+                      },
+                      "bloodGroup": {
+                        "$ref": "#/components/schemas/BloodGroup"
+                      },
+                      "registrationPhotoId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "idPhotoId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Student updated" },
+          "404": { "description": "Student not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Users - Students"],
+        "summary": "Delete a student",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Student deleted" },
+          "404": { "description": "Student not found" }
+        }
+      }
+    },
+    "/users/teachers": {
+      "post": {
+        "tags": ["Users - Teachers"],
+        "summary": "Create a teacher",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "firstName",
+                      "lastName",
+                      "email",
+                      "contact",
+                      "gender",
+                      "dateOfBirth",
+                      "address",
+                      "aadhaarId",
+                      "highestQualification",
+                      "university",
+                      "yearOfPassing"
+                    ],
+                    "properties": {
+                      "firstName": { "type": "string" },
+                      "lastName": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "contact": { "type": "string" },
+                      "gender": { "$ref": "#/components/schemas/Gender" },
+                      "dateOfBirth": { "type": "string", "format": "date" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "aadhaarId": { "type": "string" },
+                      "designation": { "type": "string" },
+                      "highestQualification": { "type": "string" },
+                      "university": { "type": "string" },
+                      "yearOfPassing": { "type": "integer" },
+                      "grade": { "type": "string" },
+                      "transportId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                      },
+                      "panCardNumber": { "type": "string", "nullable": true },
+                      "bloodGroup": {
+                        "$ref": "#/components/schemas/BloodGroup"
+                      },
+                      "registrationPhotoId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "idPhotoId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Teacher created" }
+        }
+      },
+      "get": {
+        "tags": ["Users - Teachers"],
+        "summary": "Get all teachers",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Teachers fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Teachers fetched!"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "registrationPhotoId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "idPhotoId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "registrationPhotoUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "nullable": true,
+                            "description": "URL of the registration photo"
+                          },
+                          "idPhotoUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "nullable": true,
+                            "description": "URL of the ID photo"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/teachers/{id}": {
+      "patch": {
+        "tags": ["Users - Teachers"],
+        "summary": "Update a teacher",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "firstName": { "type": "string" },
+                      "lastName": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "contact": { "type": "string" },
+                      "gender": { "$ref": "#/components/schemas/Gender" },
+                      "dateOfBirth": { "type": "string", "format": "date" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "aadhaarId": { "type": "string" },
+                      "designation": { "type": "string" },
+                      "highestQualification": { "type": "string" },
+                      "university": { "type": "string" },
+                      "yearOfPassing": { "type": "integer" },
+                      "grade": { "type": "string" },
+                      "transportId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                      },
+                      "panCardNumber": { "type": "string", "nullable": true },
+                      "bloodGroup": {
+                        "$ref": "#/components/schemas/BloodGroup"
+                      },
+                      "registrationPhotoId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "idPhotoId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Teacher updated" },
+          "404": { "description": "Teacher not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Users - Teachers"],
+        "summary": "Delete a teacher",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Teacher deleted" },
+          "404": { "description": "Teacher not found" }
+        }
+      }
+    },
+    "/users/employees": {
+      "post": {
+        "tags": ["Users - Employees"],
+        "summary": "Create an employee",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "firstName",
+                      "lastName",
+                      "email",
+                      "contact",
+                      "gender",
+                      "dateOfBirth",
+                      "address",
+                      "assignedRegionId"
+                    ],
+                    "properties": {
+                      "firstName": { "type": "string" },
+                      "lastName": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "contact": { "type": "string" },
+                      "gender": { "$ref": "#/components/schemas/Gender" },
+                      "dateOfBirth": { "type": "string", "format": "date" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "aadhaarId": { "type": "string" },
+                      "assignedRegionId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "registrationPhotoId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "idPhotoId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Employee created" }
+        }
+      },
+      "get": {
+        "tags": ["Users - Employees"],
+        "summary": "Get all employees",
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Employees fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Employees fetched!"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "registrationPhotoId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "idPhotoId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "registrationPhotoUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "nullable": true,
+                            "description": "URL of the registration photo"
+                          },
+                          "idPhotoUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "nullable": true,
+                            "description": "URL of the ID photo"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/employees/{id}": {
+      "get": {
+        "tags": ["Users - Employees"],
+        "summary": "Get an employee by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Employee fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Employee fetched!"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "registrationPhotoId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "idPhotoId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "registrationPhotoUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true,
+                          "description": "URL of the registration photo"
+                        },
+                        "idPhotoUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true,
+                          "description": "URL of the ID photo"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Employee not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Users - Employees"],
+        "summary": "Update an employee",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "firstName": { "type": "string" },
+                      "lastName": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "contact": { "type": "string" },
+                      "gender": { "$ref": "#/components/schemas/Gender" },
+                      "dateOfBirth": { "type": "string", "format": "date" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "aadhaarId": { "type": "string" },
+                      "assignedRegionId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "registrationPhotoId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "idPhotoId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Employee updated" },
+          "404": { "description": "Employee not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Users - Employees"],
+        "summary": "Delete an employee",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Employee deleted" },
+          "404": { "description": "Employee not found" }
+        }
+      }
+    },
+    "/users/roles": {
+      "get": {
+        "tags": ["Users - Roles"],
+        "summary": "Get all roles",
+        "responses": {
+          "200": { "description": "Roles fetched" }
+        }
+      }
+    },
+    "/users/change-password": {
+      "post": {
+        "tags": ["Users - Password"],
+        "summary": "Change current user's password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["currentPassword", "newPassword"],
+                    "properties": {
+                      "currentPassword": { "type": "string" },
+                      "newPassword": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password changed successfully" },
+          "400": { "description": "Incorrect current password" }
+        }
+      }
+    },
+    "/users/reset-password": {
+      "post": {
+        "tags": ["Users - Password"],
+        "summary": "Reset another user's password (admin only)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["userId", "newPassword"],
+                    "properties": {
+                      "userId": { "type": "string", "format": "uuid" },
+                      "newPassword": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password reset successfully" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "User not found" }
+        }
+      }
+    },
+    "/schools": {
+      "post": {
+        "tags": ["Schools"],
+        "summary": "Create a school",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["name", "email", "phone", "address", "code"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "phone": { "type": "string" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "code": { "type": "string" },
+                      "gstNumber": { "type": "string" },
+                      "principalName": { "type": "string" },
+                      "principalEmail": { "type": "string" },
+                      "principalPhone": { "type": "string" },
+                      "establishedYear": { "type": "string" },
+                      "boardAffiliation": { "type": "string" },
+                      "studentStrength": { "type": "string" },
+                      "certificateLink": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "School created" }
+        }
+      },
+      "get": {
+        "tags": ["Schools"],
+        "summary": "Get all schools",
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Schools fetched" }
+        }
+      }
+    },
+    "/schools/my-school": {
+      "get": {
+        "tags": ["Schools"],
+        "summary": "Get current user's school",
+        "responses": {
+          "200": { "description": "School fetched" }
+        }
+      }
+    },
+    "/schools/{id}": {
+      "patch": {
+        "tags": ["Schools"],
+        "summary": "Update a school",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "code": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "phone": { "type": "string" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "regionId": { "type": "string", "format": "uuid" },
+                      "certificateLink": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "School updated" },
+          "404": { "description": "School not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Schools"],
+        "summary": "Delete a school",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "School deleted" },
+          "404": { "description": "School not found" }
+        }
+      }
+    },
+    "/schools/classes": {
+      "post": {
+        "tags": ["Schools - Classes"],
+        "summary": "Create or update classes (batch operation)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["grade"],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "grade": { "type": "string" },
+                        "division": { "type": "string", "nullable": true },
+                        "classTeacherId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Classes processed successfully" }
+        }
+      },
+      "get": {
+        "tags": ["Schools - Classes"],
+        "summary": "Get all classes for current school",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Classes fetched" }
+        }
+      }
+    },
+    "/schools/classes/{id}": {
+      "patch": {
+        "tags": ["Schools - Classes"],
+        "summary": "Update a class",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "grade": { "type": "string" },
+                      "division": { "type": "string" },
+                      "classTeacherId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Class updated" },
+          "404": { "description": "Class not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Schools - Classes"],
+        "summary": "Delete a class",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Class deleted" },
+          "404": { "description": "Class not found" }
+        }
+      }
+    },
+    "/regions": {
+      "post": {
+        "tags": ["Regions"],
+        "summary": "Create a region",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Region created" }
+        }
+      },
+      "get": {
+        "tags": ["Regions"],
+        "summary": "Get all regions",
+        "responses": {
+          "200": { "description": "Regions fetched" }
+        }
+      }
+    },
+    "/regions/{id}": {
+      "patch": {
+        "tags": ["Regions"],
+        "summary": "Update a region",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Region updated" },
+          "404": { "description": "Region not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Regions"],
+        "summary": "Delete a region",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Region deleted" },
+          "404": { "description": "Region not found" }
+        }
+      }
+    },
+    "/vendors": {
+      "post": {
+        "tags": ["Vendors"],
+        "summary": "Create a vendor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["name", "contact", "address", "regionId"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "nullable": true
+                      },
+                      "contact": { "type": "string" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "comments": { "type": "string", "nullable": true },
+                      "regionId": { "type": "string", "format": "uuid" },
+                      "employeeId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Employee assigned to this vendor"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Vendor created" }
+        }
+      },
+      "get": {
+        "tags": ["Vendors"],
+        "summary": "Get all vendors",
+        "parameters": [
+          {
+            "name": "employeeId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "Filter by employee's assigned region"
+          },
+          {
+            "name": "regionId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/LeadStatus" }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Search by name, email, or contact"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Vendors fetched" }
+        }
+      }
+    },
+    "/vendors/stats": {
+      "get": {
+        "tags": ["Vendors"],
+        "summary": "Get vendor statistics by status",
+        "responses": {
+          "200": {
+            "description": "Vendor statistics fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total": { "type": "integer" },
+                        "new": { "type": "integer" },
+                        "hot": { "type": "integer" },
+                        "cold": { "type": "integer" },
+                        "followUp": { "type": "integer" },
+                        "converted": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vendors/{id}": {
+      "get": {
+        "tags": ["Vendors"],
+        "summary": "Get a vendor by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Vendor fetched" },
+          "404": { "description": "Vendor not found" }
+        }
+      },
+      "patch": {
+        "tags": ["Vendors"],
+        "summary": "Update a vendor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "contact": { "type": "string" },
+                      "address": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "status": { "$ref": "#/components/schemas/LeadStatus" },
+                      "comments": { "type": "string", "nullable": true },
+                      "regionId": { "type": "string", "format": "uuid" },
+                      "employeeId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Employee assigned to this vendor"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Vendor updated" },
+          "404": { "description": "Vendor not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Vendors"],
+        "summary": "Delete a vendor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Vendor deleted" },
+          "404": { "description": "Vendor not found" }
+        }
+      }
+    },
+    "/transports": {
+      "post": {
+        "tags": ["Transports"],
+        "summary": "Create a transport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "ownerFirstName",
+                      "ownerLastName",
+                      "driverFirstName",
+                      "driverLastName",
+                      "driverDateOfBirth",
+                      "driverContact",
+                      "driverGender",
+                      "conductorGender",
+                      "licenseNumber"
+                    ],
+                    "properties": {
+                      "type": { "$ref": "#/components/schemas/TransportType" },
+                      "ownerFirstName": { "type": "string" },
+                      "ownerLastName": { "type": "string" },
+                      "driverFirstName": { "type": "string" },
+                      "driverLastName": { "type": "string" },
+                      "driverDateOfBirth": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "driverContact": { "type": "string" },
+                      "driverGender": { "$ref": "#/components/schemas/Gender" },
+                      "driverPhotoLink": { "type": "string", "nullable": true },
+                      "conductorFirstName": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "conductorLastName": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "conductorDateOfBirth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                      },
+                      "conductorContact": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "conductorGender": {
+                        "$ref": "#/components/schemas/Gender"
+                      },
+                      "conductorPhotoLink": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "licenseNumber": { "type": "string" },
+                      "vehicleNumber": { "type": "string", "nullable": true }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Transport created" }
+        }
+      },
+      "get": {
+        "tags": ["Transports"],
+        "summary": "Get all transports for current school",
+        "responses": {
+          "200": { "description": "Transports fetched" }
+        }
+      }
+    },
+    "/transports/{id}": {
+      "patch": {
+        "tags": ["Transports"],
+        "summary": "Update a transport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "type": { "$ref": "#/components/schemas/TransportType" },
+                      "ownerFirstName": { "type": "string" },
+                      "ownerLastName": { "type": "string" },
+                      "driverFirstName": { "type": "string" },
+                      "driverLastName": { "type": "string" },
+                      "driverDateOfBirth": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "driverContact": { "type": "string" },
+                      "driverGender": { "$ref": "#/components/schemas/Gender" },
+                      "driverPhotoLink": { "type": "string" },
+                      "conductorFirstName": { "type": "string" },
+                      "conductorLastName": { "type": "string" },
+                      "conductorDateOfBirth": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "conductorContact": { "type": "string" },
+                      "conductorGender": {
+                        "$ref": "#/components/schemas/Gender"
+                      },
+                      "conductorPhotoLink": { "type": "string" },
+                      "licenseNumber": { "type": "string" },
+                      "vehicleNumber": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Transport updated" },
+          "404": { "description": "Transport not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Transports"],
+        "summary": "Delete a transport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Transport deleted" },
+          "404": { "description": "Transport not found" }
+        }
+      }
+    },
+    "/calendar/{date}": {
+      "get": {
+        "tags": ["Calendar"],
+        "summary": "Get calendar items for a specific date",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "date" },
+            "description": "Date in YYYY-MM-DD format"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Calendar items fetched" }
+        }
+      }
+    },
+    "/calendar/events": {
+      "post": {
+        "tags": ["Calendar - Events"],
+        "summary": "Create an event",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "title",
+                      "description",
+                      "from",
+                      "till",
+                      "visibleFrom",
+                      "visibleTill"
+                    ],
+                    "properties": {
+                      "title": { "type": "string" },
+                      "description": { "type": "string" },
+                      "from": { "type": "string", "format": "date-time" },
+                      "till": { "type": "string", "format": "date-time" },
+                      "visibleFrom": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visibleTill": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Event created" }
+        }
+      },
+      "get": {
+        "tags": ["Calendar - Events"],
+        "summary": "Get all events",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Events fetched" }
+        }
+      }
+    },
+    "/calendar/events/{id}": {
+      "patch": {
+        "tags": ["Calendar - Events"],
+        "summary": "Update an event",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "title": { "type": "string" },
+                      "description": { "type": "string" },
+                      "from": { "type": "string", "format": "date-time" },
+                      "till": { "type": "string", "format": "date-time" },
+                      "visibleFrom": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visibleTill": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Event updated" },
+          "404": { "description": "Event not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Calendar - Events"],
+        "summary": "Delete an event",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Event deleted" },
+          "404": { "description": "Event not found" }
+        }
+      }
+    },
+    "/calendar/holidays": {
+      "post": {
+        "tags": ["Calendar - Holidays"],
+        "summary": "Create a holiday",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "title",
+                      "from",
+                      "till",
+                      "visibleFrom",
+                      "visibleTill"
+                    ],
+                    "properties": {
+                      "title": { "type": "string" },
+                      "from": { "type": "string", "format": "date-time" },
+                      "till": { "type": "string", "format": "date-time" },
+                      "visibleFrom": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visibleTill": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Holiday created" }
+        }
+      },
+      "get": {
+        "tags": ["Calendar - Holidays"],
+        "summary": "Get all holidays",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Holidays fetched" }
+        }
+      }
+    },
+    "/calendar/holidays/{id}": {
+      "patch": {
+        "tags": ["Calendar - Holidays"],
+        "summary": "Update a holiday",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "title": { "type": "string" },
+                      "from": { "type": "string", "format": "date-time" },
+                      "till": { "type": "string", "format": "date-time" },
+                      "visibleFrom": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visibleTill": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Holiday updated" },
+          "404": { "description": "Holiday not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Calendar - Holidays"],
+        "summary": "Delete a holiday",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Holiday deleted" },
+          "404": { "description": "Holiday not found" }
+        }
+      }
+    },
+    "/calendar/exam-calendars": {
+      "post": {
+        "tags": ["Calendar - Exam Calendars"],
+        "summary": "Create an exam calendar",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "classId",
+                      "examId",
+                      "title",
+                      "visibleFrom",
+                      "visibleTill"
+                    ],
+                    "properties": {
+                      "classId": { "type": "string", "format": "uuid" },
+                      "examId": { "type": "string", "format": "uuid" },
+                      "title": { "type": "string" },
+                      "visibleFrom": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visibleTill": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": ["subject", "date"],
+                          "properties": {
+                            "subject": { "type": "string" },
+                            "date": { "type": "string", "format": "date-time" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Exam calendar created" }
+        }
+      },
+      "get": {
+        "tags": ["Calendar - Exam Calendars"],
+        "summary": "Get all exam calendars",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Exam calendars fetched" }
+        }
+      }
+    },
+    "/calendar/exam-calendars/{id}": {
+      "patch": {
+        "tags": ["Calendar - Exam Calendars"],
+        "summary": "Update an exam calendar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "classId": { "type": "string", "format": "uuid" },
+                      "examId": { "type": "string", "format": "uuid" },
+                      "title": { "type": "string" },
+                      "visibleFrom": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visibleTill": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "format": "uuid" },
+                            "subject": { "type": "string" },
+                            "date": { "type": "string", "format": "date-time" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Exam calendar updated" },
+          "404": { "description": "Exam calendar not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Calendar - Exam Calendars"],
+        "summary": "Delete an exam calendar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Exam calendar deleted" },
+          "404": { "description": "Exam calendar not found" }
+        }
+      }
+    },
+    "/calendar/notices": {
+      "post": {
+        "tags": ["Calendar - Notices"],
+        "summary": "Create a notice",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "title",
+                      "content",
+                      "visibleFrom",
+                      "visibleTill"
+                    ],
+                    "properties": {
+                      "title": { "type": "string" },
+                      "content": { "type": "string" },
+                      "visibleFrom": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visibleTill": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Notice created" }
+        }
+      },
+      "get": {
+        "tags": ["Calendar - Notices"],
+        "summary": "Get all notices",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Notices fetched" }
+        }
+      }
+    },
+    "/calendar/notices/{id}": {
+      "patch": {
+        "tags": ["Calendar - Notices"],
+        "summary": "Update a notice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "title": { "type": "string" },
+                      "content": { "type": "string" },
+                      "visibleFrom": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visibleTill": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Notice updated" },
+          "404": { "description": "Notice not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Calendar - Notices"],
+        "summary": "Delete a notice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Notice deleted" },
+          "404": { "description": "Notice not found" }
+        }
+      }
+    },
+    "/exams": {
+      "post": {
+        "tags": ["Exams"],
+        "summary": "Create a new exam",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["year", "name", "type"],
+                    "properties": {
+                      "year": {
+                        "type": "integer",
+                        "minimum": 1900,
+                        "maximum": 2100
+                      },
+                      "name": { "type": "string" },
+                      "type": { "$ref": "#/components/schemas/ExamType" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Exam created" }
+        }
+      },
+      "get": {
+        "tags": ["Exams"],
+        "summary": "Get all exams",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Exams fetched" }
+        }
+      }
+    },
+    "/exams/{id}": {
+      "patch": {
+        "tags": ["Exams"],
+        "summary": "Update an exam",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "year": {
+                        "type": "integer",
+                        "minimum": 1900,
+                        "maximum": 2100
+                      },
+                      "name": { "type": "string" },
+                      "type": { "$ref": "#/components/schemas/ExamType" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Exam updated" },
+          "404": { "description": "Exam not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Exams"],
+        "summary": "Delete an exam",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Exam deleted" },
+          "404": { "description": "Exam not found" }
+        }
+      }
+    },
+    "/id-cards/status": {
+      "get": {
+        "tags": ["ID Cards"],
+        "summary": "Get ID card status for all classes",
+        "responses": {
+          "200": { "description": "ID card classes fetched" },
+          "400": { "description": "User is not associated with a school" }
+        }
+      }
+    },
+    "/id-cards/config": {
+      "get": {
+        "tags": ["ID Cards"],
+        "summary": "Get ID card config for current school",
+        "responses": {
+          "200": {
+            "description": "ID card config fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "ID card config fetched successfully!"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid" },
+                        "schoolId": { "type": "string", "format": "uuid" },
+                        "year": { "type": "integer" },
+                        "templateId": { "type": "string", "format": "uuid" },
+                        "config": {
+                          "type": "object",
+                          "description": "ID card configuration object (structure depends on template)"
+                        },
+                        "sampleId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true,
+                          "description": "File ID of the generated sample PDF"
+                        },
+                        "sampleUrl": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL to access the generated sample PDF"
+                        },
+                        "createdBy": { "type": "string", "format": "uuid" },
+                        "updatedBy": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "User is not associated with a school" },
+          "404": { "description": "ID card config not found for this school" }
+        }
+      },
+      "post": {
+        "tags": ["ID Cards"],
+        "summary": "Create or update ID card config",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["templateId"],
+                    "properties": {
+                      "templateId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Template ID to use for ID card generation"
+                      },
+                      "config": {
+                        "type": "object",
+                        "properties": {
+                          "colors": {
+                            "type": "object",
+                            "properties": {
+                              "primaryColor": { "type": "string" },
+                              "secondaryColor": { "type": "string" }
+                            }
+                          },
+                          "typography": {
+                            "type": "object",
+                            "properties": {
+                              "textColorForHeaderAndFooter": {
+                                "type": "string"
+                              },
+                              "defaultTextColor": { "type": "string" },
+                              "defaultLabelColor": { "type": "string" },
+                              "bloodGroupTextColor": { "type": "string" }
+                            }
+                          },
+                          "schoolLogoFileId": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ID card config saved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "ID card config saved successfully!"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid" },
+                        "schoolId": { "type": "string", "format": "uuid" },
+                        "year": { "type": "integer" },
+                        "templateId": { "type": "string", "format": "uuid" },
+                        "config": {
+                          "type": "object",
+                          "description": "ID card configuration object (structure depends on template)"
+                        },
+                        "sampleId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true,
+                          "description": "File ID of the generated sample PDF"
+                        },
+                        "sampleUrl": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL to access the generated sample PDF"
+                        },
+                        "createdBy": { "type": "string", "format": "uuid" },
+                        "updatedBy": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "User is not associated with a school" }
+        }
+      }
+    },
+    "/id-cards/classes/{classId}/generate": {
+      "post": {
+        "tags": ["ID Cards"],
+        "summary": "Generate ID cards for a class",
+        "parameters": [
+          {
+            "name": "classId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "ID cards generated successfully" },
+          "400": { "description": "User is not associated with a school" },
+          "404": { "description": "Class not found" }
+        }
+      }
+    },
+    "/templates": {
+      "get": {
+        "tags": ["Templates"],
+        "summary": "Get all templates",
+        "description": "Retrieve all available templates with optional filtering by type",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": { "$ref": "#/components/schemas/TemplateType" },
+            "description": "Filter templates by type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Templates fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string", "format": "uuid" },
+                          "type": {
+                            "$ref": "#/components/schemas/TemplateType"
+                          },
+                          "path": { "type": "string" },
+                          "title": { "type": "string" },
+                          "imageId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "sampleId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "imageUrl": { "type": "string", "nullable": true },
+                          "sampleUrl": { "type": "string", "nullable": true }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/templates/{templateId}/default": {
+      "get": {
+        "tags": ["Templates"],
+        "summary": "Get default values for a template schema",
+        "description": "Retrieve default configuration values extracted from a template's schema.json file",
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "Template ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template defaults fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Template defaults fetched successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "description": "Default values object structure varies by template type",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Template not found or schema file not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files": {
+      "post": {
+        "tags": ["Files"],
+        "summary": "Upload a file",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "File uploaded" },
+          "400": { "description": "File is required" }
+        }
+      }
+    },
+    "/files/{id}": {
+      "get": {
+        "tags": ["Files"],
+        "summary": "Get a file by ID (development only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "File content" },
+          "404": { "description": "File not found" }
+        }
+      }
+    },
+    "/licenses": {
+      "post": {
+        "tags": ["Licenses"],
+        "summary": "Create a license",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["name", "issuer", "issueDate", "expiryDate"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "issuer": { "type": "string" },
+                      "issueDate": { "type": "string", "format": "date" },
+                      "expiryDate": { "type": "string", "format": "date" },
+                      "certificateNumber": { "type": "string" },
+                      "documentUrl": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "License created" }
+        }
+      },
+      "get": {
+        "tags": ["Licenses"],
+        "summary": "Get all licenses",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Licenses fetched" }
+        }
+      }
+    },
+    "/licenses/{id}": {
+      "get": {
+        "tags": ["Licenses"],
+        "summary": "Get a license by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "License fetched" }
+        }
+      },
+      "put": {
+        "tags": ["Licenses"],
+        "summary": "Update a license",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "issuer": { "type": "string" },
+                      "issueDate": { "type": "string", "format": "date" },
+                      "expiryDate": { "type": "string", "format": "date" },
+                      "certificateNumber": { "type": "string" },
+                      "documentUrl": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "License updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Licenses"],
+        "summary": "Delete a license",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "License deleted" }
+        }
+      }
+    },
+    "/receipts": {
+      "post": {
+        "tags": ["Receipts"],
+        "summary": "Create a receipt",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "receiptNumber",
+                      "schoolId",
+                      "baseAmount",
+                      "paymentMethod"
+                    ],
+                    "properties": {
+                      "receiptNumber": { "type": "string" },
+                      "schoolId": { "type": "string", "format": "uuid" },
+                      "baseAmount": { "type": "string" },
+                      "sgstPercent": { "type": "string" },
+                      "cgstPercent": { "type": "string" },
+                      "igstPercent": { "type": "string" },
+                      "ugstPercent": { "type": "string" },
+                      "description": { "type": "string" },
+                      "paymentMethod": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Receipt created" }
+        }
+      },
+      "get": {
+        "tags": ["Receipts"],
+        "summary": "Get all receipts",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/ReceiptStatus" }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Receipts fetched" }
+        }
+      }
+    },
+    "/receipts/{id}": {
+      "get": {
+        "tags": ["Receipts"],
+        "summary": "Get a receipt by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Receipt fetched" }
+        }
+      },
+      "put": {
+        "tags": ["Receipts"],
+        "summary": "Update a receipt",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "$ref": "#/components/schemas/ReceiptStatus"
+                      },
+                      "description": { "type": "string" },
+                      "paymentMethod": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Receipt updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Receipts"],
+        "summary": "Delete a receipt",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Receipt deleted" }
+        }
+      }
+    },
+    "/receipts/{id}/generate": {
+      "post": {
+        "tags": ["Receipts"],
+        "summary": "Generate receipt HTML for printing",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipt generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "html": { "type": "string" },
+                        "printUrl": { "type": "string" },
+                        "receipt": { "type": "object" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/letterhead/generate": {
+      "post": {
+        "tags": ["Letterhead"],
+        "summary": "Generate letterhead HTML",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["content"],
+                    "properties": {
+                      "content": { "type": "string" },
+                      "subject": { "type": "string" },
+                      "date": { "type": "string", "format": "date" },
+                      "signatureName": { "type": "string" },
+                      "signatureDesignation": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Letterhead generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "html": { "type": "string" },
+                        "printUrl": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Content is required" }
+        }
+      }
+    },
+    "/locations": {
+      "post": {
+        "tags": ["Locations"],
+        "summary": "Create a location",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["name", "regionId", "employeeId"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "regionId": { "type": "string", "format": "uuid" },
+                      "employeeId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Location created" }
+        }
+      },
+      "get": {
+        "tags": ["Locations"],
+        "summary": "Get all locations",
+        "parameters": [
+          {
+            "name": "employeeId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "regionId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Locations fetched" }
+        }
+      }
+    },
+    "/locations/{id}": {
+      "delete": {
+        "tags": ["Locations"],
+        "summary": "Delete a location",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Location deleted" }
+        }
+      }
+    },
+    "/statistics/schools": {
+      "get": {
+        "tags": ["Statistics"],
+        "summary": "Get school statistics",
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "School statistics fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "schools": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "name": { "type": "string" },
+                              "code": { "type": "string" },
+                              "totalStudents": { "type": "integer" },
+                              "totalStaff": { "type": "integer" },
+                              "teachers": { "type": "integer" },
+                              "adminStaff": { "type": "integer" },
+                              "status": { "type": "string" }
+                            }
+                          }
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "totalStudents": { "type": "integer" },
+                            "totalStaff": { "type": "integer" },
+                            "totalTeachers": { "type": "integer" },
+                            "totalAdminStaff": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/statistics/dashboard": {
+      "get": {
+        "tags": ["Statistics"],
+        "summary": "Get dashboard statistics",
+        "responses": {
+          "200": {
+            "description": "Dashboard statistics fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "totalSchools": { "type": "integer" },
+                        "totalEmployees": { "type": "integer" },
+                        "totalStudents": { "type": "integer" },
+                        "totalStaff": { "type": "integer" },
+                        "recentSchools": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "name": { "type": "string" },
+                              "code": { "type": "string" },
+                              "address": {
+                                "type": "array",
+                                "items": { "type": "string" }
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "students": { "type": "integer" },
+                              "status": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "tags": ["Settings"],
+        "summary": "Get settings for current school",
+        "responses": {
+          "200": {
+            "description": "Settings fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid" },
+                        "schoolId": { "type": "string", "format": "uuid" },
+                        "studentFeeInstallments": { "type": "integer" },
+                        "studentFeeAmount": {
+                          "type": "integer",
+                          "nullable": true
+                        },
+                        "currentInstallmentNumber": { "type": "integer" },
+                        "logoId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "User is not associated with a school" },
+          "404": { "description": "Settings not found for this school" }
+        }
+      },
+      "patch": {
+        "tags": ["Settings"],
+        "summary": "Update settings for current school",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "studentFeeInstallments": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 24
+                      },
+                      "studentFeeAmount": { "type": "integer", "minimum": 0 },
+                      "currentInstallmentNumber": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "logoId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Settings updated successfully" },
+          "400": { "description": "User is not associated with a school" },
+          "404": { "description": "Settings not found for this school" }
+        }
+      }
+    },
+    "/fees/installments/{installmentNumber}": {
+      "get": {
+        "tags": ["Fees"],
+        "summary": "Get fee installments by installment number",
+        "description": "Returns all fee installments for the specified installment number",
+        "parameters": [
+          {
+            "name": "installmentNumber",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 },
+            "description": "Installment number to fetch"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fee installments fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "installmentNumber": { "type": "integer" },
+                        "installments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string", "format": "uuid" },
+                              "feeId": { "type": "string", "format": "uuid" },
+                              "schoolId": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "studentId": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "installementNumber": { "type": "integer" },
+                              "paymentStatus": {
+                                "$ref": "#/components/schemas/FeePaymentStatus"
+                              },
+                              "amount": { "type": "integer" },
+                              "remainingAmount": { "type": "integer" },
+                              "paidAmount": { "type": "integer" },
+                              "paidAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "nullable": true
+                              },
+                              "receiptFileId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "nullable": true
+                              },
+                              "receiptFileUrl": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "student": {
+                                "type": "object",
+                                "nullable": true,
+                                "properties": {
+                                  "id": { "type": "string", "format": "uuid" },
+                                  "firstName": { "type": "string" },
+                                  "lastName": { "type": "string" },
+                                  "publicUserId": { "type": "string" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User is not associated with a school or invalid installment number"
+          }
+        }
+      }
+    },
+    "/fees/student/{studentId}": {
+      "get": {
+        "tags": ["Fees"],
+        "summary": "Get all fee installments for a specific student",
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student fee installments fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "student": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "format": "uuid" },
+                            "firstName": { "type": "string" },
+                            "lastName": { "type": "string" },
+                            "publicUserId": { "type": "string" }
+                          }
+                        },
+                        "fee": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "format": "uuid" },
+                            "year": { "type": "integer" },
+                            "totalAmount": { "type": "integer" },
+                            "totalPaidAmount": { "type": "integer" },
+                            "totalRemainingAmount": { "type": "integer" }
+                          }
+                        },
+                        "installments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string", "format": "uuid" },
+                              "installementNumber": { "type": "integer" },
+                              "paymentStatus": {
+                                "$ref": "#/components/schemas/FeePaymentStatus"
+                              },
+                              "amount": { "type": "integer" },
+                              "remainingAmount": { "type": "integer" },
+                              "paidAmount": { "type": "integer" },
+                              "paidAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "nullable": true
+                              },
+                              "receiptFileId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "nullable": true
+                              },
+                              "receiptFileUrl": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "User is not associated with a school" },
+          "404": { "description": "Student or fee record not found" }
+        }
+      }
+    },
+    "/fees/installments/{id}/payment": {
+      "patch": {
+        "tags": ["Fees"],
+        "summary": "Record payment for a fee installment",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "Fee installment ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["amount"],
+                    "properties": {
+                      "amount": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "Payment amount"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment recorded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid" },
+                        "installementNumber": { "type": "integer" },
+                        "paymentStatus": {
+                          "$ref": "#/components/schemas/FeePaymentStatus"
+                        },
+                        "amount": { "type": "integer" },
+                        "remainingAmount": { "type": "integer" },
+                        "paidAmount": { "type": "integer" },
+                        "paidAt": { "type": "string", "format": "date-time" },
+                        "receiptFileId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true
+                        },
+                        "receiptFileUrl": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payment amount or user not associated with school"
+          },
+          "404": { "description": "Fee installment not found" }
+        }
+      }
+    },
+    "/grievances": {
+      "post": {
+        "tags": ["Grievances"],
+        "summary": "Create a grievance",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["title", "description"],
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "description": "Grievance title"
+                      },
+                      "description": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000,
+                        "description": "Grievance description"
+                      },
+                      "priority": {
+                        "$ref": "#/components/schemas/GrievancePriority",
+                        "default": "MEDIUM"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Grievance created successfully" },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Grievances"],
+        "summary": "Get all grievances (Super Admin sees all, others filtered by permission)",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/GrievanceStatus" }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/GrievancePriority" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1 },
+            "default": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "default": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Grievances fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": { "type": "array", "items": { "type": "object" } },
+                    "total": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/grievances/my": {
+      "get": {
+        "tags": ["Grievances"],
+        "summary": "Get my grievances (School Admins and Employees see their own)",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/GrievanceStatus" }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/GrievancePriority" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1 },
+            "default": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "default": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Your grievances fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "data": { "type": "array", "items": { "type": "object" } },
+                    "total": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/grievances/{id}": {
+      "get": {
+        "tags": ["Grievances"],
+        "summary": "Get a grievance by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Grievance fetched successfully" },
+          "403": { "description": "No permission to view this grievance" },
+          "404": { "description": "Grievance not found" }
+        }
+      },
+      "patch": {
+        "tags": ["Grievances"],
+        "summary": "Update grievance status or priority (Super Admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "$ref": "#/components/schemas/GrievanceStatus"
+                      },
+                      "priority": {
+                        "$ref": "#/components/schemas/GrievancePriority"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Grievance updated successfully" },
+          "404": { "description": "Grievance not found" }
+        }
+      }
+    },
+    "/grievances/{id}/comments": {
+      "post": {
+        "tags": ["Grievances"],
+        "summary": "Add a comment to a grievance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "Grievance ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["content"],
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000,
+                        "description": "Comment content"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Comment added successfully" },
+          "403": {
+            "description": "No permission to comment on this grievance"
+          },
+          "404": { "description": "Grievance not found" }
+        }
+      }
+    },
+    "/salary-structures": {
+      "get": {
+        "tags": ["Salary Structures"],
+        "summary": "Get all salary structures",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Salary structures fetched" }
+        }
+      },
+      "post": {
+        "tags": ["Salary Structures"],
+        "summary": "Create a salary structure",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["name", "schoolId", "components"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "schoolId": { "type": "string", "format": "uuid" },
+                      "components": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "type",
+                            "value",
+                            "valueType",
+                            "frequency"
+                          ],
+                          "properties": {
+                            "name": { "type": "string" },
+                            "type": {
+                              "type": "string",
+                              "enum": ["GROSS", "NET"]
+                            },
+                            "value": { "type": "integer" },
+                            "valueType": {
+                              "type": "string",
+                              "enum": ["ABSOLUTE", "PERCENTAGE"]
+                            },
+                            "frequency": {
+                              "type": "string",
+                              "enum": ["MONTHLY", "YEARLY"]
+                            },
+                            "isBasePayComponent": {
+                              "type": "boolean",
+                              "default": false
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Salary structure created" },
+          "400": {
+            "description": "Base pay component validation failed or invalid data"
+          }
+        }
+      }
+    },
+    "/salary-structures/{id}": {
+      "get": {
+        "tags": ["Salary Structures"],
+        "summary": "Get a salary structure by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Salary structure fetched" },
+          "404": { "description": "Salary structure not found" }
+        }
+      },
+      "patch": {
+        "tags": ["Salary Structures"],
+        "summary": "Update a salary structure",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "componentsToCreate": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": { "type": "string" },
+                            "type": {
+                              "type": "string",
+                              "enum": ["GROSS", "NET"]
+                            },
+                            "value": { "type": "integer" },
+                            "valueType": {
+                              "type": "string",
+                              "enum": ["ABSOLUTE", "PERCENTAGE"]
+                            },
+                            "frequency": {
+                              "type": "string",
+                              "enum": ["MONTHLY", "YEARLY"]
+                            },
+                            "isBasePayComponent": { "type": "boolean" }
+                          }
+                        }
+                      },
+                      "componentsToUpdate": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "format": "uuid" },
+                            "name": { "type": "string" },
+                            "type": {
+                              "type": "string",
+                              "enum": ["GROSS", "NET"]
+                            },
+                            "value": { "type": "integer" },
+                            "valueType": {
+                              "type": "string",
+                              "enum": ["ABSOLUTE", "PERCENTAGE"]
+                            },
+                            "frequency": {
+                              "type": "string",
+                              "enum": ["MONTHLY", "YEARLY"]
+                            },
+                            "isBasePayComponent": { "type": "boolean" }
+                          }
+                        }
+                      },
+                      "componentsToDelete": {
+                        "type": "array",
+                        "items": { "type": "string", "format": "uuid" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Salary structure updated" },
+          "404": { "description": "Salary structure not found" },
+          "400": {
+            "description": "Base pay component validation failed"
+          }
+        }
+      }
+    },
+    "/salary-payments": {
+      "get": {
+        "tags": ["Salary Payments"],
+        "summary": "Get salary payments by month",
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" },
+            "description": "Month in YYYY-MM format"
+          },
+          {
+            "name": "schoolId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Salary payments fetched" }
+        }
+      }
+    },
+    "/salary-payments/generate": {
+      "post": {
+        "tags": ["Salary Payments"],
+        "summary": "Generate monthly salary payments for all teachers and staff",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": ["month", "schoolId"],
+                    "properties": {
+                      "month": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}$",
+                        "description": "Month in YYYY-MM format"
+                      },
+                      "schoolId": { "type": "string", "format": "uuid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Salary payments generated" },
+          "400": { "description": "Invalid month format" }
+        }
+      }
+    },
+    "/salaries": {
+      "get": {
+        "tags": ["Salary Assignments"],
+        "summary": "Get all salary assignments",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "salaryStructureId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Salary assignments fetched" }
+        }
+      },
+      "post": {
+        "tags": ["Salary Assignments"],
+        "summary": "Create a salary assignment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["request"],
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "required": [
+                      "schoolId",
+                      "userId",
+                      "salaryStructureId",
+                      "from",
+                      "till"
+                    ],
+                    "properties": {
+                      "schoolId": { "type": "string", "format": "uuid" },
+                      "userId": { "type": "string", "format": "uuid" },
+                      "salaryStructureId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "from": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Assignment start date"
+                      },
+                      "till": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Assignment end date"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Salary assignment created" },
+          "400": {
+            "description": "Invalid date range or user/structure validation failed"
+          }
+        }
+      }
+    },
+    "/salaries/{id}": {
+      "get": {
+        "tags": ["Salary Assignments"],
+        "summary": "Get a salary assignment by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Salary assignment fetched" },
+          "404": { "description": "Salary assignment not found" }
+        }
+      },
+      "patch": {
+        "tags": ["Salary Assignments"],
+        "summary": "Update a salary assignment",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "salaryStructureId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "from": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "till": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Salary assignment updated" },
+          "404": { "description": "Salary assignment not found" },
+          "400": {
+            "description": "Invalid date range or salary structure validation failed"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    { "name": "Health", "description": "Health check endpoints" },
+    { "name": "Authentication", "description": "Authentication endpoints" },
+    {
+      "name": "Users - Students",
+      "description": "Student management endpoints"
+    },
+    {
+      "name": "Users - Teachers",
+      "description": "Teacher management endpoints"
+    },
+    {
+      "name": "Users - Employees",
+      "description": "Employee management endpoints"
+    },
+    { "name": "Users - Roles", "description": "Role management endpoints" },
+    {
+      "name": "Users - Password",
+      "description": "Password management endpoints"
+    },
+    { "name": "Schools", "description": "School management endpoints" },
+    {
+      "name": "Schools - Classes",
+      "description": "Class management endpoints"
+    },
+    { "name": "Regions", "description": "Region management endpoints" },
+    { "name": "Vendors", "description": "Vendor management endpoints" },
+    { "name": "Transports", "description": "Transport management endpoints" },
+    { "name": "Calendar", "description": "Calendar endpoints" },
+    {
+      "name": "Calendar - Events",
+      "description": "Event management endpoints"
+    },
+    {
+      "name": "Calendar - Holidays",
+      "description": "Holiday management endpoints"
+    },
+    {
+      "name": "Calendar - Exam Calendars",
+      "description": "Exam calendar management endpoints"
+    },
+    {
+      "name": "Calendar - Notices",
+      "description": "Notice management endpoints"
+    },
+    { "name": "Exams", "description": "Exam management endpoints" },
+    { "name": "ID Cards", "description": "ID card management endpoints" },
+    { "name": "Templates", "description": "Template management endpoints" },
+    { "name": "Files", "description": "File upload and management endpoints" },
+    { "name": "Licenses", "description": "License management endpoints" },
+    { "name": "Receipts", "description": "Receipt management endpoints" },
+    { "name": "Letterhead", "description": "Letterhead generation endpoints" },
+    { "name": "Locations", "description": "Location management endpoints" },
+    {
+      "name": "Statistics",
+      "description": "Statistics and dashboard endpoints"
+    },
+    {
+      "name": "Settings",
+      "description": "School settings management endpoints"
+    },
+    { "name": "Fees", "description": "Student fee management endpoints" },
+    {
+      "name": "Salary Structures",
+      "description": "Salary structure and component management endpoints"
+    },
+    {
+      "name": "Salary Payments",
+      "description": "Salary payment generation and management endpoints"
+    },
+    {
+      "name": "Salary Assignments",
+      "description": "Salary structure assignment to users endpoints"
+    }
+  ]
+}

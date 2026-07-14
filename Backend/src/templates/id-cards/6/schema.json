@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "ID Card Template 6 Configuration Schema",
+  "description": "Schema for configuring ID card template variables - Apex International teal curved style",
+  "properties": {
+    "colors": {
+      "type": "object",
+      "properties": {
+        "primaryColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Primary Color",
+          "description": "Primary color used for header, name banner, and accents",
+          "default": "#0891B2"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Secondary Color",
+          "description": "Secondary color used for photo placeholder background",
+          "default": "#E0F7FA"
+        },
+        "accentColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Accent Color",
+          "description": "Accent color for highlights",
+          "default": "#06B6D4"
+        },
+        "iconClassColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Class Icon Color",
+          "description": "Color for the class detail icon",
+          "default": "#3B82F6"
+        },
+        "iconSectionColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Section Icon Color",
+          "description": "Color for the section detail icon",
+          "default": "#10B981"
+        },
+        "iconBloodColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Blood Group Icon Color",
+          "description": "Color for the blood group detail icon",
+          "default": "#EF4444"
+        },
+        "iconEmergencyColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Emergency Icon Color",
+          "description": "Color for the emergency contact icon",
+          "default": "#F59E0B"
+        }
+      },
+      "required": ["primaryColor", "secondaryColor"],
+      "additionalProperties": false
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "textColorForHeaderAndFooter": {
+          "type": "string",
+          "format": "color",
+          "title": "Text Color for Header and Footer",
+          "description": "Text color used for header and name banner text",
+          "default": "#FFFFFF"
+        },
+        "defaultTextColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Default Text Color",
+          "description": "Default text color used for main content values",
+          "default": "#1F2937"
+        },
+        "defaultLabelColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Default Label Color",
+          "description": "Default label color used for field labels",
+          "default": "#6B7280"
+        },
+        "bloodGroupTextColor": {
+          "type": "string",
+          "format": "color",
+          "title": "Blood Group Text Color",
+          "description": "Text color specifically for blood group value",
+          "default": "#EF4444"
+        }
+      },
+      "required": [
+        "textColorForHeaderAndFooter",
+        "defaultTextColor",
+        "defaultLabelColor",
+        "bloodGroupTextColor"
+      ],
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "object",
+      "properties": {
+        "footerText": {
+          "type": "string",
+          "title": "Footer Text",
+          "description": "Footer text to be displayed at the bottom of the card",
+          "default": "Valid Until: 2030"
+        }
+      },
+      "required": ["footerText"],
+      "additionalProperties": false
+    },
+    "schoolLogoFileId": {
+      "type": "string",
+      "title": "School Logo for ID Card",
+      "description": "File ID for the school logo image displayed in the header"
+    }
+  },
+  "required": ["colors", "typography", "text"],
+  "additionalProperties": false
+}

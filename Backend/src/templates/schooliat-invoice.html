@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchooliAT Invoice</title>
+    <style>
+        @media print {
+            @page {
+                margin: 0;
+                size: letter;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                height: 11in;
+                display: flex;
+                flex-direction: column;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 11pt;
+            line-height: 1.7;
+            color: #1e1e1e;
+            background: #fff;
+            position: relative;
+            min-height: 11in;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .header-container {
+            width: 100%;
+            padding: 10px 30px;
+            border-bottom: 3px solid #678d3d;
+            margin-bottom: 5px;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .company-name {
+            font-size: 18pt;
+            font-weight: 800;
+            color: #678d3d;
+            margin-bottom: 2px;
+        }
+        .company-tagline {
+            font-size: 10pt;
+            color: #666;
+            font-weight: 500;
+        }
+        .header-right {
+            text-align: right;
+            font-size: 9pt;
+            color: #555;
+        }
+        .invoice-header {
+            text-align: center;
+            margin: 10px 30px;
+            padding-bottom: 5px;
+            border-bottom: 3px solid #678d3d;
+        }
+        .invoice-title {
+            font-size: 24pt;
+            font-weight: 700;
+            color: #1e1e1e;
+        }
+        .invoice-number {
+            font-size: 14pt;
+            color: #666;
+            font-weight: 600;
+        }
+        .info-section {
+            margin: 10px 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .info-box {
+            background: #f8f9fb;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #678d3d;
+        }
+        .info-box-title {
+            font-size: 10pt;
+            font-weight: 700;
+            color: #678d3d;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .info-box-content {
+            font-size: 10pt;
+            color: #333;
+        }
+        .items-table {
+            margin: 20px 30px;
+            width: calc(100% - 60px);
+            border-collapse: collapse;
+        }
+        .items-table th {
+            background: #4a6b2d;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 10pt;
+        }
+        .items-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 10pt;
+        }
+        .text-right { text-align: right; }
+        .totals-section {
+            margin: 10px 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .notes-box {
+            width: 50%;
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+            font-size: 9pt;
+        }
+        .totals-box {
+            width: 40%;
+            background: #f8f9fb;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 10pt;
+        }
+        .grand-total {
+            border-top: 2px solid #678d3d;
+            margin-top: 5px;
+            padding-top: 5px;
+            font-weight: 700;
+            font-size: 12pt;
+            color: #1e1e1e;
+        }
+        .footer-notice {
+            text-align: center;
+            margin-top: auto;
+            padding: 20px;
+            font-size: 8pt;
+            color: #999;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <div class="header-content">
+            <div class="header-left">
+                <img class="logo" src="https://schooliat.com/_next/static/media/logo.b01f5b08.png" alt="Logo"/>
+                <div>
+                    <h1 class="company-name">Schooliat Technologies Private Limited</h1>
+                    <p class="company-tagline">Complete School Solution</p>
+                    <p class="company-tagline">{{COMPANY_ADDRESS}}</p>
+                    <p class="company-tagline">GST: {{GST_NUMBER}}</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <p>Email: info@schooliat.com</p>
+                <p>Web: www.schooliat.com</p>
+                <p>Phone: +91 8551919628</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content-wrapper">
+        <div class="invoice-header">
+            <h2 class="invoice-title">INVOICE</h2>
+            <p class="invoice-number">#{{INVOICE_NO}}</p>
+        </div>
+
+        <div class="info-section">
+            <div class="info-box">
+                <div class="info-box-title">Invoice To</div>
+                <div class="info-box-content">
+                    {{BILL_TO}}<br>
+                    Phone: {{RECIPIENT_PHONE}}<br>
+                    Email: {{RECIPIENT_EMAIL}}
+                </div>
+            </div>
+            <div class="info-box">
+                <div class="info-box-title">Invoice Details</div>
+                <div class="info-box-content">
+                    <strong>Date:</strong> {{ISSUE_DATE}}<br>
+                    <strong>Due Date:</strong> {{DUE_DATE}}<br>
+                    <strong>Status:</strong> Unpaid
+                </div>
+            </div>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th class="text-right">Taxable Value (₹)</th>
+                    <th class="text-right">{{TAX_1}}(%)</th>
+                    <th class="text-right">{{TAX_2}}(%)</th>
+                    <th class="text-right">Amount (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{DESCRIPTION}}</td>
+                    <td class="text-right">{{TAXABLE_VALUE}}</td>
+                    <td class="text-right">{{TAX_1_PERCENTAGE}}</td>
+                    <td class="text-right">{{TAX_2_PERCENTAGE}}</td>
+                    <td class="text-right">{{AMOUNT}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="totals-section">
+            <div class="notes-box">
+                <div class="info-box-title" style="color: #92400e;">Notes</div>
+                <p>{{NOTES}}</p>
+            </div>
+            <div class="totals-box">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>₹{{TAXABLE_VALUE}}</span>
+                </div>
+                <div class="total-row">
+                    <span>{{TAX_1}} ({{TAX_1_PERCENTAGE}}):</span>
+                    <span>₹{{TAX_1_AMOUNT}}</span>
+                </div>
+                <div class="total-row">
+                    <span>{{TAX_2}} ({{TAX_2_PERCENTAGE}}):</span>
+                    <span>₹{{TAX_2_AMOUNT}}</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total Amount:</span>
+                    <span>₹{{AMOUNT}}</span>
+                </div>
+                <p style="font-size: 8pt; color: #666; margin-top: 5px; font-style: italic;">
+                    In Words: {{AMOUNT_IN_WORDS}}
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-notice">
+            This is a computer generated invoice and does not require a physical signature.
+            Please make payments by the due date to avoid late fees.
+        </div>
+    </div>
+</body>
+</html>

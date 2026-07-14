@@ -1,0 +1,647 @@
+{
+  "info": {
+    "_postman_id": "0f16491c-8245-4762-92c7-52c04bc3cb47",
+    "name": "schooliat",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "12113064"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Authenticate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json()\r",
+                  "pm.environment.set(\"AUTH_TOKEN\", jsonData.token)\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"request\": {\r\n        \"email\": \"admin@schooliat.com\",\r\n        \"password\": \"kk4uheLBVoPyLQ2\"\r\n    }\r\n}\r\n\r\n// {\r\n//     \"request\": {\r\n//         \"email\": \"riverdale@gmail.com\",\r\n//         \"password\": \"oDPSfRc2VMEyTt2\"\r\n//     }\r\n// }\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/auth/authenticate",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["auth", "authenticate"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "Get Roles",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/users/roles",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["users", "roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Student",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"request\": {\r\n        \"firstName\": \"Ritik\",\r\n        \"lastName\": \"Drona\",\r\n        \"contact\": \"1234123456\",\r\n        \"gender\": \"MALE\",\r\n        \"dateOfBirth\": \"1999-11-12\",\r\n        \"email\": \"ritik2@gmail.com\",\r\n        \"aadhaarId\": \"123123123457\",\r\n        \"apaarId\": \"1232113\",\r\n        \"fatherName\": \"Chamber\",\r\n        \"motherName\": \"Viper\",\r\n        \"fatherContact\": \"123123131\",\r\n        \"accommodationType\": \"HOSTELLER\",\r\n        \"classId\": \"6499a67d-145c-41de-8957-22ffc72a338a\",\r\n        \"address\": [\"Mumbai\"],\r\n        \"transportId\": null\r\n    }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/users/students",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["users", "students"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Students",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/users/students?pageNumber=1&pageSize=2",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["users", "students"],
+              "query": [
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Teacher",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"request\": {\r\n        \"firstName\": \"Someone\",\r\n        \"lastName\": \"World\",\r\n        \"email\": \"someone3@gmail.com\",\r\n        \"contact\": \"1231231\",\r\n        \"gender\": \"MALE\",\r\n        \"dateOfBirth\": \"1900-12-12\",\r\n        \"highestQualification\": \"BE\",\r\n        \"university\": \"RTMNU\",\r\n        \"yearOfPassing\": 1232,\r\n        \"grade\": \"93\",\r\n        \"aadhaarId\": \"123121231231\",\r\n        \"designation\": \"TEACHER\"\r\n    }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/users/teachers",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["users", "teachers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Teachers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/users/teachers",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["users", "teachers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employees",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/users/employees?pageNumber=1&pageSize=2",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["users", "employees"],
+              "query": [
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "regions",
+      "item": [
+        {
+          "name": "Create Region",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"request\": {\r\n        \"name\": \"Mumbai\"\r\n    }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/regions",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["regions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Regions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/regions",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["regions"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "vendors",
+      "item": [
+        {
+          "name": "Create Vendor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"request\": {\r\n        \"name\": \"YES\",\r\n        \"email\": \"yes@gmail.com\",\r\n        \"regionId\": \"d78f514f-b46e-43bb-a9a6-f3847af07c58\",\r\n        \"address\": [\"Borivali\", \"Mumbai\"],\r\n        \"comments\": \"Mid tier school\"\r\n    }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/vendors",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["vendors"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendors",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/vendors",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["vendors"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "schools",
+      "item": [
+        {
+          "name": "Create School",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"request\": {\r\n        \"name\": \"Riverdale\",\r\n        \"email\": \"riverdale@gmail.com\",\r\n        \"code\": \"RDL\",\r\n        \"phone\": \"12334432112\",\r\n        \"address\": [\"Andheri\", \"Mumbai\"],\r\n        \"regionId\": \"b2cc99b3-899d-4ecf-8965-c2b871fb8cb1\"\r\n    }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/schools",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["schools"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Schools",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/schools",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["schools"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My School",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/schools/my-school",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["schools", "my-school"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Classes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"request\": [\r\n        {\r\n            \"grade\": \"1\",\r\n            \"division\": \"A\",\r\n            \"classTeacherId\": null\r\n        },\r\n        {\r\n            \"grade\": \"2\",\r\n            \"division\": \"A\",\r\n            \"classTeacherId\": null\r\n        },\r\n        {\r\n            \"grade\": \"2\",\r\n            \"division\": \"B\",\r\n            \"classTeacherId\": null\r\n        }\r\n    ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/schools/classes",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["schools", "classes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Classes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/schools/classes",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["schools", "classes"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "transports",
+      "item": [
+        {
+          "name": "Create Transport",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"request\": {\r\n        \"type\": \"BUS\",\r\n        \"driverName\": \"Mahesh\",\r\n        \"conductorName\": \"Suresh\",\r\n        \"driverContact\": \"9789787978\",\r\n        \"conductorContact\": \"1784414578\",\r\n        \"licenseNumber\": \"MH35 AB 1212\",\r\n        \"vehicleNumber\": \"1\"\r\n    }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/transports",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["transports"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transports",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/transports",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["transports"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get FIle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://{{API_BASE_URL}}/files/ee857759-a868-43aa-a96a-48a5b7ebbe7c",
+              "protocol": "http",
+              "host": ["{{API_BASE_URL}}"],
+              "path": ["files", "ee857759-a868-43aa-a96a-48a5b7ebbe7c"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Live Check",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"request\": {\r\n        \"name\": \"Ritik Drona\",\r\n        \"email\": \"ritik@gmail.com\",\r\n        \"classId\": 1234,\r\n        \"transportId\": 1234\r\n    }\r\n}\r\n"
+        },
+        "url": {
+          "raw": "http://{{API_BASE_URL}}",
+          "protocol": "http",
+          "host": ["{{API_BASE_URL}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload File",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{AUTH_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "/C:/Users/Ritik Drona/Downloads/Untitled Diagram.drawio.html"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://{{API_BASE_URL}}/files",
+          "protocol": "http",
+          "host": ["{{API_BASE_URL}}"],
+          "path": ["files"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

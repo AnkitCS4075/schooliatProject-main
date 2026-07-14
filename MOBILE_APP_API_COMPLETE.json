@@ -1,0 +1,2134 @@
+{
+  "info": {
+    "name": "SchooliAt Mobile App API - Complete Reference",
+    "version": "1.0.0",
+    "description": "Complete API reference for SchooliAt production backend. Generated from backend codebase analysis. All endpoints available to mobile (Android/iOS) for TEACHER, STUDENT, and EMPLOYEE roles.",
+    "baseUrl": "https://api.schooliat.com",
+    "authPath": "/auth",
+    "apiBasePath": "/api/v1",
+    "commonHeaders": {
+      "Content-Type": "application/json",
+      "x-platform": "android | ios",
+      "Authorization": "Bearer <token> (required for all except auth)"
+    },
+    "generatedAt": "2026-03-09"
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/auth/authenticate",
+      "authRequired": false,
+      "group": "authentication",
+      "description": "Login. Body: { request: { email, password } }. Returns token and user with role, school."
+    },
+    {
+      "method": "POST",
+      "path": "/auth/request-otp",
+      "authRequired": false,
+      "group": "authentication",
+      "description": "Request OTP. Body: { request: { email, purpose } }. purpose: verification | password-reset | login | deletion"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/verify-otp",
+      "authRequired": false,
+      "group": "authentication",
+      "description": "Verify OTP. Body: { request: { email, otp, purpose } }"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/forgot-password",
+      "authRequired": false,
+      "group": "authentication",
+      "description": "Request password reset. Body: { request: { email } }"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/reset-password",
+      "authRequired": false,
+      "group": "authentication",
+      "description": "Reset password with OTP. Body: { request: { email, otp, newPassword } } or { token, password }"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/change-password",
+      "authRequired": true,
+      "group": "authentication",
+      "description": "Change password (authenticated). Body: { request: { currentPassword, newPassword } }"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/roles",
+      "authRequired": false,
+      "group": "authentication",
+      "description": "Get roles allowed for mobile login (TEACHER, STUDENT, EMPLOYEE)"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me",
+      "authRequired": true,
+      "group": "authentication",
+      "description": "Get current user profile with role and school"
+    },
+    {
+      "method": "PATCH",
+      "path": "/auth/me",
+      "authRequired": true,
+      "group": "authentication",
+      "description": "Update current user profile"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/students",
+      "authRequired": true,
+      "group": "students",
+      "description": "List students. Query: page, limit, search, classId, academicYear, gender"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/students/:id",
+      "authRequired": true,
+      "group": "students",
+      "description": "Get student by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/employees",
+      "authRequired": true,
+      "group": "employees",
+      "description": "List employees. Query: search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/employees/:id",
+      "authRequired": true,
+      "group": "employees",
+      "description": "Get employee by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/employees",
+      "authRequired": true,
+      "group": "employees",
+      "description": "Create employee. Body: { request: { email, password, firstName, lastName, roleId, ... } }"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/employees/:id",
+      "authRequired": true,
+      "group": "employees",
+      "description": "Update employee"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/employees/:id",
+      "authRequired": true,
+      "group": "employees",
+      "description": "Update employee (alias for PATCH)"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/employees/:id",
+      "authRequired": true,
+      "group": "employees",
+      "description": "Soft delete employee"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/teachers",
+      "authRequired": true,
+      "group": "users",
+      "description": "Create teacher"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/teachers",
+      "authRequired": true,
+      "group": "users",
+      "description": "List teachers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/teachers/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Get teacher by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/teachers/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Update teacher"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/teachers/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Delete teacher"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/staff",
+      "authRequired": true,
+      "group": "users",
+      "description": "Create staff"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/staff",
+      "authRequired": true,
+      "group": "users",
+      "description": "List staff"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/staff/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Get staff by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/staff/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Update staff"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/staff/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Delete staff"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/students",
+      "authRequired": true,
+      "group": "users",
+      "description": "Create student"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/students",
+      "authRequired": true,
+      "group": "users",
+      "description": "List students (same as GET /students)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/students/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Get student by ID (same as GET /students/:id)"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/students/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Update student"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/students/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Delete student"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/students/bulk-assign-class",
+      "authRequired": true,
+      "group": "users",
+      "description": "Bulk assign class to students"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/teachers/bulk",
+      "authRequired": true,
+      "group": "users",
+      "description": "Bulk create teachers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/students/bulk",
+      "authRequired": true,
+      "group": "users",
+      "description": "Bulk create students"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/students/export",
+      "authRequired": true,
+      "group": "users",
+      "description": "Export students"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/teachers/export",
+      "authRequired": true,
+      "group": "users",
+      "description": "Export teachers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/users/employees",
+      "authRequired": true,
+      "group": "users",
+      "description": "Create employee"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/employees",
+      "authRequired": true,
+      "group": "users",
+      "description": "List employees (same as GET /employees)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/employees/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Get employee by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/employees/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Update employee"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/users/employees/:id",
+      "authRequired": true,
+      "group": "users",
+      "description": "Delete employee"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/users/employees/:id/permissions",
+      "authRequired": true,
+      "group": "users",
+      "description": "Update employee permissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard",
+      "authRequired": true,
+      "group": "statistics",
+      "description": "Dashboard statistics (role-based: teacher/student/employee)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics",
+      "authRequired": true,
+      "group": "statistics",
+      "description": "Get statistics"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/schools",
+      "authRequired": true,
+      "group": "statistics",
+      "description": "School statistics list"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/schools/:id/revenue",
+      "authRequired": true,
+      "group": "statistics",
+      "description": "School revenue statistics"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/mark",
+      "authRequired": true,
+      "group": "attendance",
+      "description": "Mark single attendance. Body: { request: { studentId, classId, date, status, periodId?, lateArrivalTime?, absenceReason? } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/mark-bulk",
+      "authRequired": true,
+      "group": "attendance",
+      "description": "Mark bulk attendance. Body: { request: { classId, date, attendance: [{ studentId, status, absenceReason? }] } }"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance",
+      "authRequired": true,
+      "group": "attendance",
+      "description": "Get attendance. Query: studentId, classId, startDate, endDate, status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance/statistics",
+      "authRequired": true,
+      "group": "attendance",
+      "description": "Get attendance statistics"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance/report",
+      "authRequired": true,
+      "group": "attendance",
+      "description": "Get attendance report"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/periods",
+      "authRequired": true,
+      "group": "attendance",
+      "description": "Create attendance period"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance/periods",
+      "authRequired": true,
+      "group": "attendance",
+      "description": "Get attendance periods"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework",
+      "authRequired": true,
+      "group": "homework",
+      "description": "Create homework. Body: { request: { title, description, classIds, subjectId, dueDate, isMCQ?, attachments?, mcqQuestions? } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework/submit",
+      "authRequired": true,
+      "group": "homework",
+      "description": "Submit homework. Body: { request: { homeworkId, files?, mcqAnswers? } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework/:id/submit",
+      "authRequired": true,
+      "group": "homework",
+      "description": "Submit homework (id in URL). Body: { request: { files?, mcqAnswers? } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework/grade",
+      "authRequired": true,
+      "group": "homework",
+      "description": "Grade homework. Body: { request: { submissionId, grade?, feedback?, marksObtained?, totalMarks? } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/homework/:id/grade",
+      "authRequired": true,
+      "group": "homework",
+      "description": "Grade homework (id in URL). Body: { request: { submissionId, grade?, feedback?, marksObtained?, totalMarks? } }"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/homework",
+      "authRequired": true,
+      "group": "homework",
+      "description": "List homework. Query: homeworkId, studentId, classId, subjectId, status, page, limit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/homework/:homeworkId/mcq-results",
+      "authRequired": true,
+      "group": "homework",
+      "description": "Get MCQ results for a homework"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Enter marks. Body: { request: { examId, studentId, subjectId, classId, marksObtained, maxMarks } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks/bulk",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Bulk enter marks"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks/calculate-result",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Calculate result. Body: { request: { examId, classId } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks/publish",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Publish results. Body: { request: { examId, classId? } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/marks/publish-results",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Publish results (alias). Body: { request: { examId, classId? } }"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/marks/my-summary",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Student academic summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/marks",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Get marks. Query: examId, studentId, classId. Role-based."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/marks/results",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Get published results"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/marks/results/export",
+      "authRequired": true,
+      "group": "marks",
+      "description": "Export results"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/timetables/my-classes",
+      "authRequired": true,
+      "group": "timetables",
+      "description": "Teacher's assigned classes timetable"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/timetables/:id",
+      "authRequired": true,
+      "group": "timetables",
+      "description": "Get timetable by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/timetables",
+      "authRequired": true,
+      "group": "timetables",
+      "description": "Get timetables. Query: classId, teacherId, subjectId, timetableId, date"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/timetables",
+      "authRequired": true,
+      "group": "timetables",
+      "description": "Create timetable"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/timetables/:timetableId",
+      "authRequired": true,
+      "group": "timetables",
+      "description": "Update timetable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/timetables/check-conflicts",
+      "authRequired": true,
+      "group": "timetables",
+      "description": "Check timetable conflicts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/timetables/:timetableId/print",
+      "authRequired": true,
+      "group": "timetables",
+      "description": "Get timetable print view"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/timetables/:timetableId",
+      "authRequired": true,
+      "group": "timetables",
+      "description": "Delete timetable"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notes",
+      "authRequired": true,
+      "group": "notes",
+      "description": "List notes. Query: subjectId, classId, chapter, topic, page, limit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notes",
+      "authRequired": true,
+      "group": "notes",
+      "description": "Create note. Body: { request: { title, subjectId, classId, chapter, fileId, description? } }"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notes/:id",
+      "authRequired": true,
+      "group": "notes",
+      "description": "Update note"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/notes/:id",
+      "authRequired": true,
+      "group": "notes",
+      "description": "Delete note"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notes/notes",
+      "authRequired": true,
+      "group": "notes",
+      "description": "Create note (legacy path)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notes/notes",
+      "authRequired": true,
+      "group": "notes",
+      "description": "List notes (legacy path)"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notes/notes/:id",
+      "authRequired": true,
+      "group": "notes",
+      "description": "Update note (legacy path)"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/notes/notes/:id",
+      "authRequired": true,
+      "group": "notes",
+      "description": "Delete note (legacy path)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/syllabus",
+      "authRequired": true,
+      "group": "syllabus",
+      "description": "List syllabus. Query: subjectId, classId, academicYear, page, limit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notes/syllabus",
+      "authRequired": true,
+      "group": "syllabus",
+      "description": "Create syllabus"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notes/syllabus/:id",
+      "authRequired": true,
+      "group": "syllabus",
+      "description": "Update syllabus"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notes/syllabus",
+      "authRequired": true,
+      "group": "syllabus",
+      "description": "List syllabus (legacy path)"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/notes/syllabus/:id",
+      "authRequired": true,
+      "group": "syllabus",
+      "description": "Delete syllabus"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/leave/request",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Create leave request. Body: { request: { leaveTypeId, startDate, endDate, reason } }"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/requests",
+      "authRequired": true,
+      "group": "leave",
+      "description": "List leave requests. Query: userId, status, startDate, endDate, page, limit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/balance",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Get leave balance. Query: userId?, year?"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/history",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Leave history. Query: userId, status, startDate, endDate, page, limit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/calendar",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Leave calendar. Query: startDate, endDate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/leave/approve",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Approve leave"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/leave/reject",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Reject leave"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/leave/types",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Create leave type"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/leave/types",
+      "authRequired": true,
+      "group": "leave",
+      "description": "List leave types"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/leave/types/:id",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Update leave type"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/leave/types/:id",
+      "authRequired": true,
+      "group": "leave",
+      "description": "Delete leave type"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees",
+      "authRequired": true,
+      "group": "fees",
+      "description": "Fees overview. Query: academicYear"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees/status",
+      "authRequired": true,
+      "group": "fees",
+      "description": "Fee status summary (totalAmount, paidAmount, pendingAmount, installments). Query: studentId?, year?"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees/installments/:installmentNumber",
+      "authRequired": true,
+      "group": "fees",
+      "description": "Get installments by number. Query: end?, academicYear?"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees/student/:studentId",
+      "authRequired": true,
+      "group": "fees",
+      "description": "Get fee installments for a student"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/fees/request-otp",
+      "authRequired": true,
+      "group": "fees",
+      "description": "Request OTP for fee payment"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/fees/installments/:id/payment",
+      "authRequired": true,
+      "group": "fees",
+      "description": "Record payment for an installment. Body: { request: { amount, paymentMethod, otp, ... } }"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fees/export",
+      "authRequired": true,
+      "group": "fees",
+      "description": "Export fees"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/communication/conversations",
+      "authRequired": true,
+      "group": "communication",
+      "description": "Create conversation. Body: { request: { participants, type, title? } }"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/conversations",
+      "authRequired": true,
+      "group": "communication",
+      "description": "List conversations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/communication/messages",
+      "authRequired": true,
+      "group": "communication",
+      "description": "Send message. Body: { request: { conversationId, content, attachments? } }"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/communication/conversations/:id/messages",
+      "authRequired": true,
+      "group": "communication",
+      "description": "Send message (conversationId in URL). Body: { request: { content, attachments? } }"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/conversations/:conversationId/messages",
+      "authRequired": true,
+      "group": "communication",
+      "description": "Get conversation messages. Query: page, limit, beforeMessageId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/communication/announcements",
+      "authRequired": true,
+      "group": "communication",
+      "description": "Create announcement. Body: { request: { title, content, targetUserIds?, targetRoles? } }"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/announcements",
+      "authRequired": true,
+      "group": "communication",
+      "description": "List announcements (notifications type ANNOUNCEMENT). Query: page, limit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/notifications",
+      "authRequired": true,
+      "group": "notifications",
+      "description": "List notifications. Query: isRead, type, page, limit"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/communication/notifications/:notificationId/read",
+      "authRequired": true,
+      "group": "notifications",
+      "description": "Mark notification as read"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/communication/notifications/read-all",
+      "authRequired": true,
+      "group": "notifications",
+      "description": "Mark all notifications as read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communication/notifications/unread-count",
+      "authRequired": true,
+      "group": "notifications",
+      "description": "Get unread notification count"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications",
+      "authRequired": true,
+      "group": "notifications",
+      "description": "List notifications (alias for /communication/notifications)"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notifications/:id/read",
+      "authRequired": true,
+      "group": "notifications",
+      "description": "Mark notification as read (alias)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Calendar view / events. Query: month, date, pageNumber, pageSize"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/events",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "List events. Query: month, date"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calendar/events",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Create event"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/calendar/events/:id",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Update event"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/calendar/events/:id",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Delete event"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/holidays",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "List holidays"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calendar/holidays",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Create holiday"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/calendar/holidays/:id",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Update holiday"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/calendar/holidays/:id",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Delete holiday"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/exam-calendars",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "List exam calendars"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calendar/exam-calendars",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Create exam calendar"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/calendar/exam-calendars/:id",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Update exam calendar"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/calendar/exam-calendars/:id",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Delete exam calendar"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/notices",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "List notices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calendar/notices",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Create notice"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/calendar/notices/:id",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Update notice"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/calendar/notices/:id",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Delete notice"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar/:date",
+      "authRequired": true,
+      "group": "calendar",
+      "description": "Calendar items for a date (YYYY-MM-DD)"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/files",
+      "authRequired": true,
+      "group": "files",
+      "description": "Upload file (multipart form-data, field: file)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/files/:id",
+      "authRequired": true,
+      "group": "files",
+      "description": "Get file by ID (stream or metadata with URL)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools",
+      "authRequired": true,
+      "group": "schools",
+      "description": "List schools. Query: page, limit, search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools/:id",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Get school by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/schools",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Create school"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/schools/:id",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Update school"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/schools/:id",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Delete school"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools/my-school",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Get current user's school"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/schools/my-school",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Update my school"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools/classes",
+      "authRequired": true,
+      "group": "schools",
+      "description": "List classes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/schools/classes",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Create classes"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/schools/classes/:id",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Update class"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/schools/classes/:id",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Delete class"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/schools/classes/:id/students/export",
+      "authRequired": true,
+      "group": "schools",
+      "description": "Export class students"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings/content/:slug",
+      "authRequired": true,
+      "group": "settings",
+      "description": "Get platform content (e.g. terms, privacy, support)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings",
+      "authRequired": true,
+      "group": "settings",
+      "description": "Get settings"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings/platform-bank",
+      "authRequired": true,
+      "group": "settings",
+      "description": "Get platform bank settings"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/settings",
+      "authRequired": true,
+      "group": "settings",
+      "description": "Update settings"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/exams",
+      "authRequired": true,
+      "group": "exams",
+      "description": "List exams"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/exams",
+      "authRequired": true,
+      "group": "exams",
+      "description": "Create exam"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/exams/:id",
+      "authRequired": true,
+      "group": "exams",
+      "description": "Update exam"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/exams/:id",
+      "authRequired": true,
+      "group": "exams",
+      "description": "Delete exam"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/subjects",
+      "authRequired": true,
+      "group": "subjects",
+      "description": "List subjects. Query: classId, page, limit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/subjects",
+      "authRequired": true,
+      "group": "subjects",
+      "description": "Create subject"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/subjects/:id",
+      "authRequired": true,
+      "group": "subjects",
+      "description": "Update subject"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/subjects/:id",
+      "authRequired": true,
+      "group": "subjects",
+      "description": "Delete subject"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vendors",
+      "authRequired": true,
+      "group": "vendors",
+      "description": "List vendors"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vendors/stats",
+      "authRequired": true,
+      "group": "vendors",
+      "description": "Vendor statistics"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vendors",
+      "authRequired": true,
+      "group": "vendors",
+      "description": "Create vendor"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vendors/:id",
+      "authRequired": true,
+      "group": "vendors",
+      "description": "Get vendor by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/vendors/:id",
+      "authRequired": true,
+      "group": "vendors",
+      "description": "Update vendor"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/vendors/:id",
+      "authRequired": true,
+      "group": "vendors",
+      "description": "Delete vendor"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/licenses",
+      "authRequired": true,
+      "group": "licenses",
+      "description": "List licenses"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/licenses",
+      "authRequired": true,
+      "group": "licenses",
+      "description": "Create license"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/licenses/:id",
+      "authRequired": true,
+      "group": "licenses",
+      "description": "Get license by ID"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/licenses/:id",
+      "authRequired": true,
+      "group": "licenses",
+      "description": "Update license"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/licenses/:id",
+      "authRequired": true,
+      "group": "licenses",
+      "description": "Delete license"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/receipts",
+      "authRequired": true,
+      "group": "receipts",
+      "description": "List receipts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/receipts",
+      "authRequired": true,
+      "group": "receipts",
+      "description": "Create receipt"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/receipts/:id",
+      "authRequired": true,
+      "group": "receipts",
+      "description": "Get receipt by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/receipts/:id",
+      "authRequired": true,
+      "group": "receipts",
+      "description": "Update receipt"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/receipts/:id",
+      "authRequired": true,
+      "group": "receipts",
+      "description": "Delete receipt"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/receipts/:id/generate",
+      "authRequired": true,
+      "group": "receipts",
+      "description": "Generate receipt"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gallery",
+      "authRequired": true,
+      "group": "gallery",
+      "description": "List galleries"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gallery/:id",
+      "authRequired": true,
+      "group": "gallery",
+      "description": "Get gallery by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gallery",
+      "authRequired": true,
+      "group": "gallery",
+      "description": "Create gallery"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/gallery/:id",
+      "authRequired": true,
+      "group": "gallery",
+      "description": "Update gallery"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/gallery/:id",
+      "authRequired": true,
+      "group": "gallery",
+      "description": "Delete gallery"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gallery/images",
+      "authRequired": true,
+      "group": "gallery",
+      "description": "Add gallery image"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/gallery/images/:id",
+      "authRequired": true,
+      "group": "gallery",
+      "description": "Delete gallery image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parent/children",
+      "authRequired": true,
+      "group": "parent",
+      "description": "List linked children"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parent/children/:childId",
+      "authRequired": true,
+      "group": "parent",
+      "description": "Get child by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parent/dashboard",
+      "authRequired": true,
+      "group": "parent",
+      "description": "Parent dashboard"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/parent/children/:childId/link",
+      "authRequired": true,
+      "group": "parent",
+      "description": "Link child to parent"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/books",
+      "authRequired": true,
+      "group": "library",
+      "description": "List books"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/books/:id",
+      "authRequired": true,
+      "group": "library",
+      "description": "Get book by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/books",
+      "authRequired": true,
+      "group": "library",
+      "description": "Create book"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/books/bulk",
+      "authRequired": true,
+      "group": "library",
+      "description": "Bulk create books"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/library/books/:id",
+      "authRequired": true,
+      "group": "library",
+      "description": "Update book"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/library/books/:id",
+      "authRequired": true,
+      "group": "library",
+      "description": "Delete book"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/issues",
+      "authRequired": true,
+      "group": "library",
+      "description": "Issue book"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/issues/:id/return",
+      "authRequired": true,
+      "group": "library",
+      "description": "Return book"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/reservations",
+      "authRequired": true,
+      "group": "library",
+      "description": "Reserve book"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/history",
+      "authRequired": true,
+      "group": "library",
+      "description": "Library history"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/pending-returns",
+      "authRequired": true,
+      "group": "library",
+      "description": "Pending returns"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/library/dashboard",
+      "authRequired": true,
+      "group": "library",
+      "description": "Library dashboard"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/library/calculate-fines",
+      "authRequired": true,
+      "group": "library",
+      "description": "Calculate fines"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/circulars",
+      "authRequired": true,
+      "group": "circulars",
+      "description": "List circulars"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/circulars",
+      "authRequired": true,
+      "group": "circulars",
+      "description": "Create circular"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/circulars/:id",
+      "authRequired": true,
+      "group": "circulars",
+      "description": "Update circular"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/circulars/:id/publish",
+      "authRequired": true,
+      "group": "circulars",
+      "description": "Publish circular"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/circulars/:id",
+      "authRequired": true,
+      "group": "circulars",
+      "description": "Delete circular"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/dashboard-summary",
+      "authRequired": true,
+      "group": "reports",
+      "description": "Dashboard summary report"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/attendance",
+      "authRequired": true,
+      "group": "reports",
+      "description": "Attendance report"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/fees",
+      "authRequired": true,
+      "group": "reports",
+      "description": "Fees report"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/academic",
+      "authRequired": true,
+      "group": "reports",
+      "description": "Academic report"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/salary",
+      "authRequired": true,
+      "group": "reports",
+      "description": "Salary report"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/regions",
+      "authRequired": true,
+      "group": "regions",
+      "description": "List regions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/regions",
+      "authRequired": true,
+      "group": "regions",
+      "description": "Create region"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/regions/:id",
+      "authRequired": true,
+      "group": "regions",
+      "description": "Update region"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/regions/:id",
+      "authRequired": true,
+      "group": "regions",
+      "description": "Delete region"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transports",
+      "authRequired": true,
+      "group": "transports",
+      "description": "List transports"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Create transport"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/transports/:id",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Update transport"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/transports/:id",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Delete transport"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transports/routes",
+      "authRequired": true,
+      "group": "transports",
+      "description": "List routes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports/routes",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Create route"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/transports/routes/:id",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Update route"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/transports/routes/:id",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Delete route"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports/routes/stops",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Create route stop"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/transports/routes/stops/:id",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Update route stop"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/transports/routes/stops/:id",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Delete route stop"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports/routes/:routeId/students/:studentId",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Assign student to route"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transports/routes/:routeId/students",
+      "authRequired": true,
+      "group": "transports",
+      "description": "List students on route"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transports/:transportId/maintenance",
+      "authRequired": true,
+      "group": "transports",
+      "description": "Create maintenance record"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transports/:transportId/maintenance",
+      "authRequired": true,
+      "group": "transports",
+      "description": "List maintenance records"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/invoices",
+      "authRequired": true,
+      "group": "invoices",
+      "description": "List invoices"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/invoices",
+      "authRequired": true,
+      "group": "invoices",
+      "description": "Create invoice"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/invoices/:id",
+      "authRequired": true,
+      "group": "invoices",
+      "description": "Get invoice by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/invoices/:id",
+      "authRequired": true,
+      "group": "invoices",
+      "description": "Update invoice"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/invoices/:id",
+      "authRequired": true,
+      "group": "invoices",
+      "description": "Delete invoice"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/invoices/:id/generate",
+      "authRequired": true,
+      "group": "invoices",
+      "description": "Generate invoice"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations",
+      "authRequired": true,
+      "group": "locations",
+      "description": "List locations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/locations",
+      "authRequired": true,
+      "group": "locations",
+      "description": "Create location"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/locations/:id",
+      "authRequired": true,
+      "group": "locations",
+      "description": "Delete location"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/letterhead",
+      "authRequired": true,
+      "group": "letterhead",
+      "description": "Get letterhead"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/letterhead/generate",
+      "authRequired": true,
+      "group": "letterhead",
+      "description": "Generate letterhead"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/id-cards",
+      "authRequired": true,
+      "group": "id-cards",
+      "description": "List id-cards"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/id-cards/status",
+      "authRequired": true,
+      "group": "id-cards",
+      "description": "ID card status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/id-cards/config",
+      "authRequired": true,
+      "group": "id-cards",
+      "description": "ID card config"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/id-cards/config",
+      "authRequired": true,
+      "group": "id-cards",
+      "description": "Create/update ID card config"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/id-cards/classes/:classId/generate",
+      "authRequired": true,
+      "group": "id-cards",
+      "description": "Generate ID cards for class"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/templates",
+      "authRequired": true,
+      "group": "templates",
+      "description": "List templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/templates/:templateId/default",
+      "authRequired": true,
+      "group": "templates",
+      "description": "Get default template"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/grievances",
+      "authRequired": true,
+      "group": "grievances",
+      "description": "List grievances"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/grievances",
+      "authRequired": true,
+      "group": "grievances",
+      "description": "Create grievance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/grievances/my",
+      "authRequired": true,
+      "group": "grievances",
+      "description": "My grievances"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/grievances/:id",
+      "authRequired": true,
+      "group": "grievances",
+      "description": "Get grievance by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/grievances/:id",
+      "authRequired": true,
+      "group": "grievances",
+      "description": "Update grievance"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/grievances/:id/comments",
+      "authRequired": true,
+      "group": "grievances",
+      "description": "Add grievance comment"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salary-structures",
+      "authRequired": true,
+      "group": "salary",
+      "description": "List salary structures"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salary-structures/:id",
+      "authRequired": true,
+      "group": "salary",
+      "description": "Get salary structure by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/salary-structures",
+      "authRequired": true,
+      "group": "salary",
+      "description": "Create salary structure"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/salary-structures/:id",
+      "authRequired": true,
+      "group": "salary",
+      "description": "Update salary structure"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salary-payments",
+      "authRequired": true,
+      "group": "salary",
+      "description": "List salary payments"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/salary-payments/generate",
+      "authRequired": true,
+      "group": "salary",
+      "description": "Generate salary payment"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salaries",
+      "authRequired": true,
+      "group": "salary",
+      "description": "List salary assignments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salaries/:id",
+      "authRequired": true,
+      "group": "salary",
+      "description": "Get salary assignment by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/salaries",
+      "authRequired": true,
+      "group": "salary",
+      "description": "Create salary assignment"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/salaries/:id",
+      "authRequired": true,
+      "group": "salary",
+      "description": "Update salary assignment"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ai/chat",
+      "authRequired": true,
+      "group": "ai",
+      "description": "AI chat"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/conversations",
+      "authRequired": true,
+      "group": "ai",
+      "description": "List AI conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/conversations/:id",
+      "authRequired": true,
+      "group": "ai",
+      "description": "Get AI conversation by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ai/faqs",
+      "authRequired": true,
+      "group": "ai",
+      "description": "Create FAQ"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/faqs",
+      "authRequired": true,
+      "group": "ai",
+      "description": "List FAQs"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/ai/faqs/:id",
+      "authRequired": true,
+      "group": "ai",
+      "description": "Update FAQ"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/ai/faqs/:id",
+      "authRequired": true,
+      "group": "ai",
+      "description": "Delete FAQ"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/audit",
+      "authRequired": true,
+      "group": "audit",
+      "description": "List audit logs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/audit/:id",
+      "authRequired": true,
+      "group": "audit",
+      "description": "Get audit log by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/deletion-otp/request",
+      "authRequired": true,
+      "group": "deletion-otp",
+      "description": "Request deletion OTP"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transfer-certificates",
+      "authRequired": true,
+      "group": "transfer-certificates",
+      "description": "Create transfer certificate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transfer-certificates",
+      "authRequired": true,
+      "group": "transfer-certificates",
+      "description": "List transfer certificates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transfer-certificates/:id",
+      "authRequired": true,
+      "group": "transfer-certificates",
+      "description": "Get transfer certificate by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transfer-certificates/:id/download",
+      "authRequired": true,
+      "group": "transfer-certificates",
+      "description": "Download transfer certificate"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/transfer-certificates/:id/status",
+      "authRequired": true,
+      "group": "transfer-certificates",
+      "description": "Update TC status"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/transfer-certificates/:id",
+      "authRequired": true,
+      "group": "transfer-certificates",
+      "description": "Delete transfer certificate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/emergency-contacts",
+      "authRequired": true,
+      "group": "emergency-contacts",
+      "description": "Create emergency contact"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/emergency-contacts/student/:studentId",
+      "authRequired": true,
+      "group": "emergency-contacts",
+      "description": "Get emergency contacts for student"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/emergency-contacts/:id",
+      "authRequired": true,
+      "group": "emergency-contacts",
+      "description": "Get emergency contact by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/emergency-contacts/:id",
+      "authRequired": true,
+      "group": "emergency-contacts",
+      "description": "Update emergency contact"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/emergency-contacts/:id",
+      "authRequired": true,
+      "group": "emergency-contacts",
+      "description": "Delete emergency contact"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/inventory",
+      "authRequired": true,
+      "group": "inventory",
+      "description": "List inventory items"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/inventory",
+      "authRequired": true,
+      "group": "inventory",
+      "description": "Create inventory item"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/inventory/:id",
+      "authRequired": true,
+      "group": "inventory",
+      "description": "Update inventory item"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/inventory/:id",
+      "authRequired": true,
+      "group": "inventory",
+      "description": "Delete inventory item"
+    }
+  ],
+  "summary": {
+    "totalEndpoints": 248,
+    "authEndpoints": 9,
+    "apiEndpoints": 239,
+    "groups": [
+      "authentication",
+      "students",
+      "employees",
+      "users",
+      "statistics",
+      "attendance",
+      "homework",
+      "marks",
+      "timetables",
+      "notes",
+      "syllabus",
+      "leave",
+      "fees",
+      "communication",
+      "notifications",
+      "calendar",
+      "files",
+      "schools",
+      "settings",
+      "exams",
+      "subjects",
+      "vendors",
+      "licenses",
+      "receipts",
+      "gallery",
+      "parent",
+      "library",
+      "circulars",
+      "reports",
+      "regions",
+      "transports",
+      "invoices",
+      "locations",
+      "letterhead",
+      "id-cards",
+      "templates",
+      "grievances",
+      "salary",
+      "ai",
+      "audit",
+      "deletion-otp",
+      "transfer-certificates",
+      "emergency-contacts",
+      "inventory"
+    ]
+  }
+}

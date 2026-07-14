@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="id-card-container">
+        <div class="id-card">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="header-left">
+                    <div class="logo-container">
+                        <img src="{{school.logoSrc}}" alt="School Logo" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <svg class="logo-icon-fallback" style="display: none;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="header-text">
+                        <h1 class="school-name">{{school.name}}</h1>
+                        <p class="card-title">Student Identification Card</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <span class="academic-year-label">Academic Year</span>
+                    <span class="academic-year">{{academicYear}}</span>
+                </div>
+            </div>
+            
+            <!-- Body Section -->
+            <div class="body">
+                <!-- Left Column: Photo and Info -->
+                <div class="left-column">
+                    <div class="photo-container">
+                        <div class="photo-placeholder">
+                            <img src="{{student.idPhotoSrc}}" alt="Student Photo" class="student-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="photo-fallback" style="display: none;">
+                                <svg class="photo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="photo-text">PHOTO</span>
+                            </div>
+                        </div>
+                        <div class="blood-group-badge">
+                            <span>{{student.studentProfile.bloodGroup}}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Center Column: Details -->
+                <div class="center-column">
+                    <h2 class="student-name">{{student.name}}</h2>
+                    
+                    <div class="detail-list">
+                        <div class="detail-item">
+                            <div class="detail-bullet"></div>
+                            <div class="detail-content">
+                                <span class="value">{{class.grade}}</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-bullet"></div>
+                            <div class="detail-content">
+                                <span class="value">Section {{class.division}}</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-bullet"></div>
+                            <div class="detail-content">
+                                <span class="value">Roll #{{rollNumber}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-item">
+                            <span class="label">Student ID Number</span>
+                            <span class="value">{{student.publicId}}</span>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-item">
+                            <span class="label">Date of Birth</span>
+                            <span class="value">{{dateOfBirth}}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Emergency Card -->
+                <div class="right-column">
+                    <div class="emergency-card">
+                        <h3 class="emergency-title">EMERGENCY</h3>
+                        <p class="emergency-label">In case of emergency:</p>
+                        <p class="emergency-value">{{student.contact}}</p>
+                        <div class="validity-info">
+                            <span class="validity-label">Valid:</span>
+                            <span class="validity-value">{{config.text.footerText}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Section -->
+            <div class="footer">
+                <p class="footer-text">This card is property of {{school.name}}. If found, please return to school office.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

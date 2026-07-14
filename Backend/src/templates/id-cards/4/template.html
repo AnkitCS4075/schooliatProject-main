@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="id-card-container">
+        <div class="id-card">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="logo-container">
+                    <img src="{{school.logoSrc}}" alt="School Logo" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <svg class="logo-icon-fallback" style="display: none;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h1 class="school-name">{{school.name}}</h1>
+                    <p class="card-title">Student ID Card</p>
+                </div>
+            </div>
+            
+            <!-- Divider Line -->
+            <div class="divider-line"></div>
+            
+            <!-- Body Section -->
+            <div class="body">
+                <!-- Photo Section -->
+                <div class="photo-section">
+                    <div class="photo-container">
+                        <div class="photo-placeholder">
+                            <img src="{{student.idPhotoSrc}}" alt="Student Photo" class="student-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="photo-fallback" style="display: none;">
+                                <svg class="photo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="photo-text">PHOTO</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Name Banner -->
+                <div class="name-banner">
+                    <span class="name-value">{{student.name}}</span>
+                </div>
+                
+                <!-- Details Section -->
+                <div class="details-section">
+                    <div class="detail-row">
+                        <span class="label">Student ID:</span>
+                        <span class="value">{{student.publicId}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Class:</span>
+                        <span class="value">{{class.grade}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Section:</span>
+                        <span class="value">{{class.division}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Blood Group:</span>
+                        <span class="value blood-group">{{student.studentProfile.bloodGroup}}</span>
+                    </div>
+                    <div class="detail-row emergency">
+                        <span class="label">Emergency Contact</span>
+                        <span class="value">{{student.contact}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Section -->
+            <div class="footer">
+                <p class="validity-text">Valid Until: {{config.text.footerText}}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
