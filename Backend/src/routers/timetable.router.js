@@ -481,6 +481,16 @@ router.delete(
       });
     }
 
+    // Fetch timetable with slots for notification before deleting
+    const timetableToDelete = await prisma.timetable.findUnique({
+      where: { id: timetableId },
+      include: {
+        slots: {
+          select: { teacherId: true },
+        },
+      },
+    });
+
     await prisma.timetable.update({
       where: { id: timetableId },
       data: {
@@ -489,6 +499,35 @@ router.delete(
         isActive: false,
       },
     });
+
+    // Send deletion notifications
+    if (timetableToDelete.classId) {
+      try {
+        const notificationService = (await import("../services/notification.service.js")).default;
+        const students = await prisma.user.findMany({
+          where: { studentProfile: { classId: timetableToDelete.classId }, deletedAt: null },
+          select: { id: true },
+        });
+        const teacherIds = [...new Set(timetableToDelete.slots.map((s) => s.teacherId))];
+        const parentLinks = await prisma.parentChildLink.findMany({
+          where: { childId: { in: students.map((s) => s.id) }, deletedAt: null },
+          select: { parentId: true },
+        });
+        const parentIds = [...new Set(parentLinks.map((l) => l.parentId))];
+        const allUserIds = [...students.map((s) => s.id), ...teacherIds, ...parentIds];
+        if (allUserIds.length > 0) {
+          await notificationService.createBulkNotifications(allUserIds, {
+            title: "Timetable Removed",
+            content: `Timetable "${timetableToDelete.name}" has been removed from the schedule.`,
+            type: "GENERAL",
+            schoolId: timetableToDelete.schoolId,
+            createdBy: currentUser.id,
+          });
+        }
+      } catch (err) {
+        logger.error({ err, timetableId }, "Failed to send timetable deletion notifications");
+      }
+    }
 
     res.json({
       message: "Timetable deleted successfully",

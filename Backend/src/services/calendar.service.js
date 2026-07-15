@@ -22,6 +22,7 @@ const getCalendar = async (date, schoolId = null) => {
   const events = await prisma.event.findMany({
     where: {
       ...whereClause,
+      approvalStatus: "APPROVED",
       from: {
         lte: endOfDay,
       },

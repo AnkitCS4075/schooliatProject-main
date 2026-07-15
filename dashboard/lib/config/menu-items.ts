@@ -19,6 +19,7 @@ export const FINANCE_SUBMENU: SubMenuItem[] = [
   { name: "Fees Management", route: "/admin/finance/fees" },
   { name: "Fee Defaulters", route: "/admin/finance/fee-defaulters" },
   { name: "Salary Distribution", route: "/admin/finance/salary" },
+  { name: "Discounts & Scholarships", route: "/admin/finance/discounts" },
 ];
 
 // Submenu items for Attendance
@@ -189,6 +190,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Bonafide",
     icon: "ScrollText",
     route: "/admin/bonafide",
+  },
+  {
+    name: "Approvals",
+    icon: "CheckSquare",
+    route: "/admin/approvals",
   },
   {
     name: "Messages",

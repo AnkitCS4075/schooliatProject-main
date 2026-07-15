@@ -92,6 +92,7 @@ router.post(
         visibleTill: new Date(createData.visibleTill),
         schoolId: schoolId || null,
         createdBy: currentUser.id,
+        approvalStatus: "PENDING",
       },
     });
 
@@ -112,6 +113,7 @@ router.get(
       schoolId: schoolId || null,
       deletedAt: null,
       deletedBy: null,
+      approvalStatus: req.query.approvalStatus || (currentUser.role?.name === "SCHOOL_ADMIN" ? undefined : "APPROVED"),
     };
 
     // Filter by month (YYYY-MM format): from >= 1st of month AND till <= last of month
@@ -140,6 +142,34 @@ router.get(
     });
 
     return res.json({ message: "Events fetched!", data: events });
+  },
+);
+
+// Get pending event approvals
+router.get(
+  "/events/pending-approvals",
+  withPermission(Permission.GET_EVENTS),
+  async (req, res) => {
+    try {
+      const currentUser = req.context.user;
+      const events = await prisma.event.findMany({
+        where: {
+          schoolId: currentUser.schoolId,
+          approvalStatus: "PENDING",
+          deletedAt: null,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return res.status(200).json({
+        message: "Pending event approvals fetched",
+        data: events,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || "Failed to fetch pending event approvals",
+      });
+    }
   },
 );
 
@@ -896,5 +926,85 @@ router.get(
     });
   },
 );
+
+// ─── Event Approval Endpoints ───────────────────────────────────────────
+
+// Approve event
+router.patch(
+  "/events/:id/approve",
+  withPermission(Permission.EDIT_EVENT),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const currentUser = req.context.user;
+
+      const event = await prisma.event.findFirst({
+        where: { id, schoolId: currentUser.schoolId, deletedAt: null },
+      });
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      const updated = await prisma.event.update({
+        where: { id },
+        data: {
+          approvalStatus: "APPROVED",
+          approvedBy: currentUser.id,
+          approvedAt: new Date(),
+          rejectionReason: null,
+        },
+      });
+
+      return res.status(200).json({
+        message: "Event approved successfully",
+        data: updated,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || "Failed to approve event",
+      });
+    }
+  },
+);
+
+// Reject event
+router.patch(
+  "/events/:id/reject",
+  withPermission(Permission.EDIT_EVENT),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const currentUser = req.context.user;
+      const { reason } = req.body.request || {};
+
+      const event = await prisma.event.findFirst({
+        where: { id, schoolId: currentUser.schoolId, deletedAt: null },
+      });
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      const updated = await prisma.event.update({
+        where: { id },
+        data: {
+          approvalStatus: "REJECTED",
+          approvedBy: currentUser.id,
+          approvedAt: new Date(),
+          rejectionReason: reason || null,
+        },
+      });
+
+      return res.status(200).json({
+        message: "Event rejected",
+        data: updated,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || "Failed to reject event",
+      });
+    }
+  },
+);
+
 
 export default router;

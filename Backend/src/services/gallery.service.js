@@ -36,6 +36,7 @@ const createGallery = async (data) => {
       classId,
       schoolId,
       createdBy,
+      approvalStatus: "PENDING",
     },
   });
 
@@ -89,6 +90,13 @@ const getGalleries = async (schoolId, filters = {}, options = {}) => {
 
   if (filters.privacy) {
     where.privacy = filters.privacy;
+  }
+
+  if (filters.approvalStatus) {
+    where.approvalStatus = filters.approvalStatus;
+  } else {
+    // Default: only show approved galleries to non-admin users
+    where.approvalStatus = "APPROVED";
   }
 
   const [galleries, total] = await Promise.all([

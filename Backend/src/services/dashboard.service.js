@@ -592,6 +592,7 @@ const getSchoolAdminDashboardData = async (currentUser, schoolId, academicYear, 
         where: {
           schoolId,
           deletedAt: null,
+          approvalStatus: "APPROVED",
           from: { lte: academicEnd },
           till: { gte: academicStart },
         },
@@ -1048,6 +1049,7 @@ const getStaffDashboardData = async (schoolId, staffId, academicYear) => {
         schoolId,
         startDate: { gte: currentDate },
         deletedAt: null,
+        approvalStatus: "APPROVED",
       },
       take: 5,
       orderBy: {

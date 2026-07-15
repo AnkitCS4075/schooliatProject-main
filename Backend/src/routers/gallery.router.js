@@ -84,6 +84,7 @@ router.get(
           eventId: query.eventId,
           classId: query.classId,
           privacy: query.privacy,
+          approvalStatus: query.approvalStatus || (currentUser.role?.name === "SCHOOL_ADMIN" ? undefined : "APPROVED"),
         },
         {
           page: query.page,
@@ -99,6 +100,39 @@ router.get(
     } catch (error) {
       return res.status(400).json({
         message: error.message || "Failed to fetch galleries",
+      });
+    }
+  },
+);
+
+// Get pending approvals
+router.get(
+  "/pending-approvals",
+  withPermission(Permission.GET_GALLERIES),
+  async (req, res) => {
+    try {
+      const currentUser = req.context.user;
+      const galleries = await prisma.gallery.findMany({
+        where: {
+          schoolId: currentUser.schoolId,
+          approvalStatus: "PENDING",
+          deletedAt: null,
+        },
+        include: {
+          images: true,
+          class: { select: { id: true, grade: true, division: true } },
+          event: { select: { id: true, title: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return res.status(200).json({
+        message: "Pending approvals fetched",
+        data: galleries,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || "Failed to fetch pending approvals",
       });
     }
   },
@@ -209,6 +243,85 @@ router.delete(
     } catch (error) {
       return res.status(400).json({
         message: error.message || "Failed to delete image",
+      });
+    }
+  },
+);
+
+// ─── Approval endpoints ─────────────────────────────────────────────────
+
+// Approve gallery
+router.patch(
+  "/:id/approve",
+  withPermission(Permission.EDIT_GALLERY),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const currentUser = req.context.user;
+
+      const gallery = await prisma.gallery.findFirst({
+        where: { id, schoolId: currentUser.schoolId, deletedAt: null },
+      });
+      if (!gallery) {
+        return res.status(404).json({ message: "Gallery not found" });
+      }
+
+      const updated = await prisma.gallery.update({
+        where: { id },
+        data: {
+          approvalStatus: "APPROVED",
+          approvedBy: currentUser.id,
+          approvedAt: new Date(),
+          rejectionReason: null,
+        },
+      });
+
+      return res.status(200).json({
+        message: "Gallery approved successfully",
+        data: updated,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || "Failed to approve gallery",
+      });
+    }
+  },
+);
+
+// Reject gallery
+router.patch(
+  "/:id/reject",
+  withPermission(Permission.EDIT_GALLERY),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const currentUser = req.context.user;
+      const { reason } = req.body.request || {};
+
+      const gallery = await prisma.gallery.findFirst({
+        where: { id, schoolId: currentUser.schoolId, deletedAt: null },
+      });
+      if (!gallery) {
+        return res.status(404).json({ message: "Gallery not found" });
+      }
+
+      const updated = await prisma.gallery.update({
+        where: { id },
+        data: {
+          approvalStatus: "REJECTED",
+          approvedBy: currentUser.id,
+          approvedAt: new Date(),
+          rejectionReason: reason || null,
+        },
+      });
+
+      return res.status(200).json({
+        message: "Gallery rejected",
+        data: updated,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || "Failed to reject gallery",
       });
     }
   },

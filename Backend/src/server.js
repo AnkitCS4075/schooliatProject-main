@@ -76,6 +76,7 @@ import otherIncomeRouter from "./routers/other-income.router.js";
 import accountingRouter from "./routers/accounting.router.js";
 import schoolOnboardingRouter from "./routers/school-onboarding.router.js";
 import platformFinanceRouter from "./routers/platform-finance.router.js";
+import feeDiscountRouter from "./routers/fee-discount.router.js";
 import bootstrapDataService from "./services/bootstrap-data.service.js";
 import logRequestStart from "./middlewares/log-request-start.middleware.js";
 import templateLoaderService from "./services/template-loader.service.js";
@@ -301,6 +302,7 @@ function addRouters(app) {
   // Super Admin Routers
   app.use("/school-onboardings", schoolOnboardingRouter);
   app.use("/platform-finance", platformFinanceRouter);
+  app.use("/fee-management", feeDiscountRouter);
 }
 
 async function setupData() {
