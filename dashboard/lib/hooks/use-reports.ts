@@ -1,123 +1,76 @@
-"use client";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { get, downloadFromApi } from "@/lib/api/client";
 
-import { useQuery } from "@tanstack/react-query";
-import { get } from "@/lib/api/client";
+function fetchReportTypes() {
+  return get("/reports/types");
+}
 
-export function useDashboardSummary(params: { academicYear?: string } = {}) {
-  const { academicYear } = params;
+function fetchReportData(type: string, filters?: Record<string, any>) {
+  return get("/reports/data", { type, ...(filters || {}) });
+}
+
+function downloadReportExcel(type: string, filters?: Record<string, any>) {
+  return downloadFromApi(`/reports/export/excel`, { method: "GET", params: { type, ...(filters || {}) } });
+}
+
+function downloadReportCsv(type: string, filters?: Record<string, any>) {
+  return downloadFromApi(`/reports/export/csv`, { method: "GET", params: { type, ...(filters || {}) } });
+}
+
+function downloadReportPdf(type: string, filters?: Record<string, any>) {
+  return downloadFromApi(`/reports/export/pdf`, { method: "GET", params: { type, ...(filters || {}) } });
+}
+
+function fetchReportTemplates() {
+  return get("/report-templates");
+}
+
+function deleteReportTemplate(id: string) {
+  return downloadFromApi(`/report-templates/${id}`, { method: "DELETE" });
+}
+
+export function useReportTypes() {
   return useQuery({
-    queryKey: ["reports", "summary", academicYear],
-    queryFn: () => get("/reports/dashboard-summary", { academicYear }),
-    staleTime: 2 * 60 * 1000,
+    queryKey: ["report-types"],
+    queryFn: fetchReportTypes,
+    staleTime: 5 * 60_000,
   });
 }
 
-// Exams list for academic filter
-function fetchExams(params: { page?: number; limit?: number } = {}) {
-  return get("/exams", { page: params.page ?? 1, limit: params.limit ?? 500 });
-}
-
-export function useExamsForReports(params: { page?: number; limit?: number } = {}) {
+export function useReportData(type: string, filters?: Record<string, any>, enabled = true) {
   return useQuery({
-    queryKey: ["exams", "reports", params],
-    queryFn: () => fetchExams(params),
-    staleTime: 5 * 60 * 1000,
+    queryKey: ["report", type, filters],
+    queryFn: () => fetchReportData(type, filters),
+    enabled: enabled && !!type,
+    staleTime: 30_000,
   });
 }
 
-// Fetch attendance reports
-function fetchAttendanceReports(params: {
-  classId?: string;
-  studentId?: string;
-  schoolId?: string;
-  startDate?: string;
-  endDate?: string;
-  /** User who recorded the attendance */
-  markedBy?: string;
-}) {
-  return get("/reports/attendance", params);
-}
-
-// Fetch fee analytics
-function fetchFeeAnalytics(params: {
-  classId?: string;
-  schoolId?: string;
-  startDate?: string;
-  endDate?: string;
-}) {
-  return get("/reports/fees", params);
-}
-
-// Fetch academic performance reports
-function fetchAcademicReports(params: {
-  classId?: string;
-  examId?: string;
-  subjectId?: string;
-  studentId?: string;
-  schoolId?: string;
-}) {
-  return get("/reports/academic", params);
-}
-
-// Fetch salary reports
-function fetchSalaryReports(params: {
-  startDate?: string;
-  endDate?: string;
-}) {
-  return get("/reports/salary", params);
-}
-
-// Hooks
-export function useAttendanceReports(params: {
-  classId?: string;
-  studentId?: string;
-  schoolId?: string;
-  startDate?: string;
-  endDate?: string;
-  markedBy?: string;
-} = {}) {
-  return useQuery({
-    queryKey: ["reports", "attendance", params],
-    queryFn: () => fetchAttendanceReports(params),
-    staleTime: 5 * 60 * 1000,
+export function useDownloadReportExcel() {
+  return useMutation({
+    mutationFn: ({ type, filters }: { type: string; filters?: Record<string, any> }) =>
+      downloadReportExcel(type, filters),
   });
 }
 
-export function useFeeAnalytics(params: {
-  classId?: string;
-  schoolId?: string;
-  startDate?: string;
-  endDate?: string;
-} = {}) {
-  return useQuery({
-    queryKey: ["reports", "fees", params],
-    queryFn: () => fetchFeeAnalytics(params),
-    staleTime: 5 * 60 * 1000,
+export function useDownloadReportCsv() {
+  return useMutation({
+    mutationFn: ({ type, filters }: { type: string; filters?: Record<string, any> }) =>
+      downloadReportCsv(type, filters),
   });
 }
 
-export function useAcademicReports(params: {
-  classId?: string;
-  examId?: string;
-  subjectId?: string;
-  studentId?: string;
-  schoolId?: string;
-} = {}) {
-  return useQuery({
-    queryKey: ["reports", "academic", params],
-    queryFn: () => fetchAcademicReports(params),
-    staleTime: 5 * 60 * 1000,
+export function useDownloadReportPdf() {
+  return useMutation({
+    mutationFn: ({ type, filters }: { type: string; filters?: Record<string, any> }) =>
+      downloadReportPdf(type, filters),
   });
 }
 
-export function useSalaryReports(params: {
-  startDate?: string;
-  endDate?: string;
-} = {}) {
+export function useReportTemplates() {
   return useQuery({
-    queryKey: ["reports", "salary", params],
-    queryFn: () => fetchSalaryReports(params),
-    staleTime: 5 * 60 * 1000,
+    queryKey: ["report-templates"],
+    queryFn: fetchReportTemplates,
+    staleTime: 30_000,
   });
 }
-

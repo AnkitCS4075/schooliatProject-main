@@ -78,9 +78,14 @@ const authorize = async (req, res, next) => {
     }
 
     // Ensure permissions is always an array
-    const permissions = Array.isArray(user.role.permissions)
+    const rolePermissions = Array.isArray(user.role.permissions)
       ? user.role.permissions
       : [];
+    // Merge user-level permission overrides (additive: user permissions extend role)
+    const userPermissions = Array.isArray(user.permissions)
+      ? user.permissions
+      : [];
+    const permissions = [...new Set([...rolePermissions, ...userPermissions])];
 
     // Set context with fresh user data
     req.context = {

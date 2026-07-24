@@ -431,6 +431,23 @@ router.patch(
       }
     }
 
+    // ─── Company configuration fields ────────────────────────────────
+    const companyFields = [
+      "companyName", "companyGstin", "companyPan", "companyCin",
+      "companyPhone", "companyEmail", "companyWebsite", "companyAddress",
+      "companyBankName", "companyBankAccount", "companyBankIfsc", "companyBankBranch", "companyBankQrUrl",
+      "signatureImageUrl", "signatureName", "signatureDesignation", "stampImageUrl",
+      "quotationPrefix", "quotationNextSequence", "defaultQuotationTerms", "defaultQuotationNotes", "quotationValidityDays",
+      "invoicePrefix", "invoiceNextSequence",
+      "taxConfigGstPercent", "taxConfigCgstPercent", "taxConfigSgstPercent", "taxConfigIgstPercent",
+      "themePrimaryColor", "themeSecondaryColor", "themeAccentColor",
+    ];
+    for (const field of companyFields) {
+      if (updateData[field] !== undefined) {
+        settingsUpdateData[field] = updateData[field];
+      }
+    }
+
     settingsUpdateData.updatedBy = currentUser.id;
 
     try {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, IndianRupee, Bell, Key, CreditCard, FileText } from "lucide-react";
+import { Building2, IndianRupee, Bell, Key, CreditCard, FileText, Building } from "lucide-react";
 import { PlatformBankCard } from "@/components/fees/platform-bank-card";
 import { SchoolProfileSection } from "./SchoolProfileSection";
 import { SchoolLogoSection } from "./SchoolLogoSection";
@@ -12,9 +12,11 @@ import { NotificationsSection } from "./NotificationsSection";
 import { ChangePasswordSection } from "./ChangePasswordSection";
 import { DeletionOtpEmailSection } from "./DeletionOtpEmailSection";
 import { TemplatesCatalog } from "@/components/templates/templates-catalog";
+import { CompanyConfigSection } from "./CompanyConfigSection";
 
 const SETTINGS_TABS = [
   "general",
+  "company",
   "fees",
   "notifications",
   "account",
@@ -74,6 +76,10 @@ export function SchoolSettingsManagement() {
             <Building2 className="h-4 w-4 shrink-0" />
             General
           </TabsTrigger>
+          <TabsTrigger value="company" className="flex items-center gap-2 shrink-0">
+            <Building className="h-4 w-4 shrink-0" />
+            Company
+          </TabsTrigger>
           <TabsTrigger value="fees" className="flex items-center gap-2 shrink-0">
             <IndianRupee className="h-4 w-4 shrink-0" />
             Fees
@@ -100,6 +106,10 @@ export function SchoolSettingsManagement() {
           <SchoolProfileSection />
           <DeletionOtpEmailSection />
           <SchoolLogoSection />
+        </TabsContent>
+
+        <TabsContent value="company" className="space-y-6">
+          <CompanyConfigSection />
         </TabsContent>
 
         <TabsContent value="fees" className="space-y-6">

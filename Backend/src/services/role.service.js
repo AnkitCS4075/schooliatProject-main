@@ -130,6 +130,27 @@ const defaultRolePermissionsMap = {
     Permission.CREATE_ANNOUNCEMENT,
     Permission.SEND_NOTIFICATION,
     Permission.REQUEST_DELETION_OTP,
+    // Quotation
+    Permission.CREATE_QUOTATION,
+    Permission.GET_QUOTATIONS,
+    Permission.EDIT_QUOTATION,
+    Permission.DELETE_QUOTATION,
+    Permission.APPROVE_QUOTATION,
+    Permission.CANCEL_QUOTATION,
+    Permission.CONVERT_QUOTATION,
+    Permission.EXPORT_QUOTATION,
+    Permission.SEND_QUOTATION,
+    // Reports
+    Permission.GET_REPORTS,
+    Permission.EXPORT_REPORTS,
+    Permission.SCHEDULE_REPORTS,
+    // Custom Roles & User Permissions
+    Permission.MANAGE_CUSTOM_ROLES,
+    Permission.ASSIGN_USER_PERMISSIONS,
+    // System
+    Permission.MANAGE_DATABASE_BACKUP,
+    Permission.MANAGE_SUBSCRIPTION,
+    Permission.MANAGE_BRANDING,
   ],
   [RoleName.EMPLOYEE]: [
     Permission.GET_SCHOOLS,
@@ -304,6 +325,23 @@ const defaultRolePermissionsMap = {
     // Bonafide permissions
     Permission.GENERATE_BONAFIDE,
     Permission.GET_BONAFIDE_CERTIFICATES,
+    // Quotation permissions
+    Permission.CREATE_QUOTATION,
+    Permission.GET_QUOTATIONS,
+    Permission.EDIT_QUOTATION,
+    Permission.DELETE_QUOTATION,
+    Permission.APPROVE_QUOTATION,
+    Permission.CANCEL_QUOTATION,
+    Permission.CONVERT_QUOTATION,
+    Permission.EXPORT_QUOTATION,
+    Permission.SEND_QUOTATION,
+    // Reports & Export
+    Permission.GET_REPORTS,
+    Permission.EXPORT_REPORTS,
+    // Roles & Custom Roles
+    Permission.GET_ROLES,
+    Permission.MANAGE_CUSTOM_ROLES,
+    Permission.ASSIGN_USER_PERMISSIONS,
   ],
   [RoleName.STUDENT]: [
     Permission.GET_MY_SCHOOL,
@@ -383,6 +421,11 @@ const defaultRolePermissionsMap = {
     Permission.APPROVE_LEAVE,
     Permission.REJECT_LEAVE,
     Permission.GET_STATISTICS,
+    // Quotation view
+    Permission.GET_QUOTATIONS,
+    // Reports
+    Permission.GET_REPORTS,
+    Permission.EXPORT_REPORTS,
   ],
   [RoleName.STAFF]: [
     Permission.GET_MY_SCHOOL,
@@ -393,6 +436,8 @@ const defaultRolePermissionsMap = {
     Permission.GET_EXAMS,
     Permission.GET_CALENDAR,
     Permission.GET_DASHBOARD_STATS,
+    // Quotation view
+    Permission.GET_QUOTATIONS,
   ],
   // Internal Winforge roles
   [RoleName.MANAGEMENT]: [
@@ -447,6 +492,27 @@ const defaultRolePermissionsMap = {
     Permission.UPDATE_SALES_LEAD,
     Permission.DELETE_SALES_LEAD,
     Permission.GET_SALES_PERFORMANCE,
+    // Quotation permissions
+    Permission.CREATE_QUOTATION,
+    Permission.GET_QUOTATIONS,
+    Permission.EDIT_QUOTATION,
+    Permission.DELETE_QUOTATION,
+    Permission.APPROVE_QUOTATION,
+    Permission.CANCEL_QUOTATION,
+    Permission.CONVERT_QUOTATION,
+    Permission.EXPORT_QUOTATION,
+    Permission.SEND_QUOTATION,
+    // Custom Role permissions
+    Permission.MANAGE_CUSTOM_ROLES,
+    Permission.ASSIGN_USER_PERMISSIONS,
+    // Reports & Export
+    Permission.GET_REPORTS,
+    Permission.EXPORT_REPORTS,
+    Permission.SCHEDULE_REPORTS,
+    // System Admin
+    Permission.MANAGE_DATABASE_BACKUP,
+    Permission.MANAGE_SUBSCRIPTION,
+    Permission.MANAGE_BRANDING,
   ],
   [RoleName.HR_ADMIN]: [
     Permission.CREATE_EMPLOYEE,
@@ -480,6 +546,19 @@ const defaultRolePermissionsMap = {
     Permission.GET_ONBOARDING,
     Permission.GET_MESSAGES,
     Permission.SEND_MESSAGE,
+    // Quotation permissions
+    Permission.CREATE_QUOTATION,
+    Permission.GET_QUOTATIONS,
+    Permission.EDIT_QUOTATION,
+    Permission.DELETE_QUOTATION,
+    Permission.APPROVE_QUOTATION,
+    Permission.CANCEL_QUOTATION,
+    Permission.CONVERT_QUOTATION,
+    Permission.EXPORT_QUOTATION,
+    Permission.SEND_QUOTATION,
+    // Reports
+    Permission.GET_REPORTS,
+    Permission.EXPORT_REPORTS,
   ],
 };
 

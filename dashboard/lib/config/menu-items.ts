@@ -172,6 +172,11 @@ export const MENU_ITEMS: MenuItem[] = [
     route: "/admin/accounting",
   },
   {
+    name: "Quotations",
+    icon: "FileText",
+    route: "/admin/quotations",
+  },
+  {
     name: "Courier",
     icon: "Truck",
     route: "/admin/courier",
@@ -210,6 +215,11 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Settings",
     icon: "ShieldCheck",
     route: "/admin/settings",
+  },
+  {
+    name: "Custom Roles",
+    icon: "Shield",
+    route: "/admin/custom-roles",
   },
   {
     name: "Help",

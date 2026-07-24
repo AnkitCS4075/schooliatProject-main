@@ -1,206 +1,152 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
-import {
-  useAttendanceReports,
-  useFeeAnalytics,
-  useAcademicReports,
-  useSalaryReports,
-  useDashboardSummary,
-  useExamsForReports,
-} from "@/lib/hooks/use-reports";
-import { useAllClasses } from "@/lib/hooks/use-classes";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getDateRangeForPreset } from "@/lib/utils/analytics";
-import { useAcademicYear } from "@/lib/context/academic-year-context";
-import type { ReportFilters as ReportFiltersType } from "@/lib/types/reports";
-import { ReportFilters } from "@/components/reports/ReportFilters";
-import { ExportReportMenu } from "@/components/reports/ExportReportMenu";
-import { DashboardSummaryStrip } from "@/components/reports/DashboardSummaryStrip";
-import { AttendanceSection } from "@/components/reports/AttendanceSection";
-import { FeeSection } from "@/components/reports/FeeSection";
-import { AcademicSection } from "@/components/reports/AcademicSection";
-import { SalarySection } from "@/components/reports/SalarySection";
-import { usePortalPeriod } from "@/lib/context/portal-period-context";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-
-const defaultRange = getDateRangeForPreset("last30");
+import { useState } from "react";
+import { useReportTypes, useReportData, useDownloadReportExcel, useDownloadReportPdf, useDownloadReportCsv } from "@/lib/hooks/use-reports";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Download, FileSpreadsheet, FileText, FileDown } from "lucide-react";
 
 export default function ReportsPage() {
-  const [activeTab, setActiveTab] = useState<"attendance" | "fees" | "academic" | "salary">("attendance");
-  const [filters, setFilters] = useState<ReportFiltersType>({
-    dateRange: defaultRange,
-    classId: null,
-    examId: null,
-    compareWithPrevious: false,
-  });
-  const { portalMonth, getMonthDateRange } = usePortalPeriod();
-  const [portalDateSync, setPortalDateSync] = useState(true);
-  const prevDateRangeRef = useRef(filters.dateRange);
+  const { toast } = useToast();
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [filters, setFilters] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    prevDateRangeRef.current = filters.dateRange;
-  }, [filters.dateRange]);
+  const { data: typesData, isLoading: typesLoading } = useReportTypes();
+  const { data: reportData, isLoading: dataLoading, refetch } = useReportData(selectedType, filters, !!selectedType);
+  const downloadExcel = useDownloadReportExcel();
+  const downloadPdf = useDownloadReportPdf();
+  const downloadCsv = useDownloadReportCsv();
 
-  const handleFiltersChange = (f: ReportFiltersType) => {
-    const prev = prevDateRangeRef.current;
-    const dateChanged =
-      f.dateRange.startDate !== prev.startDate ||
-      f.dateRange.endDate !== prev.endDate ||
-      f.dateRange.preset !== prev.preset;
-    if (dateChanged) setPortalDateSync(false);
-    setFilters(f);
+  const types = typesData?.data || [];
+  const reportRows = reportData?.data || [];
+  const statistics = reportData?.statistics || {};
+
+  const handleExport = async (format: "excel" | "pdf" | "csv") => {
+    if (!selectedType) return;
+    try {
+      const downloader = format === "excel" ? downloadExcel : format === "pdf" ? downloadPdf : downloadCsv;
+      const blob = await downloader.mutateAsync({ type: selectedType, filters: Object.keys(filters).length ? filters : undefined });
+      const ext = format === "excel" ? "xlsx" : format;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${selectedType.replace(/\//g, "-")}-report.${ext}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Exported", description: `Report downloaded as ${ext.toUpperCase()}` });
+    } catch (err: any) {
+      toast({ title: "Export failed", description: err.message, variant: "destructive" });
+    }
   };
 
-  useEffect(() => {
-    if (!portalDateSync) return;
-    const r = getMonthDateRange();
-    setFilters((prev) => ({
-      ...prev,
-      dateRange: {
-        ...prev.dateRange,
-        preset: "custom",
-        startDate: r.startDate,
-        endDate: r.endDate,
-      },
-    }));
-  }, [portalMonth, portalDateSync, getMonthDateRange]);
-
-  const { selectedYear } = useAcademicYear();
-  const { data: classesData } = useAllClasses();
-  const { data: examsData } = useExamsForReports({ limit: 500 });
-  const { data: summaryData, isLoading: summaryLoading } = useDashboardSummary({
-    academicYear: selectedYear
-  });
-
-  const classes = useMemo(() => classesData?.data ?? [], [classesData]);
-  const exams = useMemo(() => examsData?.data ?? [], [examsData]);
-
-  const { data: attendanceData, isLoading: attendanceLoading } = useAttendanceReports({
-    classId: filters.classId && filters.classId !== "all" ? filters.classId : undefined,
-    startDate: filters.dateRange.startDate,
-    endDate: filters.dateRange.endDate,
-  });
-
-  const { data: feeData, isLoading: feeLoading } = useFeeAnalytics({
-    classId: filters.classId && filters.classId !== "all" ? filters.classId : undefined,
-    startDate: filters.dateRange.startDate,
-    endDate: filters.dateRange.endDate,
-  });
-
-  const { data: academicData, isLoading: academicLoading } = useAcademicReports({
-    classId: filters.classId && filters.classId !== "all" ? filters.classId : undefined,
-    examId: filters.examId ?? undefined,
-  });
-
-  const { data: salaryData, isLoading: salaryLoading } = useSalaryReports({
-    startDate: filters.dateRange.startDate,
-    endDate: filters.dateRange.endDate,
-  });
-
-  const attendanceReport = attendanceData?.data ?? [];
-  const attendanceStats = attendanceData?.statistics ?? {};
-  const feeAnalytics = feeData?.data ?? [];
-  const feeStats = feeData?.statistics ?? {};
-  const academicReport = academicData?.data ?? [];
-  const academicStats = academicData?.statistics ?? {};
-  const salaryReport = salaryData?.data ?? [];
-  const salaryStats = salaryData?.statistics ?? {};
+  const columns = reportRows.length > 0 ? Object.keys(reportRows[0]).filter(k => k !== "id" && k !== "deletedAt" && k !== "deletedBy").slice(0, 8) : [];
 
   return (
-    <div className="space-y-6 pb-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Reports & Analytics</h1>
-          <p className="text-muted-foreground mt-1">
-            Comprehensive reports and analytics for school administration
-          </p>
-          <div className="flex items-center gap-2 mt-3">
-            <Switch
-              id="reports-portal-sync"
-              checked={portalDateSync}
-              onCheckedChange={(c) => {
-                const on = c === true;
-                setPortalDateSync(on);
-                if (on) {
-                  const r = getMonthDateRange();
-                  setFilters((prev) => ({
-                    ...prev,
-                    dateRange: {
-                      ...prev.dateRange,
-                      preset: "custom",
-                      startDate: r.startDate,
-                      endDate: r.endDate,
-                    },
-                  }));
-                }
-              }}
-            />
-            <Label htmlFor="reports-portal-sync" className="text-sm font-normal cursor-pointer mb-0">
-              Date range follows portal month
-            </Label>
-          </div>
-        </div>
-        <ExportReportMenu
-          tab={activeTab}
-          attendanceData={attendanceReport}
-          feeData={feeAnalytics}
-          academicData={academicReport}
-          salaryData={salaryReport}
-        />
+    <div className="container mx-auto py-6 px-4 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
+        <p className="text-muted-foreground text-sm">Generate and export school reports</p>
       </div>
 
-      <DashboardSummaryStrip summary={summaryData?.data} isLoading={summaryLoading} />
+      {/* Report Type Selector + Filters */}
+      <Card>
+        <CardHeader><CardTitle>Select Report</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Select value={selectedType} onValueChange={(v) => { setSelectedType(v); setFilters({}); }}>
+              <SelectTrigger className="w-full sm:w-[300px]">
+                <SelectValue placeholder="Choose a report type" />
+              </SelectTrigger>
+              <SelectContent>
+                {types.map((t: any) => (
+                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedType && (
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => handleExport("excel")} disabled={downloadExcel.isPending}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
+                <Button variant="outline" onClick={() => handleExport("pdf")} disabled={downloadPdf.isPending}>
+                  <FileText className="mr-2 h-4 w-4" /> PDF
+                </Button>
+                <Button variant="outline" onClick={() => handleExport("csv")} disabled={downloadCsv.isPending}>
+                  <FileDown className="mr-2 h-4 w-4" /> CSV
+                </Button>
+              </div>
+            )}
+          </div>
+          {selectedType && (
+            <div className="flex flex-wrap gap-3">
+              <Input placeholder="Start Date" type="date" className="w-[170px]" onChange={(e) => setFilters(f => ({ ...f, startDate: e.target.value }))} />
+              <Input placeholder="End Date" type="date" className="w-[170px]" onChange={(e) => setFilters(f => ({ ...f, endDate: e.target.value }))} />
+              <Button variant="ghost" size="sm" onClick={() => { setFilters({}); refetch(); }}>Clear Filters</Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      <ReportFilters
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        classes={classes}
-        exams={exams}
-        showExamFilter
-      />
+      {/* Statistics */}
+      {selectedType && statistics && Object.keys(statistics).length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Object.entries(statistics).map(([key, val]) => (
+            <Card key={key}>
+              <CardContent className="pt-4 text-center">
+                <p className="text-xl font-bold">{typeof val === "number" ? val.toLocaleString("en-IN") : String(val)}</p>
+                <p className="text-xs text-muted-foreground capitalize">{key.replace(/([A-Z])/g, " $1")}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="attendance">Attendance</TabsTrigger>
-          <TabsTrigger value="fees">Fees</TabsTrigger>
-          <TabsTrigger value="academic">Academic</TabsTrigger>
-          <TabsTrigger value="salary">Salary</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="attendance" className="mt-6">
-          <AttendanceSection
-            data={attendanceReport}
-            statistics={attendanceStats}
-            isLoading={attendanceLoading}
-          />
-        </TabsContent>
-
-        <TabsContent value="fees" className="mt-6">
-          <FeeSection
-            data={feeAnalytics}
-            statistics={feeStats}
-            isLoading={feeLoading}
-          />
-        </TabsContent>
-
-        <TabsContent value="academic" className="mt-6">
-          <AcademicSection
-            data={academicReport}
-            statistics={academicStats}
-            isLoading={academicLoading}
-          />
-        </TabsContent>
-
-        <TabsContent value="salary" className="mt-6">
-          <SalarySection
-            data={salaryReport}
-            statistics={salaryStats}
-            isLoading={salaryLoading}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Data Table */}
+      {selectedType && (
+        <Card>
+          <CardContent className="p-0">
+            {dataLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            ) : reportRows.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">No data available for this report</div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columns.map((col) => (
+                      <TableHead key={col} className="text-xs capitalize">
+                        {col.replace(/\./g, " > ").replace(/([A-Z])/g, " $1")}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reportRows.slice(0, 50).map((row: any, idx: number) => (
+                    <TableRow key={row.id || idx}>
+                      {columns.map((col) => {
+                        let val = row[col];
+                        if (val && typeof val === "object" && val !== null) val = JSON.stringify(val);
+                        if (typeof val === "boolean") val = val ? "Yes" : "No";
+                        if (col.includes("amount") || col.includes("price") || col.includes("Amount") || col.includes("Price")) {
+                          val = `₹${Number(val || 0).toLocaleString("en-IN")}`;
+                        }
+                        return <TableCell key={col} className="text-xs">{String(val ?? "-")}</TableCell>;
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -61,6 +61,7 @@ import galleryRouter from "./routers/gallery.router.js";
 import circularRouter from "./routers/circular.router.js";
 import parentRouter from "./routers/parent.router.js";
 import reportsRouter from "./routers/reports.router.js";
+import enhancedReportsRouter from "./routers/enhanced-reports.router.js";
 import aiRouter from "./routers/ai.router.js";
 import auditRouter from "./routers/audit.router.js";
 import deletionOtpRouter from "./routers/deletion-otp.router.js";
@@ -77,6 +78,8 @@ import accountingRouter from "./routers/accounting.router.js";
 import schoolOnboardingRouter from "./routers/school-onboarding.router.js";
 import platformFinanceRouter from "./routers/platform-finance.router.js";
 import feeDiscountRouter from "./routers/fee-discount.router.js";
+import quotationRouter from "./routers/quotation.router.js";
+import customRoleRouter from "./routers/custom-role.router.js";
 import bootstrapDataService from "./services/bootstrap-data.service.js";
 import logRequestStart from "./middlewares/log-request-start.middleware.js";
 import templateLoaderService from "./services/template-loader.service.js";
@@ -303,6 +306,9 @@ function addRouters(app) {
   app.use("/school-onboardings", schoolOnboardingRouter);
   app.use("/platform-finance", platformFinanceRouter);
   app.use("/fee-management", feeDiscountRouter);
+  app.use("/", quotationRouter);
+  app.use("/", customRoleRouter);
+  app.use("/", enhancedReportsRouter);
 }
 
 async function setupData() {
