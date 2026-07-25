@@ -1,5 +1,5 @@
-# Multi-stage build for Railway deployment
-# Uses node-chromium for Puppeteer PDF generation
+# Docker build for Render / Railway / any Docker host
+# Installs Node 20 + Chromium (for Puppeteer PDF generation) + Prisma
 
 FROM node:20-slim AS base
 

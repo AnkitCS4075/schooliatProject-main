@@ -1,43 +1,53 @@
-# SchooliAT — Railway + Vercel Deployment Guide
+# SchooliAT — Render + Vercel Deployment Guide (FREE)
 
 This guide deploys:
-- **Backend API** → Railway (free $5/month credit)
+- **Backend API** → Render (free tier)
 - **Dashboard (Next.js)** → Vercel (free tier)
-- **PostgreSQL Database** → Railway (free, bundled with backend)
+- **PostgreSQL Database** → Render (free tier, bundled)
 
 ---
 
 ## Prerequisites
 
 - GitHub account with this repo pushed
-- Railway account → https://railway.app (sign up with GitHub)
+- Render account → https://render.com (sign up with GitHub, no credit card needed)
 - Vercel account → https://vercel.com (sign up with GitHub)
 
 ---
 
-## PART 1: Deploy Backend to Railway
+## PART 1: Deploy Backend to Render
 
-### Step 1: Create Railway Project
+### Step 1: Create PostgreSQL Database
 
-1. Go to **https://railway.app** → log in with GitHub
-2. Click **"New Project"** → select **"Deploy from GitHub Repo"**
-3. Select your repo: `schooliatProject-main`
-4. Railway will detect the `Backend/Dockerfile` and `railway.toml`
+1. Go to **https://render.com** → sign up with GitHub
+2. Click **"New +"** → **"PostgreSQL"**
+3. Settings:
+   - **Name**: `schooliat-db`
+   - **Database**: `schooliat`
+   - **User**: `schooliat`
+   - **Plan**: Free
+4. Click **"Create Database"**
+5. Wait ~2 minutes for it to be ready
+6. Go to **"Connection"** tab → copy the **"Internal Database URL"**
+   - It looks like: `postgresql://schooliat:abc123@dpg-xxxxx.oregon-postgres.render.com/schooliat`
 
-### Step 2: Add PostgreSQL Database
+### Step 2: Create Backend Web Service
 
-1. In your Railway project dashboard, click **"+ New"** → **"Database"** → **"PostgreSQL"**
-2. Railway creates a PostgreSQL instance automatically
-3. Click on the PostgreSQL service → go to **"Variables"** tab → copy the `DATABASE_URL`
-
-### Step 3: Set Environment Variables
-
-Go to your backend service → **"Variables"** tab → **"Raw Editor"** → paste:
+1. Click **"New +"** → **"Web Service"**
+2. Connect your GitHub repo: `schooliatProject-main`
+3. Settings:
+   - **Name**: `schooliat-api`
+   - **Region**: Oregon (same as database)
+   - **Branch**: `main`
+   - **Runtime**: Docker
+   - **Dockerfile Path**: `Backend/Dockerfile`
+   - **Plan**: Free
+4. Scroll to **"Environment Variables"** → click **"Add Environment Variable"** → add:
 
 ```env
 NODE_ENV=production
 PORT=4000
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@YOUR_RAILWAY_HOST:5432/railway
+DATABASE_URL=postgresql://schooliat:abc123@dpg-xxxxx.oregon-postgres.render.com/schooliat
 JWT_SECRET=generate-a-long-random-string-here-use-https-randomkeygen-com
 JWT_EXPIRATION_TIME=48
 ALLOWED_ORIGINS=https://your-app.vercel.app
@@ -49,72 +59,70 @@ LOG_LEVEL=info
 PUPPETEER_POOL_SIZE=1
 ```
 
-**IMPORTANT:** Replace these values:
-- `YOUR_PASSWORD` → from the PostgreSQL service variables
-- `YOUR_RAILWAY_HOST` → from PostgreSQL variables (looks like `roundhouse.proxy.rlwy.net`)
-- `your-app.vercel.app` → your actual Vercel URL (you'll get this after Part 2)
+**Replace:**
+- `DATABASE_URL` → paste the Internal Database URL from Step 1
+- `your-app.vercel.app` → your actual Vercel URL (get this after Part 2)
+- `JWT_SECRET` → generate at https://randomkeygen.com
 
-### Step 4: Set Root Directory
+5. Click **"Create Web Service"**
 
-1. Go to backend service → **"Settings"** tab
-2. Under **"Build"** → set **"Root Directory"** to `Backend`
-3. Click **"Deploy"**
+### Step 3: Wait for First Deploy
 
-### Step 5: Wait for First Deploy
-
-- Build takes ~3-5 minutes (downloading Chromium for Puppeteer)
-- On every start, `docker-entrypoint.sh` runs `prisma db push` automatically to sync schema
-- Once deployed, Railway gives you a URL like: `https://your-backend.up.railway.app`
-- Test it: visit `https://your-backend.up.railway.app/health`
+- Build takes ~5-8 minutes (downloading Chromium for Puppeteer)
+- On every start, `docker-entrypoint.sh` runs `prisma db push` automatically
+- Once deployed, Render gives you a URL like: `https://schooliat-api.onrender.com`
+- Test it: visit `https://schooliat-api.onrender.com/health`
 - You should see: `{"status":"healthy"}`
+
+**Note:** Free tier services spin down after 15 minutes of inactivity. First request after idle takes ~30-50 seconds to wake up. Subsequent requests are fast.
 
 ---
 
 ## PART 2: Deploy Dashboard to Vercel
 
-### Step 6: Import Repository
+### Step 4: Import Repository
 
 1. Go to **https://vercel.com** → log in with GitHub
 2. Click **"Add New Project"** → **"Import"**
 3. Select your repo: `schooliatProject-main`
 
-### Step 7: Configure Project
+### Step 5: Configure Project
 
 1. **Framework Preset**: Next.js (auto-detected)
 2. **Root Directory**: click "Edit" → set to `dashboard`
 3. **Build Command**: `npm run build` (default)
 4. **Install Command**: `npm install` (default)
 
-### Step 8: Set Environment Variables
+### Step 6: Set Environment Variables
 
 Click **"Environment Variables"** → add:
 
 | Key | Value |
 |-----|-------|
 | `NEXT_PUBLIC_API_URL` | *(leave EMPTY)* |
-| `BACKEND_URL` | `https://your-backend.up.railway.app` |
+| `BACKEND_URL` | `https://schooliat-api.onrender.com` |
 
 **Why NEXT_PUBLIC_API_URL is empty:**
 - Empty = dashboard makes requests to its own domain (`/api/v1/...`)
-- Next.js rewrites proxy those requests server-side to Railway
+- Next.js rewrites proxy those requests server-side to Render
 - No CORS issues, no exposed backend URL
 
-### Step 9: Deploy
+### Step 7: Deploy
 
 Click **"Deploy"** → wait ~2 minutes.
 
 Vercel gives you a URL like: `https://schooliat.vercel.app`
 
-### Step 10: Update Backend CORS
+### Step 8: Update Backend CORS
 
-Go back to **Railway** → backend service → **Variables** → update:
+Go back to **Render** → backend service → **Environment** → edit variables:
 
 ```env
 ALLOWED_ORIGINS=https://schooliat.vercel.app
 FRONTEND_URL=https://schooliat.vercel.app
 ```
 
-Redeploy the backend.
+Click **"Save"** → Render auto-redeploys.
 
 ---
 
@@ -140,13 +148,15 @@ Open browser DevTools → Network tab → login → verify:
 
 | Problem | Fix |
 |---------|-----|
-| Build fails on Railway | Check logs — usually Prisma generate needs schema path |
-| `JWT_SECRET must be set` | Add JWT_SECRET to Railway env vars |
+| Build fails on Render | Check deploy logs — usually Prisma generate needs schema path |
+| `JWT_SECRET must be set` | Add JWT_SECRET to Render env vars |
 | `Puppeteer error` | Ensure Dockerfile installs Chromium (already included) |
-| CORS error on login | Update `ALLOWED_ORIGINS` in Railway to include Vercel URL |
+| CORS error on login | Update `ALLOWED_ORIGINS` in Render to include Vercel URL |
 | Dashboard shows "Network error" | Check `BACKEND_URL` is set correctly in Vercel |
-| `prisma db push` fails | Ensure DATABASE_URL points to Railway PostgreSQL, not local |
+| `prisma db push` fails | Ensure DATABASE_URL points to Render PostgreSQL (Internal URL, not External) |
 | 404 on all pages | Ensure Vercel root directory is set to `dashboard` |
+| Service sleeps after idle | Normal for free tier — first request takes ~30-50 sec to wake |
+| `Connection refused` | Database might not be ready — check Render dashboard database status |
 
 ---
 
@@ -154,8 +164,7 @@ Open browser DevTools → Network tab → login → verify:
 
 | File | Purpose |
 |------|---------|
-| `Backend/Dockerfile` | Railway build — installs Node 20, Chromium, Prisma |
-| `Backend/railway.toml` | Railway deploy config — health check, restart policy |
+| `Backend/Dockerfile` | Docker build — Node 20 + Chromium + Prisma |
 | `Backend/docker-entrypoint.sh` | Runs `prisma db push` on every start, then boots server |
 | `Backend/package.json` | `postinstall` runs `prisma generate` automatically |
 | `dashboard/next.config.js` | Rewrites `/api/*` → `BACKEND_URL` (server-side proxy) |
@@ -165,9 +174,21 @@ Open browser DevTools → Network tab → login → verify:
 
 ## Cost Estimate
 
-| Service | Free Tier | Paid (if exceeded) |
-|---------|-----------|-------------------|
-| Railway PostgreSQL | 500MB, 100 hours/month | $1-5/month |
-| Railway Backend | $5 credit/month | ~$5/month for small app |
-| Vercel Dashboard | 100GB bandwidth, unlimited deploys | $20/month Pro |
-| **Total** | **$0** | **~$5-10/month** |
+| Service | Free Tier | Notes |
+|---------|-----------|-------|
+| Render PostgreSQL | 90 days free, then $7/month | 90-day free trial included |
+| Render Web Service | Free (spins down after 15 min) | ~30-50 sec wake-up time |
+| Vercel Dashboard | 100GB bandwidth, unlimited deploys | Always-on |
+| **Total** | **$0 for 90 days** | Then ~$7/month for database |
+
+---
+
+## Alternative: Free Database Beyond 90 Days
+
+If Render's database trial expires, use **Neon** (free PostgreSQL):
+1. Go to https://neon.tech → sign up → create project
+2. Copy the connection string
+3. Update `DATABASE_URL` in Render with Neon's URL (append `?sslmode=require`)
+4. Redeploy
+
+Neon free tier: 512MB storage, always available, no expiration.
