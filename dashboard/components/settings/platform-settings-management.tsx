@@ -284,7 +284,7 @@ export function PlatformSettingsManagement() {
             <CardContent className="space-y-4">
               <FormCard title="Platform Logo">
                 <PhotoUpload
-                  control={passwordForm.control}
+                  control={passwordForm.control as any}
                   name="schoolPhotoId"
                   hintText="Upload platform logo (Recommended: 512x512px)"
                   buttonText="Add / Update Logo"

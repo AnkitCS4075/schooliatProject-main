@@ -17,7 +17,7 @@ interface PhotoUploadProps {
   hintText?: string;
   buttonText?: string;
   rules?: any;
-  control?: Control<any>;
+  control?: any;
   loading?: boolean;
   onUploadSuccess?: (fileResponse: any) => void;
   onUploadError?: () => void;

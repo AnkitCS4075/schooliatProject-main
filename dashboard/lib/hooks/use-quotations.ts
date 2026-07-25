@@ -63,7 +63,7 @@ function addQuotationCommentApi(id: string, text: string) {
 }
 
 function downloadQuotationPdf(id: string) {
-  return downloadFromApi(`/quotations/${id}/pdf`, { method: "GET" });
+  return downloadFromApi(`/quotations/${id}/pdf`);
 }
 
 // ─── Hooks ───────────────────────────────────────────────────────────
@@ -109,7 +109,7 @@ export function useUpdateQuotation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => updateQuotationApi(id, data),
-    onSuccess: (_: any, variables: { id: string }) => {
+    onSuccess: (_: any, variables: any) => {
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
       queryClient.invalidateQueries({ queryKey: ["quotation", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["quotation-stats"] });
@@ -132,7 +132,7 @@ export function useApproveQuotation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data?: { comments?: string } }) => approveQuotationApi(id, data),
-    onSuccess: (_: any, variables: { id: string }) => {
+    onSuccess: (_: any, variables: any) => {
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
       queryClient.invalidateQueries({ queryKey: ["quotation", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["quotation-stats"] });
@@ -144,7 +144,7 @@ export function useRejectQuotation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: { reason: string } }) => rejectQuotationApi(id, data),
-    onSuccess: (_: any, variables: { id: string }) => {
+    onSuccess: (_: any, variables: any) => {
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
       queryClient.invalidateQueries({ queryKey: ["quotation", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["quotation-stats"] });
@@ -156,7 +156,7 @@ export function useCancelQuotation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data?: { reason?: string } }) => cancelQuotationApi(id, data),
-    onSuccess: (_: any, variables: { id: string }) => {
+    onSuccess: (_: any, variables: any) => {
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
       queryClient.invalidateQueries({ queryKey: ["quotation", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["quotation-stats"] });
@@ -206,7 +206,7 @@ export function useAddQuotationComment() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, text }: { id: string; text: string }) => addQuotationCommentApi(id, text),
-    onSuccess: (_: any, variables: { id: string }) => {
+    onSuccess: (_: any, variables: any) => {
       queryClient.invalidateQueries({ queryKey: ["quotation-comments", variables.id] });
     },
   });

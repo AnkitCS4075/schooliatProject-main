@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useQuotation, useApproveQuotation, useRejectQuotation, useCancelQuotation, useConvertToInvoice, useDownloadQuotationPdf, useSendQuotationEmail } from "@/lib/hooks/use-quotations";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -21,10 +21,12 @@ const STATUS_COLORS: Record<string, string> = {
   CLOSED: "bg-slate-100 text-slate-700",
 };
 
-export default function QuotationDetailPage({ params }: { params: { id: string } }) {
+export default function QuotationDetailPage() {
   const router = useRouter();
+  const routeParams = useParams();
+  const id = routeParams.id as string;
   const { toast } = useToast();
-  const { data, isLoading, refetch } = useQuotation(params.id);
+  const { data, isLoading, refetch } = useQuotation(id);
   const approveQuotation = useApproveQuotation();
   const rejectQuotation = useRejectQuotation();
   const cancelQuotation = useCancelQuotation();
@@ -45,16 +47,16 @@ export default function QuotationDetailPage({ params }: { params: { id: string }
   const handleAction = async (action: string) => {
     try {
       if (action === "approve") {
-        await approveQuotation.mutateAsync({ id: params.id, data: { comments: "Approved" } });
+        await (approveQuotation.mutateAsync as any)({ id, data: { comments: "Approved" } });
         toast({ title: "Approved", description: "Quotation approved" });
       } else if (action === "reject") {
-        await rejectQuotation.mutateAsync({ id: params.id, data: { reason: "Rejected by admin" } });
+        await (rejectQuotation.mutateAsync as any)({ id, data: { reason: "Rejected by admin" } });
         toast({ title: "Rejected", description: "Quotation rejected" });
       } else if (action === "cancel") {
-        await cancelQuotation.mutateAsync({ id: params.id });
+        await (cancelQuotation.mutateAsync as any)({ id });
         toast({ title: "Cancelled", description: "Quotation cancelled" });
       } else if (action === "convert") {
-        await convertToInvoice.mutateAsync(params.id);
+        await convertToInvoice.mutateAsync(id);
         toast({ title: "Converted", description: "Quotation converted to invoice" });
       }
       refetch();
@@ -65,7 +67,7 @@ export default function QuotationDetailPage({ params }: { params: { id: string }
 
   const handleDownloadPdf = async () => {
     try {
-      const blob = await downloadPdf.mutateAsync(params.id);
+      const blob = await downloadPdf.mutateAsync(id);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -94,7 +96,7 @@ export default function QuotationDetailPage({ params }: { params: { id: string }
         <div className="flex gap-2 flex-wrap">
           {quotation.status === "DRAFT" && (
             <>
-              <Button variant="outline" onClick={() => router.push(`/admin/quotations/${params.id}/edit`)}>
+              <Button variant="outline" onClick={() => router.push(`/admin/quotations/${id}/edit`)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
               <Button variant="outline" onClick={handleDownloadPdf} disabled={downloadPdf.isPending}>

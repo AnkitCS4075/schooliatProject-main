@@ -105,7 +105,7 @@ export function FeeSection({ data, statistics, isLoading }: FeeSectionProps) {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="period" />
                   <YAxis tickFormatter={(v) => `₹${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`} />
-                  <Tooltip formatter={(value: number | undefined) => [formatCurrency(value ?? 0), ""]} />
+                  <Tooltip formatter={(value: any) => [formatCurrency(Number(value) || 0), ""]} />
                   <Legend />
                   <Bar dataKey="paid" fill={CHART_COLORS.paid} name="Paid" />
                   <Bar dataKey="pending" fill={CHART_COLORS.pending} name="Pending" />
@@ -142,7 +142,7 @@ export function FeeSection({ data, statistics, isLoading }: FeeSectionProps) {
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number | undefined) => [formatCurrency(value ?? 0), "Amount"]} />
+                  <Tooltip formatter={(value: any) => [formatCurrency(Number(value) || 0), "Amount"]} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (

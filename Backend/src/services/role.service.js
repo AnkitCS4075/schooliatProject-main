@@ -130,6 +130,10 @@ const defaultRolePermissionsMap = {
     Permission.CREATE_ANNOUNCEMENT,
     Permission.SEND_NOTIFICATION,
     Permission.REQUEST_DELETION_OTP,
+    // AI & Chatbot
+    Permission.USE_CHATBOT,
+    Permission.GET_CHATBOT_HISTORY,
+    Permission.MANAGE_FAQ,
     // Quotation
     Permission.CREATE_QUOTATION,
     Permission.GET_QUOTATIONS,

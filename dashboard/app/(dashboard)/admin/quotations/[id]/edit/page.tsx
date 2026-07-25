@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { quotationSchema, type QuotationFormData } from "@/lib/schemas/quotation-schema";
@@ -14,10 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 
-export default function EditQuotationPage({ params }: { params: { id: string } }) {
+export default function EditQuotationPage() {
   const router = useRouter();
+  const routeParams = useParams();
+  const id = routeParams.id as string;
   const { toast } = useToast();
-  const { data: quotationData, isLoading } = useQuotation(params.id);
+  const { data: quotationData, isLoading } = useQuotation(id);
   const updateQuotation = useUpdateQuotation();
 
   const quotation = quotationData?.data;
@@ -30,7 +32,7 @@ export default function EditQuotationPage({ params }: { params: { id: string } }
     reset,
     formState: { errors },
   } = useForm<QuotationFormData>({
-    resolver: zodResolver(quotationSchema),
+    resolver: zodResolver(quotationSchema) as any,
     defaultValues: {
       items: [{ name: "", description: "", quantity: 1, unitPrice: 0, taxPercent: 0, discountPercent: 0 }],
       discountPercent: 0,
@@ -81,7 +83,7 @@ export default function EditQuotationPage({ params }: { params: { id: string } }
 
   const onSubmit = async (formData: QuotationFormData) => {
     try {
-      await updateQuotation.mutateAsync({ id: params.id, data: formData });
+      await updateQuotation.mutateAsync({ id, data: formData });
       toast({ title: "Success", description: "Quotation updated!" });
       router.push("/admin/quotations");
     } catch (err: any) {

@@ -95,7 +95,7 @@ export function SalarySection({ data, statistics, isLoading }: SalarySectionProp
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="employeeName" tick={{ fontSize: 12 }} />
                 <YAxis tickFormatter={(v) => formatCurrency(v)} />
-                <Tooltip formatter={(value: number | undefined) => [formatCurrency(value ?? 0), "Amount"]} />
+                <Tooltip formatter={(value: any) => [formatCurrency(Number(value) || 0), "Amount"]} />
                 <Legend />
                 <Bar dataKey="amount" fill={CHART_COLORS.primary} name="Salary" />
               </BarChart>

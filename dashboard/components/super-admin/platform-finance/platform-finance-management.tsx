@@ -87,7 +87,7 @@ export function PlatformFinanceManagement() {
 
   const handleBootstrap = async () => {
     try {
-      await bootstrapMutation.mutateAsync({});
+      await bootstrapMutation.mutateAsync(undefined as any);
       toast.success("Platform accounts bootstrapped");
     } catch (err: any) {
       toast.error(err.message);

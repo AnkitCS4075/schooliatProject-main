@@ -59,7 +59,7 @@ export function CompanyConfigSection() {
     reset,
     formState: { errors, isDirty },
   } = useForm<CompanyFormData>({
-    resolver: zodResolver(companySchema),
+    resolver: zodResolver(companySchema) as any,
   });
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export function CompanyConfigSection() {
 
   const onSubmit = async (data: CompanyFormData) => {
     try {
-      await updateSettings.mutateAsync(data);
+      await updateSettings.mutateAsync({ request: data } as any);
       toast({ title: "Saved", description: "Company settings updated" });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -122,7 +122,7 @@ export function CompanyConfigSection() {
       {opts?.rows ? (
         <Textarea {...register(name)} placeholder={opts.placeholder} rows={opts.rows} />
       ) : (
-        <Input type={opts?.type || "text"} {...register(name)} placeholder={opts.placeholder} />
+        <Input type={opts?.type || "text"} {...register(name)} placeholder={opts?.placeholder} />
       )}
       {errors[name] && <p className="text-xs text-red-500">{errors[name]?.message}</p>}
     </div>
@@ -140,7 +140,7 @@ export function CompanyConfigSection() {
           {field("Website", "companyWebsite", { placeholder: "https://company.com" })}
           {field("GSTIN", "companyGstin", { placeholder: "22AAAAA0000A1Z5" })}
           {field("PAN", "companyPan", { placeholder: "AAAAA0000A" })}
-          {field("CIN", "companyCin" })}
+          {field("CIN", "companyCin")}
           <div className="md:col-span-2">
             {field("Address", "companyAddress", { placeholder: "Full registered address", rows: 2 })}
           </div>

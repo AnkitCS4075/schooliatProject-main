@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { get, downloadFromApi } from "@/lib/api/client";
+import { get, del, downloadFromApi } from "@/lib/api/client";
 
 function fetchReportTypes() {
   return get("/reports/types");
@@ -10,15 +10,15 @@ function fetchReportData(type: string, filters?: Record<string, any>) {
 }
 
 function downloadReportExcel(type: string, filters?: Record<string, any>) {
-  return downloadFromApi(`/reports/export/excel`, { method: "GET", params: { type, ...(filters || {}) } });
+  return downloadFromApi(`/reports/export/excel`, { query: { type, ...(filters || {}) } });
 }
 
 function downloadReportCsv(type: string, filters?: Record<string, any>) {
-  return downloadFromApi(`/reports/export/csv`, { method: "GET", params: { type, ...(filters || {}) } });
+  return downloadFromApi(`/reports/export/csv`, { query: { type, ...(filters || {}) } });
 }
 
 function downloadReportPdf(type: string, filters?: Record<string, any>) {
-  return downloadFromApi(`/reports/export/pdf`, { method: "GET", params: { type, ...(filters || {}) } });
+  return downloadFromApi(`/reports/export/pdf`, { query: { type, ...(filters || {}) } });
 }
 
 function fetchReportTemplates() {
@@ -26,7 +26,23 @@ function fetchReportTemplates() {
 }
 
 function deleteReportTemplate(id: string) {
-  return downloadFromApi(`/report-templates/${id}`, { method: "DELETE" });
+  return del(`/report-templates/${id}`);
+}
+
+function fetchAttendanceReports(filters?: Record<string, any>) {
+  return get("/reports/attendance", filters || {});
+}
+
+function fetchFeeAnalytics(filters?: Record<string, any>) {
+  return get("/reports/fees", filters || {});
+}
+
+function fetchAcademicReports(filters?: Record<string, any>) {
+  return get("/reports/academic", filters || {});
+}
+
+function fetchSalaryReports(filters?: Record<string, any>) {
+  return get("/reports/salary", filters || {});
 }
 
 export function useReportTypes() {
@@ -42,6 +58,38 @@ export function useReportData(type: string, filters?: Record<string, any>, enabl
     queryKey: ["report", type, filters],
     queryFn: () => fetchReportData(type, filters),
     enabled: enabled && !!type,
+    staleTime: 30_000,
+  });
+}
+
+export function useAttendanceReports(filters?: Record<string, any>) {
+  return useQuery({
+    queryKey: ["attendance-reports", filters],
+    queryFn: () => fetchAttendanceReports(filters),
+    staleTime: 30_000,
+  });
+}
+
+export function useFeeAnalytics(filters?: Record<string, any>) {
+  return useQuery({
+    queryKey: ["fee-analytics", filters],
+    queryFn: () => fetchFeeAnalytics(filters),
+    staleTime: 30_000,
+  });
+}
+
+export function useAcademicReports(filters?: Record<string, any>) {
+  return useQuery({
+    queryKey: ["academic-reports", filters],
+    queryFn: () => fetchAcademicReports(filters),
+    staleTime: 30_000,
+  });
+}
+
+export function useSalaryReports(filters?: Record<string, any>) {
+  return useQuery({
+    queryKey: ["salary-reports", filters],
+    queryFn: () => fetchSalaryReports(filters),
     staleTime: 30_000,
   });
 }

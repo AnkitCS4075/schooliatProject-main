@@ -64,7 +64,7 @@ export function useUpdateCustomRole() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => updateCustomRoleApi(id, data),
-    onSuccess: (_: any, variables: { id: string }) => {
+    onSuccess: (_: any, variables: any) => {
       queryClient.invalidateQueries({ queryKey: ["custom-roles"] });
       queryClient.invalidateQueries({ queryKey: ["custom-role", variables.id] });
     },
@@ -103,7 +103,7 @@ export function useAssignUserPermissions() {
   return useMutation({
     mutationFn: ({ userId, permissions }: { userId: string; permissions: string[] }) =>
       assignUserPermissionsApi(userId, permissions),
-    onSuccess: (_: any, variables: { userId: string }) => {
+    onSuccess: (_: any, variables: any) => {
       queryClient.invalidateQueries({ queryKey: ["user-permissions", variables.userId] });
     },
   });

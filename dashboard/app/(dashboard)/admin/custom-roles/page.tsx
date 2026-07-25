@@ -27,7 +27,10 @@ export default function CustomRolesPage() {
   const updateRole = useUpdateCustomRole();
   const deleteRole = useDeleteCustomRole();
 
-  const roles = rolesData?.data || [];
+  const roles = [
+    ...((rolesData?.data?.systemRoles || []).map((r: any) => ({ ...r, isSystem: true }))),
+    ...((rolesData?.data?.customRoles || []).map((r: any) => ({ ...r, isSystem: r.isSystem ?? false }))),
+  ];
   const permissions = permsData?.data || [];
 
   const [dialogOpen, setDialogOpen] = useState(false);

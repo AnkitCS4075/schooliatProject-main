@@ -132,7 +132,7 @@ export function AttendanceSection({ data, statistics, isLoading }: AttendanceSec
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number | undefined) => [value ?? 0, "Count"]} />
+                  <Tooltip formatter={(value: any) => [Number(value) || 0, "Count"]} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (

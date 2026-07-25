@@ -20,7 +20,7 @@ export function CrmPipeline() {
   if (isLoading) return <div className="text-center py-4 text-muted-foreground">Loading CRM data...</div>;
   if (!funnel) return null;
 
-  const stages = Object.entries(funnel.stages);
+  const stages = Object.entries(funnel.stages) as [string, number][];
   const maxCount = Math.max(...stages.map(([, v]) => v), 1);
 
   return (

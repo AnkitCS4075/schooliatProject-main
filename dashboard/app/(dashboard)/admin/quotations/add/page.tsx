@@ -26,7 +26,7 @@ export default function AddQuotationPage() {
     watch,
     formState: { errors },
   } = useForm<QuotationFormData>({
-    resolver: zodResolver(quotationSchema),
+    resolver: zodResolver(quotationSchema) as any,
     defaultValues: {
       items: [{ name: "", description: "", quantity: 1, unitPrice: 0, taxPercent: 0, discountPercent: 0 }],
       discountPercent: 0,
