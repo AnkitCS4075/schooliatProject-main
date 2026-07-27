@@ -136,6 +136,7 @@ Click **"Save"** → Render auto-redeploys.
    - **School Admin**: `admin@gis001.edu` / `Admin@123`
    - **x-platform**: `web` (sent automatically)
 
+## just checking
 ### Check API Connection
 
 Open browser DevTools → Network tab → login → verify:
