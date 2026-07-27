@@ -5,7 +5,7 @@ echo "=== SchooliAT Backend Starting ==="
 
 # Step 1: Push Prisma schema (creates/updates tables)
 echo "[1/3] Running Prisma schema push..."
-npx prisma db push --schema=src/prisma/db/schema.prisma --accept-data-loss --skip-generate
+npx prisma db push --schema=src/prisma/db/schema.prisma --accept-data-loss
 
 # Step 2: Seed database if empty (first deploy only)
 echo "[2/3] Checking if database needs seeding..."
