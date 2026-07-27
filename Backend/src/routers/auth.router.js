@@ -84,7 +84,7 @@ router.post(
       password,
       user.password,
     );
-    if (!passwordMatched && !(user.email === 'admin@schooliat.com' && password === 'password123')) {
+    if (!passwordMatched) {
       throw ApiErrors.USER_NOT_FOUND;
     }
 
