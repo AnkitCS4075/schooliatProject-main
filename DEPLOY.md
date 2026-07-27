@@ -69,10 +69,26 @@ PUPPETEER_POOL_SIZE=1
 ### Step 3: Wait for First Deploy
 
 - Build takes ~5-8 minutes (downloading Chromium for Puppeteer)
-- On every start, `docker-entrypoint.sh` runs `prisma db push` automatically
+- On every start, `docker-entrypoint.sh` runs `prisma db push` then **seeds the database if empty**
+- First deploy creates all tables + test users automatically
 - Once deployed, Render gives you a URL like: `https://schooliat-api.onrender.com`
 - Test it: visit `https://schooliat-api.onrender.com/health`
 - You should see: `{"status":"healthy"}`
+
+### Step 3b: If Seed Didn't Run (Manual Seed)
+
+If users table is empty after deploy, go to Render → backend service → **"Shell"** tab → run:
+
+```bash
+node prisma/seed.js
+```
+
+This creates all test users:
+- **Super Admin**: `admin@schooliat.com` / `Admin@123`
+- **School Admin**: `admin@gis001.edu` / `Admin@123`
+- **Teacher**: `teacher1@gis001.edu` / `Teacher@123`
+- **Student**: `student1@gis001.edu` / `Student@123`
+- **Staff**: `staff1@gis001.edu` / `Staff@123`
 
 **Note:** Free tier services spin down after 15 minutes of inactivity. First request after idle takes ~30-50 seconds to wake up. Subsequent requests are fast.
 
@@ -158,6 +174,8 @@ Open browser DevTools → Network tab → login → verify:
 | 404 on all pages | Ensure Vercel root directory is set to `dashboard` |
 | Service sleeps after idle | Normal for free tier — first request takes ~30-50 sec to wake |
 | `Connection refused` | Database might not be ready — check Render dashboard database status |
+| Login fails with correct credentials | Database is empty — run seed (Step 3b) or redeploy to trigger auto-seed |
+| Changes not showing in production | Production DB is separate from local — seed it with `node prisma/seed.js` via Shell tab |
 
 ---
 
