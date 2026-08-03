@@ -6,6 +6,79 @@ import logger from "../config/logger.js";
 
 const router = Router();
 
+// List role templates (pre-built custom roles usable by any school)
+router.get(
+  "/role-templates",
+  withPermission(Permission.GET_ROLES),
+  async (req, res) => {
+    try {
+      const templates = await prisma.customRole.findMany({
+        where: { isSystem: true, schoolId: null, deletedAt: null },
+        select: {
+          id: true,
+          name: true,
+          displayName: true,
+          description: true,
+          permissions: true,
+          isSystem: true,
+        },
+        orderBy: { displayName: "asc" },
+      });
+      return res.status(200).json({ message: "Role templates retrieved", data: templates });
+    } catch (error) {
+      return res.status(400).json({ message: error.message || "Failed to fetch role templates" });
+    }
+  },
+);
+
+// Apply a custom role / template to a user: copies the role's permissions into the user's
+// additive permission overrides (merged with the user's system role permissions).
+router.post(
+  "/roles/:id/apply",
+  withPermission(Permission.ASSIGN_USER_PERMISSIONS),
+  async (req, res) => {
+    try {
+      const currentUser = req.context.user;
+      const { userId } = req.body.request || {};
+      if (!userId) return res.status(400).json({ message: "userId is required" });
+
+      const role = await prisma.customRole.findFirst({
+        where: { id: req.params.id, deletedAt: null },
+      });
+      if (!role) return res.status(404).json({ message: "Role not found" });
+      if (role.schoolId && role.schoolId !== currentUser.schoolId) {
+        return res.status(403).json({ message: "This role is not available in your school" });
+      }
+
+      const target = await prisma.user.findFirst({
+        where: { id: userId, deletedAt: null },
+        include: { role: { select: { name: true } } },
+      });
+      if (!target) return res.status(404).json({ message: "User not found" });
+      if (currentUser.schoolId && target.schoolId !== currentUser.schoolId) {
+        return res.status(403).json({ message: "Cannot modify users outside your school" });
+      }
+
+      const basePermissions = Array.isArray(target.permissions) ? target.permissions : [];
+      const merged = [...new Set([...basePermissions, ...(role.permissions || [])])];
+
+      const updated = await prisma.user.update({
+        where: { id: userId },
+        data: { permissions: merged, updatedBy: currentUser.id },
+        select: { id: true, email: true, permissions: true },
+      });
+
+      return res.status(200).json({
+        message: `Permissions of "${role.displayName || role.name}" applied to ${target.firstName} ${target.lastName || ""}`.trim(),
+        data: updated,
+      });
+    } catch (error) {
+      logger.error({ error }, "Failed to apply role");
+      return res.status(400).json({ message: error.message || "Failed to apply role" });
+    }
+  },
+);
+
 // List all roles (system + custom)
 router.get(
   "/roles/all",

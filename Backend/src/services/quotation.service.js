@@ -5,7 +5,18 @@ const QUOTATION_INCLUDE = {
   items: { orderBy: { sortOrder: "asc" } },
   versions: { orderBy: { createdAt: "desc" }, take: 10 },
   comments: { orderBy: { createdAt: "desc" }, take: 20 },
+  school: { select: { id: true, name: true, code: true } },
 };
+
+/**
+ * Build the where clause. A falsy schoolId (super admin / platform view)
+ * means "all schools" — the filter is simply omitted.
+ */
+function buildQuotationWhere(schoolId, extra = {}) {
+  const where = { ...extra };
+  if (schoolId) where.schoolId = schoolId;
+  return where;
+}
 
 async function getNextQuotationNumber(schoolId) {
   const settings = await prisma.settings.findFirst({
@@ -95,13 +106,16 @@ const getQuotations = async (schoolId, options = {}) => {
   const { page = 1, limit = 20, status, search, sortBy = "createdAt", sortOrder = "desc" } = options;
   const skip = (page - 1) * limit;
 
-  const where = { schoolId, deletedAt: null };
+  const where = buildQuotationWhere(schoolId, { deletedAt: null });
   if (status) where.status = status;
   if (search) {
     where.OR = [
       { quotationNumber: { contains: search, mode: "insensitive" } },
       { customerName: { contains: search, mode: "insensitive" } },
       { customerEmail: { contains: search, mode: "insensitive" } },
+      ...(schoolId
+        ? []
+        : [{ school: { name: { contains: search, mode: "insensitive" } } }]),
     ];
   }
 
@@ -111,6 +125,7 @@ const getQuotations = async (schoolId, options = {}) => {
       include: {
         items: { select: { id: true, description: true, totalAmount: true } },
         _count: { select: { items: true, comments: true } },
+        school: { select: { id: true, name: true, code: true } },
       },
       orderBy: { [sortBy]: sortOrder },
       skip,
@@ -127,21 +142,21 @@ const getQuotations = async (schoolId, options = {}) => {
 
 const getQuotationById = async (id, schoolId) => {
   return prisma.quotation.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { id, deletedAt: null }),
     include: QUOTATION_INCLUDE,
   });
 };
 
 const getQuotationByNumber = async (quotationNumber, schoolId) => {
   return prisma.quotation.findFirst({
-    where: { quotationNumber, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { quotationNumber, deletedAt: null }),
     include: QUOTATION_INCLUDE,
   });
 };
 
 const updateQuotation = async (id, schoolId, data) => {
   const existing = await prisma.quotation.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { id, deletedAt: null }),
   });
   if (!existing) throw new Error("Quotation not found");
   if (existing.status !== "DRAFT" && existing.status !== "SENT") {
@@ -225,7 +240,7 @@ const updateQuotation = async (id, schoolId, data) => {
 
 const deleteQuotation = async (id, schoolId, userId) => {
   const existing = await prisma.quotation.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { id, deletedAt: null }),
   });
   if (!existing) throw new Error("Quotation not found");
   if (existing.status === "CONVERTED") {
@@ -240,7 +255,7 @@ const deleteQuotation = async (id, schoolId, userId) => {
 
 const approveQuotation = async (id, schoolId, userId) => {
   const existing = await prisma.quotation.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { id, deletedAt: null }),
   });
   if (!existing) throw new Error("Quotation not found");
   if (!["DRAFT", "SENT"].includes(existing.status)) {
@@ -261,7 +276,7 @@ const approveQuotation = async (id, schoolId, userId) => {
 
 const rejectQuotation = async (id, schoolId, reason) => {
   const existing = await prisma.quotation.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { id, deletedAt: null }),
   });
   if (!existing) throw new Error("Quotation not found");
 
@@ -277,7 +292,7 @@ const rejectQuotation = async (id, schoolId, reason) => {
 
 const cancelQuotation = async (id, schoolId, comment, userId) => {
   const existing = await prisma.quotation.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { id, deletedAt: null }),
   });
   if (!existing) throw new Error("Quotation not found");
   if (existing.status === "CONVERTED") {
@@ -298,7 +313,7 @@ const cancelQuotation = async (id, schoolId, comment, userId) => {
 
 const closeQuotation = async (id, schoolId, comment, userId) => {
   const existing = await prisma.quotation.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { id, deletedAt: null }),
   });
   if (!existing) throw new Error("Quotation not found");
 
@@ -316,7 +331,7 @@ const closeQuotation = async (id, schoolId, comment, userId) => {
 
 const convertToInvoice = async (id, schoolId, userId) => {
   const quotation = await prisma.quotation.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where: buildQuotationWhere(schoolId, { id, deletedAt: null }),
     include: { items: true },
   });
   if (!quotation) throw new Error("Quotation not found");
@@ -365,26 +380,29 @@ const convertToInvoice = async (id, schoolId, userId) => {
 };
 
 const getQuotationStats = async (schoolId) => {
+  const base = buildQuotationWhere(schoolId, { deletedAt: null });
+  const withStatus = (status) => ({ ...base, status });
+
   const [total, draft, sent, approved, rejected, accepted, converted, cancelled, closed] =
     await Promise.all([
-      prisma.quotation.count({ where: { schoolId, deletedAt: null } }),
-      prisma.quotation.count({ where: { schoolId, deletedAt: null, status: "DRAFT" } }),
-      prisma.quotation.count({ where: { schoolId, deletedAt: null, status: "SENT" } }),
-      prisma.quotation.count({ where: { schoolId, deletedAt: null, status: "APPROVED" } }),
-      prisma.quotation.count({ where: { schoolId, deletedAt: null, status: "REJECTED" } }),
-      prisma.quotation.count({ where: { schoolId, deletedAt: null, status: "ACCEPTED" } }),
-      prisma.quotation.count({ where: { schoolId, deletedAt: null, status: "CONVERTED" } }),
-      prisma.quotation.count({ where: { schoolId, deletedAt: null, status: "CANCELLED" } }),
-      prisma.quotation.count({ where: { schoolId, deletedAt: null, status: "CLOSED" } }),
+      prisma.quotation.count({ where: base }),
+      prisma.quotation.count({ where: withStatus("DRAFT") }),
+      prisma.quotation.count({ where: withStatus("SENT") }),
+      prisma.quotation.count({ where: withStatus("APPROVED") }),
+      prisma.quotation.count({ where: withStatus("REJECTED") }),
+      prisma.quotation.count({ where: withStatus("ACCEPTED") }),
+      prisma.quotation.count({ where: withStatus("CONVERTED") }),
+      prisma.quotation.count({ where: withStatus("CANCELLED") }),
+      prisma.quotation.count({ where: withStatus("CLOSED") }),
     ]);
 
   const totalValue = await prisma.quotation.aggregate({
-    where: { schoolId, deletedAt: null },
+    where: base,
     _sum: { totalAmount: true },
   });
 
   const convertedValue = await prisma.quotation.aggregate({
-    where: { schoolId, deletedAt: null, status: "CONVERTED" },
+    where: withStatus("CONVERTED"),
     _sum: { totalAmount: true },
   });
 

@@ -16,9 +16,14 @@ router.post(
   async (req, res) => {
     try {
       const currentUser = req.context.user;
+      // Super admin / platform user has no schoolId — require one in the request.
+      const schoolId = currentUser.schoolId || req.body.request?.schoolId;
+      if (!schoolId) {
+        return res.status(400).json({ message: "schoolId is required to create a quotation" });
+      }
       const quotation = await quotationService.createQuotation({
         ...req.body.request,
-        schoolId: currentUser.schoolId,
+        schoolId,
         createdBy: currentUser.id,
       });
       return res.status(201).json({ message: "Quotation created", data: quotation });
@@ -221,7 +226,7 @@ router.get(
       const quotation = await quotationService.getQuotationById(req.params.id, currentUser.schoolId);
       if (!quotation) return res.status(404).json({ message: "Quotation not found" });
 
-      const settings = await getSettingsForQuotation(currentUser.schoolId);
+      const settings = await getSettingsForQuotation(quotation.schoolId);
       const { html } = await buildQuotationHtmlDocument(quotation, settings);
       const pdfBuffer = await renderBillingHtmlToPdfBuffer(html);
 
@@ -246,7 +251,7 @@ router.get(
       const quotation = await quotationService.getQuotationById(req.params.id, currentUser.schoolId);
       if (!quotation) return res.status(404).json({ message: "Quotation not found" });
 
-      const settings = await getSettingsForQuotation(currentUser.schoolId);
+      const settings = await getSettingsForQuotation(quotation.schoolId);
       const { html, printUrl } = await buildQuotationHtmlDocument(quotation, settings);
       return res.status(200).json({ message: "Preview generated", data: { html, printUrl } });
     } catch (error) {
@@ -265,7 +270,7 @@ router.post(
       const quotation = await quotationService.getQuotationById(req.params.id, currentUser.schoolId);
       if (!quotation) return res.status(404).json({ message: "Quotation not found" });
 
-      const settings = await getSettingsForQuotation(currentUser.schoolId);
+      const settings = await getSettingsForQuotation(quotation.schoolId);
       const { html } = await buildQuotationHtmlDocument(quotation, settings);
       const pdfBuffer = await renderBillingHtmlToPdfBuffer(html);
 

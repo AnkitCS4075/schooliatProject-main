@@ -566,6 +566,159 @@ const defaultRolePermissionsMap = {
   ],
 };
 
+/**
+ * Pre-built role templates (custom roles usable by any school). Seeded with schoolId null + isSystem true.
+ * These give schools ready-made permission sets for common job functions.
+ */
+const roleTemplates = [
+  {
+    name: "TEMPLATE_PRINCIPAL",
+    displayName: "Principal",
+    description: "Full school oversight — all modules view/create/edit/export/approve, no platform settings.",
+    permissions: [
+      Permission.CREATE_STUDENT, Permission.GET_STUDENTS, Permission.EDIT_STUDENT, Permission.DELETE_STUDENT,
+      Permission.CREATE_TEACHER, Permission.GET_TEACHERS, Permission.EDIT_TEACHER, Permission.DELETE_TEACHER,
+      Permission.CREATE_STAFF, Permission.GET_STAFF, Permission.EDIT_STAFF, Permission.DELETE_STAFF,
+      Permission.CREATE_CLASSES, Permission.GET_CLASSES, Permission.EDIT_CLASSES, Permission.DELETE_CLASSES,
+      Permission.CREATE_TRANSPORT, Permission.GET_TRANSPORTS, Permission.EDIT_TRANSPORT, Permission.DELETE_TRANSPORT,
+      Permission.GET_MY_SCHOOL, Permission.CREATE_EVENT, Permission.GET_EVENTS, Permission.EDIT_EVENT, Permission.DELETE_EVENT,
+      Permission.CREATE_HOLIDAY, Permission.GET_HOLIDAYS, Permission.EDIT_HOLIDAY, Permission.DELETE_HOLIDAY,
+      Permission.CREATE_EXAM_CALENDAR, Permission.GET_EXAM_CALENDARS, Permission.EDIT_EXAM_CALENDAR, Permission.DELETE_EXAM_CALENDAR,
+      Permission.CREATE_NOTICE, Permission.GET_NOTICES, Permission.EDIT_NOTICE, Permission.DELETE_NOTICE,
+      Permission.CREATE_EXAM, Permission.GET_EXAMS, Permission.EDIT_EXAM, Permission.DELETE_EXAM,
+      Permission.GET_CALENDAR, Permission.MANAGE_ID_CARD_CONFIG, Permission.GENERATE_ID_CARDS, Permission.GET_ID_CARDS,
+      Permission.GET_SETTINGS, Permission.EDIT_SETTINGS, Permission.GET_FEES, Permission.RECORD_FEE_PAYMENT,
+      Permission.GET_DASHBOARD_STATS, Permission.VIEW_AUDIT_LOGS,
+      Permission.GET_GALLERIES, Permission.CREATE_GALLERY, Permission.EDIT_GALLERY, Permission.DELETE_GALLERY,
+      Permission.UPLOAD_GALLERY_IMAGE, Permission.DELETE_GALLERY_IMAGE,
+      Permission.GET_MESSAGES, Permission.SEND_MESSAGE, Permission.CREATE_ANNOUNCEMENT, Permission.SEND_NOTIFICATION,
+      Permission.MARK_ATTENDANCE, Permission.GET_ATTENDANCE, Permission.EXPORT_ATTENDANCE,
+      Permission.CREATE_HOMEWORK, Permission.GET_HOMEWORK, Permission.EDIT_HOMEWORK, Permission.DELETE_HOMEWORK,
+      Permission.ENTER_MARKS, Permission.GET_MARKS, Permission.EDIT_MARKS, Permission.PUBLISH_RESULTS, Permission.GET_RESULTS,
+      Permission.CREATE_TIMETABLE, Permission.GET_TIMETABLE, Permission.EDIT_TIMETABLE, Permission.DELETE_TIMETABLE,
+      Permission.CREATE_NOTE, Permission.EDIT_NOTE, Permission.GET_NOTES, Permission.DELETE_NOTE,
+      Permission.CREATE_SYLLABUS, Permission.EDIT_SYLLABUS, Permission.GET_SYLLABUS, Permission.DELETE_SYLLABUS,
+      Permission.CREATE_CIRCULAR, Permission.EDIT_CIRCULAR, Permission.PUBLISH_CIRCULAR, Permission.GET_CIRCULARS, Permission.DELETE_CIRCULAR,
+      Permission.CREATE_LIBRARY_BOOK, Permission.EDIT_LIBRARY_BOOK, Permission.GET_LIBRARY_BOOKS, Permission.ISSUE_LIBRARY_BOOK,
+      Permission.RETURN_LIBRARY_BOOK, Permission.RESERVE_LIBRARY_BOOK, Permission.GET_LIBRARY_HISTORY,
+      Permission.GET_ATTENDANCE_REPORTS, Permission.GET_FEE_ANALYTICS, Permission.GET_ACADEMIC_REPORTS, Permission.GET_SALARY_REPORTS,
+      Permission.GET_REPORTS, Permission.EXPORT_REPORTS,
+      Permission.USE_CHATBOT, Permission.GET_CHATBOT_HISTORY, Permission.MANAGE_FAQ,
+      Permission.MANAGE_ROUTES, Permission.GET_ROUTES, Permission.ASSIGN_STUDENTS_TO_ROUTE,
+      Permission.CREATE_INVENTORY_ITEM, Permission.GET_INVENTORY, Permission.EDIT_INVENTORY_ITEM, Permission.DELETE_INVENTORY_ITEM,
+      Permission.GET_COURIERS, Permission.CREATE_COURIER_ENTRY, Permission.UPDATE_COURIER_ENTRY, Permission.DELETE_COURIER_ENTRY,
+      Permission.CREATE_GATE_ENTRY, Permission.GET_GATE_ENTRIES, Permission.UPDATE_GATE_ENTRY, Permission.DELETE_GATE_ENTRY,
+      Permission.CREATE_CRM_LEAD, Permission.GET_CRM_LEADS, Permission.UPDATE_CRM_LEAD, Permission.DELETE_CRM_LEAD,
+      Permission.GENERATE_BONAFIDE, Permission.GET_BONAFIDE_CERTIFICATES,
+      Permission.CREATE_QUOTATION, Permission.GET_QUOTATIONS, Permission.EDIT_QUOTATION, Permission.DELETE_QUOTATION,
+      Permission.APPROVE_QUOTATION, Permission.CANCEL_QUOTATION, Permission.CONVERT_QUOTATION, Permission.EXPORT_QUOTATION, Permission.SEND_QUOTATION,
+      Permission.CREATE_LEAVE_REQUEST, Permission.GET_LEAVE_REQUESTS, Permission.APPROVE_LEAVE, Permission.REJECT_LEAVE,
+    ],
+  },
+  {
+    name: "TEMPLATE_CLASS_TEACHER",
+    displayName: "Class Teacher",
+    description: "Manages a class — attendance, homework, marks, timetable, notices for own class.",
+    permissions: [
+      Permission.GET_STUDENTS, Permission.GET_CLASSES, Permission.GET_MY_SCHOOL,
+      Permission.GET_EVENTS, Permission.GET_HOLIDAYS, Permission.GET_EXAM_CALENDARS, Permission.GET_NOTICES,
+      Permission.GET_EXAMS, Permission.GET_CALENDAR, Permission.GET_DASHBOARD_STATS,
+      Permission.GET_MESSAGES, Permission.SEND_MESSAGE, Permission.SEND_NOTIFICATION,
+      Permission.GET_TIMETABLE, Permission.CREATE_TIMETABLE, Permission.EDIT_TIMETABLE,
+      Permission.GET_HOMEWORK, Permission.CREATE_HOMEWORK, Permission.EDIT_HOMEWORK, Permission.DELETE_HOMEWORK, Permission.GRADE_HOMEWORK,
+      Permission.MARK_ATTENDANCE, Permission.GET_ATTENDANCE, Permission.EXPORT_ATTENDANCE,
+      Permission.ENTER_MARKS, Permission.GET_MARKS, Permission.EDIT_MARKS, Permission.PUBLISH_RESULTS, Permission.GET_RESULTS,
+      Permission.GET_NOTES, Permission.CREATE_NOTE, Permission.EDIT_NOTE, Permission.DELETE_NOTE,
+      Permission.GET_SYLLABUS, Permission.GET_FEES, Permission.GET_ATTENDANCE_REPORTS, Permission.GET_ACADEMIC_REPORTS,
+      Permission.GET_LEAVE_REQUESTS, Permission.CREATE_LEAVE_REQUEST,
+      Permission.CREATE_GRIEVANCE, Permission.GET_MY_GRIEVANCES, Permission.ADD_GRIEVANCE_COMMENT,
+      Permission.GET_REPORTS, Permission.EXPORT_REPORTS,
+    ],
+  },
+  {
+    name: "TEMPLATE_ACCOUNTANT",
+    displayName: "Accountant",
+    description: "Fee collection, receipts, invoices, salary reports and financial analytics.",
+    permissions: [
+      Permission.GET_STUDENTS, Permission.GET_CLASSES, Permission.GET_MY_SCHOOL, Permission.GET_DASHBOARD_STATS,
+      Permission.GET_SETTINGS, Permission.GET_FEES, Permission.RECORD_FEE_PAYMENT,
+      Permission.GET_MESSAGES, Permission.SEND_MESSAGE,
+      Permission.GET_ATTENDANCE_REPORTS, Permission.GET_FEE_ANALYTICS, Permission.GET_SALARY_REPORTS,
+      Permission.GET_REPORTS, Permission.EXPORT_REPORTS,
+      Permission.CREATE_QUOTATION, Permission.GET_QUOTATIONS, Permission.EDIT_QUOTATION, Permission.DELETE_QUOTATION,
+      Permission.APPROVE_QUOTATION, Permission.CANCEL_QUOTATION, Permission.CONVERT_QUOTATION, Permission.EXPORT_QUOTATION, Permission.SEND_QUOTATION,
+    ],
+  },
+  {
+    name: "TEMPLATE_RECEPTION",
+    displayName: "Reception / Admission Desk",
+    description: "Handles admissions, student enquiries, gate entry, couriers and parent communication.",
+    permissions: [
+      Permission.CREATE_STUDENT, Permission.GET_STUDENTS, Permission.EDIT_STUDENT,
+      Permission.GET_CLASSES, Permission.GET_MY_SCHOOL, Permission.GET_DASHBOARD_STATS,
+      Permission.GET_MESSAGES, Permission.SEND_MESSAGE, Permission.SEND_NOTIFICATION,
+      Permission.CREATE_GATE_ENTRY, Permission.GET_GATE_ENTRIES, Permission.UPDATE_GATE_ENTRY,
+      Permission.GET_COURIERS, Permission.CREATE_COURIER_ENTRY, Permission.UPDATE_COURIER_ENTRY,
+      Permission.CREATE_CRM_LEAD, Permission.GET_CRM_LEADS, Permission.UPDATE_CRM_LEAD,
+      Permission.CREATE_GRIEVANCE, Permission.GET_MY_GRIEVANCES, Permission.ADD_GRIEVANCE_COMMENT,
+      Permission.CREATE_QUOTATION, Permission.GET_QUOTATIONS, Permission.EDIT_QUOTATION, Permission.SEND_QUOTATION,
+    ],
+  },
+  {
+    name: "TEMPLATE_LIBRARIAN",
+    displayName: "Librarian",
+    description: "Library books, issues, returns and reservations.",
+    permissions: [
+      Permission.GET_MY_SCHOOL, Permission.GET_DASHBOARD_STATS,
+      Permission.CREATE_LIBRARY_BOOK, Permission.EDIT_LIBRARY_BOOK, Permission.GET_LIBRARY_BOOKS,
+      Permission.ISSUE_LIBRARY_BOOK, Permission.RETURN_LIBRARY_BOOK, Permission.RESERVE_LIBRARY_BOOK,
+      Permission.GET_LIBRARY_HISTORY,
+      Permission.GET_MESSAGES, Permission.SEND_MESSAGE,
+    ],
+  },
+  {
+    name: "TEMPLATE_TRANSPORT",
+    displayName: "Transport Manager",
+    description: "Transport routes, vehicle management and student route assignment.",
+    permissions: [
+      Permission.GET_MY_SCHOOL, Permission.GET_DASHBOARD_STATS,
+      Permission.CREATE_TRANSPORT, Permission.GET_TRANSPORTS, Permission.EDIT_TRANSPORT, Permission.DELETE_TRANSPORT,
+      Permission.MANAGE_ROUTES, Permission.GET_ROUTES, Permission.ASSIGN_STUDENTS_TO_ROUTE,
+      Permission.GET_STUDENTS, Permission.GET_CLASSES,
+      Permission.GET_MESSAGES, Permission.SEND_MESSAGE, Permission.SEND_NOTIFICATION,
+      Permission.GET_ATTENDANCE_REPORTS, Permission.GET_REPORTS,
+    ],
+  },
+];
+
+const createRoleTemplates = async () => {
+  const existing = await prisma.customRole.findMany({
+    where: { isSystem: true, schoolId: null },
+    select: { name: true },
+  });
+  const existingNames = new Set(existing.map((r) => r.name));
+
+  const toCreate = roleTemplates.filter((t) => !existingNames.has(t.name));
+  if (toCreate.length === 0) {
+    logger.info("All role templates already present");
+    return [];
+  }
+
+  const created = await prisma.customRole.createManyAndReturn({
+    data: toCreate.map((t) => ({
+      name: t.name,
+      displayName: t.displayName,
+      description: t.description,
+      schoolId: null,
+      isSystem: true,
+      permissions: t.permissions,
+      createdBy: "system",
+    })),
+  });
+  logger.info(`Created ${created.length} role template(s)`);
+  return created;
+};
+
 const createDefaultRoles = async () => {
   let roleNames = [
     RoleName.SUPER_ADMIN,
@@ -666,8 +819,10 @@ const roleService = {
   getRoleByName,
   getOrCreateRoleByName,
   createDefaultRoles,
+  createRoleTemplates,
   updateRolePermissions,
   defaultRolePermissionsMap,
+  roleTemplates,
 };
 
 export default roleService;

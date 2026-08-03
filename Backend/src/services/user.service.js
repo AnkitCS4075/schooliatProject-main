@@ -48,6 +48,11 @@ const getUserSelect = (
         annualIncome: true,
         accommodationType: true,
         bloodGroup: true,
+        previousSchoolName: true,
+        previousSchoolBoard: true,
+        previousClassAttended: true,
+        previousYearOfLeaving: true,
+        previousSchoolTcNumber: true,
         class: {
           select: {
             id: true,
@@ -61,6 +66,18 @@ const getUserSelect = (
             type: true,
             vehicleNumber: true,
           },
+        },
+        rollNumberHistory: {
+          select: {
+            id: true,
+            oldRollNumber: true,
+            newRollNumber: true,
+            action: true,
+            changedBy: true,
+            changedAt: true,
+          },
+          orderBy: { changedAt: "desc" },
+          take: 20,
         },
       },
     };

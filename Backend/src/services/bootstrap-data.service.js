@@ -72,6 +72,7 @@ async function ensureSchoolSettings() {
 async function ensureBaselineData() {
   await roleService.createDefaultRoles();
   await roleService.updateRolePermissions();
+  await roleService.createRoleTemplates();
   await userService.createSuperAdmin();
 
   const [platform, schools] = await Promise.all([

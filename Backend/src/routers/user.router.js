@@ -14,6 +14,8 @@ import roleService from "../services/role.service.js";
 import csvUtil from "../utils/csv.util.js";
 import experienceCertificateService from "../services/experience-certificate.service.js";
 import feeService from "../services/fee.service.js";
+import rollNumberService from "../services/roll-number.service.js";
+import admissionFormService from "../services/admission-form.service.js";
 import { requireDeletionOTP } from "../middlewares/require-deletion-otp.middleware.js";
 import { deleteByIdWithOtpSchema } from "../schemas/common/delete-with-otp.schema.js";
 import {
@@ -1306,11 +1308,13 @@ router.post(
       const emailTrimmed = String(request.email ?? "")
         .trim()
         .toLowerCase();
-      /** User.email is globally @unique; empty strings collide. Use a unique placeholder when omitted (same as bulk import). */
-      const emailForUser =
-        emailTrimmed.length > 0
-          ? emailTrimmed
-          : bulkPlaceholderEmail(currentUser.schoolId, "student");
+      // Email is mandatory for admission (post-admission communication + login)
+      if (!emailTrimmed) {
+        return res.status(400).json({
+          message: "Email is required for admission. It is used for login and post-admission communication.",
+        });
+      }
+      const emailForUser = emailTrimmed;
 
       const normalizedRequest = {
         ...request,
@@ -1375,10 +1379,16 @@ router.post(
       if (!user) throw lastCreateError || new Error("Failed to create student user");
 
       // Create student profile
+      const requestedRoll = parseRollNumberFromValue(normalizedRequest.rollNumber);
+      const rollNumber =
+        requestedRoll > 0
+          ? requestedRoll
+          : await rollNumberService.getNextRollNumberForClass(normalizedRequest.classId);
+
       await prisma.studentProfile.create({
         data: {
           userId: user.id,
-          rollNumber: parseRollNumberFromValue(normalizedRequest.rollNumber),
+          rollNumber,
           apaarId: normalizedRequest.apaarId,
           classId: normalizedRequest.classId,
           transportId: normalizedRequest.transportId || null,
@@ -1392,8 +1402,22 @@ router.post(
             : null,
           accommodationType: normalizedRequest.accommodationType || "DAY_SCHOLAR",
           bloodGroup: normalizedRequest.bloodGroup || null,
+          previousSchoolName: normalizedRequest.previousSchoolName || null,
+          previousSchoolBoard: normalizedRequest.previousSchoolBoard || null,
+          previousClassAttended: normalizedRequest.previousClassAttended || null,
+          previousYearOfLeaving: normalizedRequest.previousYearOfLeaving || null,
+          previousSchoolTcNumber: normalizedRequest.previousSchoolTcNumber || null,
           createdBy: currentUser.id,
         },
+      });
+
+      await rollNumberService.logRollNumberChange({
+        studentUserId: user.id,
+        classId: normalizedRequest.classId,
+        oldRollNumber: null,
+        newRollNumber: rollNumber,
+        action: requestedRoll > 0 ? "MANUAL_OVERRIDE" : "AUTO_ASSIGNED",
+        changedBy: currentUser.id,
       });
 
       try {
@@ -1409,13 +1433,26 @@ router.post(
         );
       }
 
-      // Auto-send admission confirmation email to parent
+      // Auto-send admission confirmation email to parent (with credentials + admission form PDF)
       try {
         if (user.email && !user.email.includes("@placeholder.schooliat.local")) {
           const school = await prisma.school.findUnique({ where: { id: currentUser.schoolId }, select: { name: true } });
           const classLabel = request.classId
             ? (await prisma.class.findUnique({ where: { id: request.classId }, select: { grade: true, division: true } }))
             : null;
+
+          let admissionFormBuffer = null;
+          try {
+            const fullForPdf = await prisma.user.findFirst({
+              where: { id: user.id },
+              select: userService.getStudentSelect(),
+            });
+            const withSchool = { ...fullForPdf, school: school ?? null };
+            admissionFormBuffer = await admissionFormService.renderAdmissionFormPdf({ student: withSchool });
+          } catch (pdfErr) {
+            logger.warn({ err: pdfErr, studentId: user.id }, "Admission form PDF generation failed for welcome email");
+          }
+
           await emailService.sendStudentWelcomeEmail({
             to: user.email,
             studentName: `${user.firstName} ${user.lastName || ""}`.trim(),
@@ -1425,6 +1462,9 @@ router.post(
             publicUserId: user.publicUserId,
             password: generatedPassword,
             className: classLabel ? `${classLabel.grade}${classLabel.division ? ` - ${classLabel.division}` : ""}` : "",
+            rollNumber,
+            admissionFormBuffer,
+            admissionFormName: `Admission-Form-${user.publicUserId || ""}.pdf`,
           });
         }
       } catch (emailErr) {
@@ -1551,7 +1591,69 @@ router.get(
   },
 );
 
-// Export all students as CSV — MUST be registered before GET /students/:id or "export" is matched as :id
+// Rearrange roll numbers of a class alphabetically (by first name). Reassigns sequential numbers.
+router.post(
+  "/students/roll-numbers/rearrange",
+  withPermission(Permission.EDIT_STUDENT),
+  async (req, res) => {
+    try {
+      const currentUser = req.context.user;
+      const { classId, order } = req.body.request || req.body;
+      if (!classId) {
+        return res.status(400).json({ message: "classId is required" });
+      }
+      const classEntity = await prisma.class.findFirst({
+        where: { id: classId, schoolId: currentUser.schoolId, deletedAt: null },
+      });
+      if (!classEntity) {
+        return res.status(404).json({ message: "Class not found!" });
+      }
+      const result = await rollNumberService.rearrangeClassRollNumbers({
+        classId,
+        changedBy: currentUser.id,
+        order,
+      });
+      return res.status(200).json({
+        message: `Roll numbers rearranged for ${result.changes.length} student(s).`,
+        data: result,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || "Failed to rearrange roll numbers",
+      });
+    }
+  },
+);
+
+// Get roll number change history (filter by class or student)
+router.get(
+  "/students/roll-numbers/history",
+  withPermission(Permission.GET_STUDENTS),
+  async (req, res) => {
+    try {
+      const currentUser = req.context.user;
+      const { classId, studentUserId, page, limit } = req.query;
+      if (classId) {
+        const classEntity = await prisma.class.findFirst({
+          where: { id: classId, schoolId: currentUser.schoolId, deletedAt: null },
+        });
+        if (!classEntity) return res.status(404).json({ message: "Class not found!" });
+      }
+      const result = await rollNumberService.getRollNumberHistory({
+        classId,
+        studentUserId,
+        page: parseInt(page, 10) || 1,
+        limit: parseInt(limit, 10) || 20,
+      });
+      return res.status(200).json({ message: "Roll number history fetched!", data: result });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || "Failed to fetch roll number history",
+      });
+    }
+  },
+);
+
 router.get(
   "/students/export",
   withPermission(Permission.GET_STUDENTS),
@@ -1789,6 +1891,8 @@ router.patch(
 
       // Update student profile
       const profileUpdateData = {};
+      const prevRoll = existingStudent.studentProfile?.rollNumber;
+      const prevClassIdForRoll = existingStudent.studentProfile?.classId;
       if (request.rollNumber !== undefined) {
         profileUpdateData.rollNumber = parseRollNumberFromValue(request.rollNumber);
       }
@@ -1818,12 +1922,45 @@ router.patch(
         profileUpdateData.accommodationType = request.accommodationType;
       if (request.bloodGroup !== undefined)
         profileUpdateData.bloodGroup = request.bloodGroup || null;
+      if (request.previousSchoolName !== undefined)
+        profileUpdateData.previousSchoolName = normalizeNullableTrim(request.previousSchoolName);
+      if (request.previousSchoolBoard !== undefined)
+        profileUpdateData.previousSchoolBoard = normalizeNullableTrim(request.previousSchoolBoard);
+      if (request.previousClassAttended !== undefined)
+        profileUpdateData.previousClassAttended = normalizeNullableTrim(request.previousClassAttended);
+      if (request.previousYearOfLeaving !== undefined)
+        profileUpdateData.previousYearOfLeaving = normalizeNullableTrim(request.previousYearOfLeaving);
+      if (request.previousSchoolTcNumber !== undefined)
+        profileUpdateData.previousSchoolTcNumber = normalizeNullableTrim(request.previousSchoolTcNumber);
 
       if (Object.keys(profileUpdateData).length > 0) {
         await prisma.studentProfile.update({
           where: { userId: id },
           data: profileUpdateData,
         });
+      }
+
+      // Log manual roll number override (or auto-assign when cleared to 0/empty)
+      if (request.rollNumber !== undefined) {
+        const nextRoll = profileUpdateData.rollNumber;
+        const finalRoll =
+          nextRoll > 0 ? nextRoll : await rollNumberService.getNextRollNumberForClass(
+            request.classId ?? prevClassIdForRoll,
+          );
+        if (finalRoll !== prevRoll) {
+          await prisma.studentProfile.update({
+            where: { userId: id },
+            data: { rollNumber: finalRoll, updatedBy: currentUser.id },
+          });
+          await rollNumberService.logRollNumberChange({
+            studentUserId: id,
+            classId: request.classId ?? prevClassIdForRoll,
+            oldRollNumber: prevRoll,
+            newRollNumber: finalRoll,
+            action: nextRoll > 0 ? "MANUAL_OVERRIDE" : "AUTO_ASSIGNED",
+            changedBy: currentUser.id,
+          });
+        }
       }
 
       const prevClassId = existingStudent.studentProfile?.classId;
@@ -1854,6 +1991,37 @@ router.patch(
       }
       const usersWithUrls = await userService.attachFileURLs([refreshedStudent]);
       await userService.attachStudentListMetrics(usersWithUrls, currentUser.schoolId);
+
+      // Notify parent that the admission form was updated (with the latest copy attached)
+      const profileFieldsChanged = Object.keys(profileUpdateData).length > 0;
+      const basicFieldsChanged = Object.keys(userUpdateData).some((k) => k !== "updatedBy");
+      if (profileFieldsChanged || basicFieldsChanged) {
+        try {
+          if (refreshedStudent.email && !refreshedStudent.email.includes("@placeholder.schooliat.local")) {
+            const schoolInfo = await prisma.school.findUnique({ where: { id: currentUser.schoolId }, select: { name: true } });
+            let admissionFormBuffer = null;
+            try {
+              admissionFormBuffer = await admissionFormService.renderAdmissionFormPdf({
+                student: { ...refreshedStudent, school: schoolInfo ?? null },
+              });
+            } catch (pdfErr) {
+              logger.warn({ err: pdfErr, studentId: id }, "Admission form PDF generation failed for update email");
+            }
+            await emailService.sendAdmissionFormUpdatedEmail({
+              to: refreshedStudent.email,
+              studentName: `${refreshedStudent.firstName} ${refreshedStudent.lastName || ""}`.trim(),
+              schoolName: schoolInfo?.name || "",
+              loginEmail: refreshedStudent.email,
+              publicUserId: refreshedStudent.publicUserId,
+              updatedAt: new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+              admissionFormBuffer,
+              admissionFormName: `Admission-Form-${refreshedStudent.publicUserId || ""}-Updated.pdf`,
+            });
+          }
+        } catch (emailErr) {
+          logger.warn({ err: emailErr, studentId: id }, "Admission form updated email failed");
+        }
+      }
 
       return res.json({
         message: "Student updated!",
@@ -2312,10 +2480,22 @@ router.post(
           );
           const generatedPassword = stringUtil.generateRandomString(15);
           const emailRaw = String(row.email ?? "").trim().toLowerCase();
-          const emailNorm = emailRaw || bulkPlaceholderEmail(currentUser.schoolId, "s");
+          // Email is mandatory for admission rows (used for login + post-admission communication)
+          if (!emailRaw) {
+            results.failed++;
+            results.errors.push({
+              row: rowLabel,
+              error:
+                "Email is required for admission. It is used for login and post-admission communication.",
+            });
+            continue;
+          }
+          const emailNorm = emailRaw;
           const dateOfBirth = parseBulkDateOfBirth(row.dateofbirth);
 
           let newStudentId;
+          const rollRequested = parseBulkRollNumber(row);
+          let newRollNumber;
           await prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
               data: {
@@ -2335,10 +2515,15 @@ router.post(
             });
             newStudentId = user.id;
 
+            newRollNumber =
+              rollRequested > 0
+                ? rollRequested
+                : await rollNumberService.getNextRollNumberForClass(classEntity.id);
+
             await tx.studentProfile.create({
               data: {
                 userId: user.id,
-                rollNumber: parseBulkRollNumber(row),
+                rollNumber: newRollNumber,
                 apaarId: row.apaarid?.trim() || null,
                 classId: classEntity.id,
                 fatherName: row.fathername?.trim() || "",
@@ -2346,7 +2531,23 @@ router.post(
                 fatherContact: row.fathercontact?.trim() || "",
                 motherContact: row.mothercontact?.trim() || "",
                 accommodationType: "DAY_SCHOLAR",
+                previousSchoolName: row.previousschoolname?.trim() || null,
+                previousSchoolBoard: row.previousschoolboard?.trim() || null,
+                previousClassAttended: row.previousclassattended?.trim() || null,
+                previousYearOfLeaving: row.previousyearofleaving?.trim() || null,
+                previousSchoolTcNumber: row.previousschooltcnumber?.trim() || null,
                 createdBy: currentUser.id,
+              },
+            });
+
+            await tx.rollNumberHistory.create({
+              data: {
+                studentUserId: user.id,
+                classId: classEntity.id,
+                oldRollNumber: null,
+                newRollNumber,
+                action: rollRequested > 0 ? "MANUAL_OVERRIDE" : "AUTO_ASSIGNED",
+                changedBy: currentUser.id,
               },
             });
           });

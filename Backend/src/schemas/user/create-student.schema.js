@@ -12,7 +12,7 @@ const createStudentSchema = z
             const s = String(val).trim();
             return s === "" ? undefined : s;
           },
-          z.string().email("Invalid email format").optional(),
+          z.string().email("Invalid email format"),
         ),
         contact: z.string().trim().min(1, "Contact is required"),
         gender: z.enum(["MALE", "FEMALE"], {
@@ -85,6 +85,11 @@ const createStudentSchema = z
           .uuid("ID photo ID must be a valid UUID")
           .optional(),
         rollNumber: z.string().trim().optional().nullable(),
+        previousSchoolName: z.string().trim().optional().nullable(),
+        previousSchoolBoard: z.string().trim().optional().nullable(),
+        previousClassAttended: z.string().trim().optional().nullable(),
+        previousYearOfLeaving: z.string().trim().optional().nullable(),
+        previousSchoolTcNumber: z.string().trim().optional().nullable(),
       })
       ,
     query: z.object({}),

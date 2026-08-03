@@ -45,6 +45,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+// Generate contract PDF, store it, and email it to the school
 router.post("/:id/generate-contract", async (req, res, next) => {
   try {
     const userId = req.context.user.id;
@@ -55,20 +56,50 @@ router.post("/:id/generate-contract", async (req, res, next) => {
   }
 });
 
-router.post("/:id/confirm", async (req, res, next) => {
+// School accepts the contract digitally (records acceptance + notifies team to activate)
+router.post("/:id/accept-contract", async (req, res, next) => {
   try {
+    const body = req.body.request || req.body;
     const userId = req.context.user.id;
-    const item = await schoolOnboardingService.confirmContract(req.params.id, userId);
+    const item = await schoolOnboardingService.acceptContract(req.params.id, {
+      acceptedBy: userId,
+      acceptedAt: body.acceptedAt,
+    });
     res.json({ status: 200, data: item });
   } catch (error) {
     next(error);
   }
 });
 
+// Legacy alias for accept-contract
+router.post("/:id/confirm", async (req, res, next) => {
+  try {
+    const userId = req.context.user.id;
+    const item = await schoolOnboardingService.acceptContract(req.params.id, {
+      acceptedBy: userId,
+    });
+    res.json({ status: 200, data: item });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Complete onboarding: create School + admin credentials, email credentials
 router.post("/:id/complete", async (req, res, next) => {
   try {
     const userId = req.context.user.id;
     const item = await schoolOnboardingService.complete(req.params.id, userId);
+    res.json({ status: 200, data: item });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Super Admin activates the school account
+router.post("/:id/activate", async (req, res, next) => {
+  try {
+    const userId = req.context.user.id;
+    const item = await schoolOnboardingService.activateSchool(req.params.id, userId);
     res.json({ status: 200, data: item });
   } catch (error) {
     next(error);

@@ -25,6 +25,7 @@ model File {
   syllabi       Syllabus[]
   bonafideCerts BonafideCertificate[]
   onboardingContracts SchoolOnboarding[]
+  studentDocuments StudentDocument[]
 
   @@map("files")
 }
@@ -120,6 +121,10 @@ model School {
   bankName                String?               @map("bank_name")
   upiId                   String?               @map("upi_id")
   regionId                String?               @map("region_id")
+  contractAccepted        Boolean               @default(false) @map("contract_accepted")
+  contractAcceptedAt      DateTime?             @map("contract_accepted_at")
+  contractVersion         Int?                  @default(1) @map("contract_version")
+  activationStatus        SchoolActivationStatus @default(PENDING_ACTIVATION) @map("activation_status")
   circulars               Circular[]
   schoolEmergencyContacts EmergencyContact[]    @relation("SchoolEmergencyContacts")
   faqs                    FAQ[]
@@ -144,6 +149,7 @@ model School {
   journalEntries          JournalEntry[]
   openingBalances         OpeningBalance[]
   schoolOnboardings       SchoolOnboarding[]
+  quotations              Quotation[]
 
   @@map("schools")
 }
@@ -268,6 +274,7 @@ model User {
   studentBonafideCerts       BonafideCertificate[] @relation("BonafideStudent")
   receivedOtherIncomes       OtherIncome[]
   managedOnboardings         SchoolOnboarding[]
+  studentDocuments           StudentDocument[]
 
   @@index([schoolId, deletedAt])
   @@index([roleId, userType, deletedAt])
@@ -291,6 +298,11 @@ model StudentProfile {
   annualIncome      Decimal?          @map("annual_income") @db.Decimal(15, 0)
   accommodationType AccommodationType @map("accommodation_type")
   bloodGroup        BloodGroup?       @map("blood_group")
+  previousSchoolName      String?     @map("previous_school_name")
+  previousSchoolBoard     String?     @map("previous_school_board")
+  previousClassAttended   String?     @map("previous_class_attended")
+  previousYearOfLeaving   String?     @map("previous_year_of_leaving")
+  previousSchoolTcNumber  String?     @map("previous_school_tc_number")
   createdBy         String            @map("created_by")
   updatedBy         String?           @map("updated_by")
   deletedBy         String?           @map("deleted_by")
@@ -300,8 +312,66 @@ model StudentProfile {
   class             Class             @relation(fields: [classId], references: [id])
   transport         Transport?        @relation(fields: [transportId], references: [id])
   user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rollNumberHistory RollNumberHistory[]
 
   @@map("student_profiles")
+}
+
+enum StudentDocumentCategory {
+  AADHAAR
+  PREVIOUS_SCHOOL
+  OTHERS
+
+  @@map("student_document_category")
+}
+
+model StudentDocument {
+  id         String                  @id @default(uuid())
+  userId     String                  @map("user_id")
+  category   StudentDocumentCategory
+  label      String?                 @map("label")
+  fileId     String?                 @map("file_id")
+  fileUrl    String?                 @map("file_url")
+  uploadedBy String                  @map("uploaded_by")
+  createdAt  DateTime                @default(now()) @map("created_at")
+  deletedAt  DateTime?               @map("deleted_at")
+  user       User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file       File?                   @relation(fields: [fileId], references: [id])
+
+  @@index([userId, category, deletedAt])
+  @@map("student_documents")
+}
+
+enum RollNumberChangeAction {
+  AUTO_ASSIGNED
+  MANUAL_OVERRIDE
+  REARRANGED
+
+  @@map("roll_number_change_action")
+}
+
+model RollNumberHistory {
+  id             String                  @id @default(uuid())
+  studentUserId  String                  @map("student_user_id")
+  classId        String                  @map("class_id")
+  oldRollNumber  Int?                    @map("old_roll_number")
+  newRollNumber  Int                     @map("new_roll_number")
+  action         RollNumberChangeAction
+  changedBy      String                  @map("changed_by")
+  changedAt      DateTime                @default(now()) @map("changed_at")
+  studentProfile StudentProfile          @relation(fields: [studentUserId], references: [userId], onDelete: Cascade)
+
+  @@index([studentUserId, changedAt])
+  @@index([classId, changedAt])
+  @@map("roll_number_histories")
+}
+
+enum SchoolActivationStatus {
+  PENDING_ACTIVATION
+  ACTIVE
+  SUSPENDED
+
+  @@map("school_activation_status")
 }
 
 model TeacherProfile {
@@ -2587,6 +2657,7 @@ model SchoolOnboarding {
   terminationNoticePeriod Int?          @map("termination_notice_period_months")
   status               OnboardingStatus @default(DRAFT)
   contractFileId       String?          @map("contract_file_id")
+  contractAcceptedAt   DateTime?        @map("contract_accepted_at")
   schoolId             String?          @map("school_id")
   notes                String?
   createdBy            String           @map("created_by")
@@ -2753,6 +2824,7 @@ model Quotation {
   items              QuotationItem[]
   versions           QuotationVersion[]
   comments           QuotationComment[]
+  school             School          @relation(fields: [schoolId], references: [id])
 
   @@index([schoolId, deletedAt])
   @@index([quotationNumber])
@@ -2847,4 +2919,36 @@ model ReportTemplate {
 
   @@index([schoolId, reportType, deletedAt])
   @@map("report_templates")
+}
+
+// ─── Letterhead History ───────────────────────────────────────────────
+// Managed so `prisma db push` never drops the runtime-ensured table that
+// holds issued letterhead/serial history (see src/routers/letterhead.router.js).
+
+model LetterheadHistory {
+  id                   String    @id
+  schoolId             String?   @map("school_id")
+  createdBy            String    @map("created_by")
+  createdByName        String?   @map("created_by_name")
+  subject              String?
+  dateValue            DateTime? @db.Date @map("date_value")
+  content              String
+  contentFormat        String?   @map("content_format")
+  signatureName        String?   @map("signature_name")
+  signatureDesignation String?   @map("signature_designation")
+  generatedHtml        String    @map("generated_html")
+  status               String?
+  serialNumber         String?   @map("serial_number")
+  documentType         String?   @map("document_type")
+  issuedBy             String?   @map("issued_by")
+  issuedByName         String?   @map("issued_by_name")
+  issuedAt             DateTime? @db.Timestamp(6) @map("issued_at")
+  isReprint            Boolean   @default(false) @map("is_reprint")
+  createdAt            DateTime  @default(now()) @db.Timestamp(6) @map("created_at")
+
+  @@index([createdAt])
+  @@index([schoolId])
+  @@index([createdBy])
+  @@index([status])
+  @@map("letterhead_history")
 }

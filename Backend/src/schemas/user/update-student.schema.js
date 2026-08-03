@@ -109,6 +109,11 @@ const updateStudentSchema = z
           .uuid("ID photo ID must be a valid UUID")
           .optional(),
         rollNumber: z.string().trim().optional().nullable(),
+        previousSchoolName: z.string().trim().optional().nullable(),
+        previousSchoolBoard: z.string().trim().optional().nullable(),
+        previousClassAttended: z.string().trim().optional().nullable(),
+        previousYearOfLeaving: z.string().trim().optional().nullable(),
+        previousSchoolTcNumber: z.string().trim().optional().nullable(),
       })
       ,
     query: z.object({}),

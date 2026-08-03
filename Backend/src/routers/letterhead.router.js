@@ -43,9 +43,31 @@ const ensureLetterheadHistoryTable = async () => {
         signature_name TEXT NULL,
         signature_designation TEXT NULL,
         generated_html TEXT NOT NULL,
+        status TEXT NULL,
+        serial_number TEXT NULL,
+        document_type TEXT NULL,
+        issued_by TEXT NULL,
+        issued_by_name TEXT NULL,
+        issued_at TIMESTAMP NULL,
+        is_reprint BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    const addColumnIfMissing = async (columnSql) => {
+      try {
+        await prisma.$executeRawUnsafe(`ALTER TABLE letterhead_history ADD COLUMN IF NOT EXISTS ${columnSql}`);
+      } catch {
+        /* column may already exist in older Postgres; ignore */
+      }
+    };
+    await addColumnIfMissing("status TEXT NULL");
+    await addColumnIfMissing("serial_number TEXT NULL");
+    await addColumnIfMissing("document_type TEXT NULL");
+    await addColumnIfMissing("issued_by TEXT NULL");
+    await addColumnIfMissing("issued_by_name TEXT NULL");
+    await addColumnIfMissing("issued_at TIMESTAMP NULL");
+    await addColumnIfMissing("is_reprint BOOLEAN NOT NULL DEFAULT FALSE");
 
     await prisma.$executeRawUnsafe(
       `CREATE INDEX IF NOT EXISTS letterhead_history_created_at_idx ON letterhead_history (created_at DESC)`,
@@ -55,6 +77,9 @@ const ensureLetterheadHistoryTable = async () => {
     );
     await prisma.$executeRawUnsafe(
       `CREATE INDEX IF NOT EXISTS letterhead_history_created_by_idx ON letterhead_history (created_by)`,
+    );
+    await prisma.$executeRawUnsafe(
+      `CREATE INDEX IF NOT EXISTS letterhead_history_status_idx ON letterhead_history (status)`,
     );
 
     letterheadHistoryTableEnsured = true;
@@ -370,6 +395,21 @@ router.post(
 
       const historyId = randomUUID();
 
+      // Draft mode: no serial number, status DRAFT. Issued documents get a serial + locked status.
+      const isDraft = request.isDraft === true || request.mode === "draft";
+      const documentType = String(request.documentType || "LETTER").trim().toUpperCase();
+
+      let serialNumber = null;
+      if (!isDraft) {
+        const year = new Date().getFullYear();
+        const issuedCountRows = await prisma.$queryRaw`
+          SELECT COUNT(*)::int AS total FROM letterhead_history
+          WHERE status = 'ISSUED' AND EXTRACT(YEAR FROM COALESCE(issued_at, created_at)) = ${year}
+        `;
+        const issuedCount = Number(issuedCountRows?.[0]?.total || 0);
+        serialNumber = `LH-${year}-${String(issuedCount + 1).padStart(4, "0")}`;
+      }
+
       await prisma.$queryRaw`
         INSERT INTO letterhead_history (
           id,
@@ -382,7 +422,14 @@ router.post(
           content_format,
           signature_name,
           signature_designation,
-          generated_html
+          generated_html,
+          status,
+          serial_number,
+          document_type,
+          issued_by,
+          issued_by_name,
+          issued_at,
+          is_reprint
         )
         VALUES (
           ${historyId},
@@ -397,7 +444,14 @@ router.post(
           ${request.signatureDesignation
             ? String(request.signatureDesignation).trim()
             : null},
-          ${letterheadHTML}
+          ${letterheadHTML},
+          ${isDraft ? "DRAFT" : "ISSUED"},
+          ${serialNumber},
+          ${documentType},
+          ${isDraft ? null : user?.id || null},
+          ${isDraft ? null : createdByName || null},
+          ${isDraft ? null : new Date()},
+          ${false}
         )
       `;
 
@@ -407,11 +461,16 @@ router.post(
       const dataUrl = `data:text/html;base64,${base64HTML}`;
 
       return res.json({
-        message: "Letterhead generated successfully!",
+        message: isDraft
+          ? "Letterhead draft saved successfully!"
+          : "Letterhead generated and issued successfully!",
         data: {
           id: historyId,
           html: letterheadHTML,
           printUrl: dataUrl,
+          status: isDraft ? "DRAFT" : "ISSUED",
+          serialNumber,
+          documentType,
         },
       });
     } catch (error) {
@@ -475,6 +534,12 @@ router.get(
             created_by_name,
             signature_name,
             signature_designation,
+            status,
+            serial_number,
+            document_type,
+            issued_by_name,
+            issued_at,
+            is_reprint,
             generated_html,
             created_at
           FROM letterhead_history
@@ -530,6 +595,12 @@ router.get(
               content_format,
               signature_name,
               signature_designation,
+              status,
+              serial_number,
+              document_type,
+              issued_by_name,
+              issued_at,
+              is_reprint,
               generated_html,
               created_at
             FROM letterhead_history
@@ -547,6 +618,12 @@ router.get(
               content_format,
               signature_name,
               signature_designation,
+              status,
+              serial_number,
+              document_type,
+              issued_by_name,
+              issued_at,
+              is_reprint,
               generated_html,
               created_at
             FROM letterhead_history
@@ -565,6 +642,128 @@ router.get(
     } catch (error) {
       return res.status(500).json({
         error: "Failed to fetch letterhead history",
+        message: error.message,
+      });
+    }
+  },
+);
+
+// Issue a draft letterhead: assigns a serial number, locks it, and registers in issuance history.
+router.post(
+  "/issue/:id",
+  withPermission(Permission.CREATE_RECEIPT),
+  async (req, res) => {
+    try {
+      await ensureLetterheadHistoryTable();
+      const id = req.params.id;
+      const user = req?.context?.user;
+      const schoolId = user?.schoolId || null;
+
+      const rows = schoolId
+        ? await prisma.$queryRaw`SELECT * FROM letterhead_history WHERE id = ${id} AND school_id = ${schoolId} LIMIT 1`
+        : await prisma.$queryRaw`SELECT * FROM letterhead_history WHERE id = ${id} LIMIT 1`;
+
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ error: "Letterhead not found" });
+      }
+      const doc = rows[0];
+      if (doc.status === "ISSUED") {
+        return res.status(400).json({ error: "Letterhead is already issued and locked" });
+      }
+
+      const year = new Date().getFullYear();
+      const issuedCountRows = await prisma.$queryRaw`
+        SELECT COUNT(*)::int AS total FROM letterhead_history
+        WHERE status = 'ISSUED' AND EXTRACT(YEAR FROM COALESCE(issued_at, created_at)) = ${year}
+      `;
+      const issuedCount = Number(issuedCountRows?.[0]?.total || 0);
+      const serialNumber = `LH-${year}-${String(issuedCount + 1).padStart(4, "0")}`;
+
+      const createdByName = [user?.firstName, user?.lastName]
+        .map((v) => String(v || "").trim())
+        .filter(Boolean)
+        .join(" ");
+
+      await prisma.$queryRaw`
+        UPDATE letterhead_history
+        SET status = 'ISSUED',
+            serial_number = ${serialNumber},
+            issued_by = ${user?.id || null},
+            issued_by_name = ${createdByName || null},
+            issued_at = ${new Date()}
+        WHERE id = ${id}
+      `;
+
+      const updatedRows = await prisma.$queryRaw`SELECT * FROM letterhead_history WHERE id = ${id} LIMIT 1`;
+      return res.json({
+        message: "Letterhead issued successfully!",
+        data: updatedRows[0],
+      });
+    } catch (error) {
+      return res.status(500).json({
+        error: "Failed to issue letterhead",
+        message: error.message,
+      });
+    }
+  },
+);
+
+// Reprint an issued letterhead with a DUPLICATE watermark. Original remains locked/unchanged.
+router.get(
+  "/reprint/:id",
+  withPermission(Permission.CREATE_RECEIPT),
+  async (req, res) => {
+    try {
+      await ensureLetterheadHistoryTable();
+      const id = req.params.id;
+      const schoolId = req?.context?.user?.schoolId || null;
+
+      const rows = schoolId
+        ? await prisma.$queryRaw`SELECT * FROM letterhead_history WHERE id = ${id} AND school_id = ${schoolId} LIMIT 1`
+        : await prisma.$queryRaw`SELECT * FROM letterhead_history WHERE id = ${id} LIMIT 1`;
+
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ error: "Letterhead not found" });
+      }
+      const doc = rows[0];
+      if (doc.status !== "ISSUED") {
+        return res.status(400).json({ error: "Only issued letterheads can be reprinted. Issue the letterhead first." });
+      }
+
+      // Inject DUPLICATE watermark + serial into the stored HTML (safe string manipulation).
+      let reprintHtml = doc.generated_html || "";
+      const watermark = `
+        <div style="position: fixed; top: 42%; left: 0; width: 100%; text-align: center;
+                    font-size: 64px; font-weight: bold; letter-spacing: 14px; color: rgba(200,30,30,0.12);
+                    transform: rotate(-28deg); z-index: 999; pointer-events: none;">
+          DUPLICATE
+        </div>`;
+      reprintHtml = reprintHtml.replace("</body>", `${watermark}</body>`);
+      if (!reprintHtml.includes("</body>")) {
+        reprintHtml = `${reprintHtml}${watermark}`;
+      }
+
+      // Append serial number line near the top if present.
+      if (doc.serial_number) {
+        const serialBadge = `<div style="position: fixed; top: 8px; right: 16px; font-size: 11px; color: #666;">Serial: ${doc.serial_number} (COPY)</div>`;
+        reprintHtml = reprintHtml.replace("</body>", `${serialBadge}</body>`);
+      }
+
+      const base64HTML = Buffer.from(reprintHtml).toString("base64");
+      return res.json({
+        message: "Letterhead reprint generated with DUPLICATE watermark.",
+        data: {
+          id: doc.id,
+          html: reprintHtml,
+          printUrl: `data:text/html;base64,${base64HTML}`,
+          status: doc.status,
+          serialNumber: doc.serial_number,
+          isReprint: true,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        error: "Failed to reprint letterhead",
         message: error.message,
       });
     }

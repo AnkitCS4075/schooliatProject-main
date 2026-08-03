@@ -1,6 +1,12 @@
 import prisma from "../prisma/client.js";
 import logger from "../config/logger.js";
 import emailService from "./email.service.js";
+import userService from "./user.service.js";
+import roleService from "./role.service.js";
+import { RoleName, UserType, Gender } from "../prisma/generated/index.js";
+import { renderBillingHtmlToPdfBuffer } from "../billing/billing-html-to-pdf.service.js";
+import { uploadFile } from "../config/storage/index.js";
+import crypto from "crypto";
 
 const COMPANY_DETAILS = {
   name: "Winforge Private Limited",
@@ -66,6 +72,23 @@ const COMPANY_DETAILS = {
   },
 };
 
+/** Save a PDF buffer as a File record so it can be served via /files/:id. */
+async function savePdfFile({ buffer, name, createdBy }) {
+  const fileId = crypto.randomUUID();
+  const key = `${fileId}.pdf`;
+  await uploadFile({ buffer, key, contentType: "application/pdf" });
+  return prisma.file.create({
+    data: {
+      id: fileId,
+      name,
+      extension: "pdf",
+      contentType: "application/pdf",
+      size: buffer.length,
+      createdBy,
+    },
+  });
+}
+
 const generateContractHtml = (onboarding) => {
   const today = new Date().toLocaleDateString("en-IN", {
     year: "numeric",
@@ -109,9 +132,11 @@ const generateContractHtml = (onboarding) => {
     ol li { margin-bottom: 8px; }
     .annexure { page-break-before: always; border-top: 2px solid #6f8f3e; padding-top: 20px; }
     .footer { text-align: center; color: #999; font-size: 11px; margin-top: 60px; border-top: 1px solid #eee; padding-top: 10px; }
+    .watermark { position: fixed; top: 45%; left: 10%; font-size: 60px; color: rgba(111,143,62,0.12); transform: rotate(-30deg); z-index: -1; font-weight: bold; }
   </style>
 </head>
 <body>
+  ${onboarding.contractVersion > 1 ? `<div class="watermark">REV ${onboarding.contractVersion}</div>` : ""}
   <div class="header">
     <p style="font-size: 12px; color: #999;">${COMPANY_DETAILS.name}</p>
     <h1>SCHOOLiAT SERVICE AGREEMENT</h1>
@@ -120,6 +145,7 @@ const generateContractHtml = (onboarding) => {
 
   <p><strong>Date:</strong> ${today}</p>
   <p><strong>Contract Reference:</strong> SA-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9999)).padStart(4, "0")}</p>
+  ${onboarding.contractVersion ? `<p><strong>Revision:</strong> ${onboarding.contractVersion}</p>` : ""}
 
   <h2>Parties</h2>
   <table>
@@ -221,7 +247,7 @@ const getById = async (id) => {
     where: { id, deletedAt: null },
     include: {
       relationshipManager: { select: { id: true, firstName: true, lastName: true, email: true } },
-      school: { select: { id: true, name: true, code: true } },
+      school: { select: { id: true, name: true, code: true, activationStatus: true, contractAccepted: true } },
       contractFile: { select: { id: true, name: true, extension: true } },
     },
   });
@@ -251,6 +277,7 @@ const list = async (filters = {}, options = {}) => {
       orderBy: { createdAt: "desc" },
       include: {
         relationshipManager: { select: { id: true, firstName: true, lastName: true } },
+        school: { select: { id: true, code: true, activationStatus: true } },
       },
     }),
     prisma.schoolOnboarding.count({ where }),
@@ -259,6 +286,9 @@ const list = async (filters = {}, options = {}) => {
   return { items, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 };
 
+/**
+ * Generate contract PDF, store it, email it to the school, and set status CONTRACT_SENT.
+ */
 const generateContract = async (id, userId) => {
   const onboarding = await prisma.schoolOnboarding.findFirst({
     where: { id, deletedAt: null },
@@ -267,36 +297,123 @@ const generateContract = async (id, userId) => {
     },
   });
   if (!onboarding) throw new Error("Onboarding not found");
+  if (["COMPLETED", "CANCELLED"].includes(onboarding.status)) {
+    throw new Error(`Cannot generate contract in status: ${onboarding.status}`);
+  }
 
   const html = generateContractHtml(onboarding);
+  let pdfBuffer;
+  try {
+    pdfBuffer = await renderBillingHtmlToPdfBuffer(html);
+  } catch (err) {
+    logger.error({ err: err.message }, "Contract PDF rendering failed");
+    throw new Error(`Contract PDF generation failed: ${err.message}`);
+  }
+
+  const file = await savePdfFile({
+    buffer: pdfBuffer,
+    name: `SchooliAT-Contract-${onboarding.schoolName.replace(/[^\w]+/g, "-")}`,
+    createdBy: userId,
+  });
 
   const updated = await prisma.schoolOnboarding.update({
     where: { id },
-    data: { status: "CONTRACT_SENT", updatedBy: userId },
+    data: {
+      status: "CONTRACT_SENT",
+      contractFileId: file.id,
+      updatedBy: userId,
+    },
+    include: {
+      contractFile: { select: { id: true, name: true } },
+    },
   });
 
-  logger.info({ onboardingId: id }, "Contract generated");
+  // Email the contract PDF to the school authority
+  try {
+    await emailService.sendEmail({
+      to: onboarding.concernedEmail,
+      subject: `SchooliAT Service Contract — ${onboarding.schoolName}`,
+      html: `
+        <p>Dear ${onboarding.pointOfContactName || "School Administrator"},</p>
+        <p>Your service contract with <strong>SchooliAT (${COMPANY_DETAILS.name})</strong> has been generated.</p>
+        <p>Please find the contract attached. Review the terms and accept it to complete your onboarding.</p>
+        <p>Once accepted, the SchooliAT team will activate your school account and you will receive your login credentials.</p>
+      `,
+      attachments: [
+        {
+          filename: `SchooliAT-Contract-${onboarding.schoolName.replace(/[^\w]+/g, "-")}.pdf`,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+  } catch (emailErr) {
+    logger.warn({ err: emailErr.message }, "Contract email failed (contract still generated)");
+  }
+
+  logger.info({ onboardingId: id }, "Contract generated and emailed");
   return { ...updated, contractHtml: html };
 };
 
-const confirmContract = async (id, userId) => {
+/**
+ * School accepts the contract digitally (checkbox or OTP confirmation).
+ * Records acceptance timestamp on onboarding AND linked school, and notifies the super admin to activate.
+ */
+const acceptContract = async (id, { acceptedBy, acceptedAt }) => {
   const onboarding = await prisma.schoolOnboarding.findFirst({
     where: { id, deletedAt: null },
   });
   if (!onboarding) throw new Error("Onboarding not found");
   if (onboarding.status !== "CONTRACT_SENT") {
-    throw new Error(`Cannot confirm onboarding in status: ${onboarding.status}`);
+    throw new Error(`Cannot accept contract in status: ${onboarding.status}`);
   }
+
+  const now = acceptedAt ? new Date(acceptedAt) : new Date();
 
   const updated = await prisma.schoolOnboarding.update({
     where: { id },
-    data: { status: "CONTRACT_CONFIRMED", updatedBy: userId },
+    data: {
+      status: "CONTRACT_CONFIRMED",
+      contractAcceptedAt: now,
+      updatedBy: acceptedBy,
+    },
   });
 
-  logger.info({ onboardingId: id }, "Contract confirmed");
+  // If a school record is already linked, record acceptance there too
+  if (onboarding.schoolId) {
+    await prisma.school.update({
+      where: { id: onboarding.schoolId },
+      data: { contractAccepted: true, contractAcceptedAt: now, updatedBy: acceptedBy },
+    });
+  }
+
+  // Notify the super admin / SchooliAT team to activate the school ID
+  try {
+    await emailService.sendEmail({
+      to: "admin@schooliat.com",
+      subject: `[Action Required] Contract accepted by ${onboarding.schoolName} — Activate school`,
+      html: `
+        <p><strong>${onboarding.schoolName}</strong> has digitally accepted the SchooliAT service contract.</p>
+        <p>Please activate the school account from the Super Admin panel to grant them platform access.</p>
+        <table>
+          <tr><td>School</td><td>${onboarding.schoolName}</td></tr>
+          <tr><td>Email</td><td>${onboarding.concernedEmail}</td></tr>
+          <tr><td>Accepted at</td><td>${now.toISOString()}</td></tr>
+        </table>
+      `,
+    });
+  } catch (emailErr) {
+    logger.warn({ err: emailErr.message }, "Activation notification email failed");
+  }
+
+  logger.info({ onboardingId: id }, "Contract accepted");
   return updated;
 };
 
+/**
+ * Complete onboarding: create the School record (if not yet created), generate school admin
+ * credentials, email them, and set activationStatus PENDING_ACTIVATION.
+ */
 const complete = async (id, userId) => {
   const onboarding = await prisma.schoolOnboarding.findFirst({
     where: { id, deletedAt: null },
@@ -306,12 +423,118 @@ const complete = async (id, userId) => {
     throw new Error(`Cannot complete onboarding in status: ${onboarding.status}`);
   }
 
-  const updated = await prisma.schoolOnboarding.update({
-    where: { id },
-    data: { status: "COMPLETED", updatedBy: userId },
+  let schoolId = onboarding.schoolId;
+
+  // Create the School record if not already created
+  if (!schoolId) {
+    const existing = await prisma.school.findFirst({
+      where: { email: onboarding.concernedEmail, deletedAt: null },
+    });
+    if (existing) {
+      schoolId = existing.id;
+    } else {
+      const schoolCode = (onboarding.schoolName || "SCH")
+        .replace(/[^A-Za-z0-9]+/g, "")
+        .toUpperCase()
+        .slice(0, 6) || "SCH";
+      const code = `${schoolCode}${String(Math.floor(Math.random() * 900) + 100)}`;
+      const created = await prisma.school.create({
+        data: {
+          name: onboarding.schoolName,
+          code,
+          email: onboarding.concernedEmail,
+          phone: onboarding.schoolContactNumber,
+          address: [onboarding.schoolAddress],
+          principalName: onboarding.pointOfContactName || null,
+          principalPhone: onboarding.principalPhone || null,
+          createdBy: userId,
+        },
+      });
+      schoolId = created.id;
+    }
+  }
+
+  // Create school admin credentials (idempotent — skip if already exists)
+  let adminCreds = null;
+  const school = await prisma.school.findUnique({ where: { id: schoolId } });
+  const existingAdmin = await prisma.user.findFirst({
+    where: { schoolId, roleId: (await roleService.getRoleByName(RoleName.SCHOOL_ADMIN))?.id, deletedAt: null },
   });
 
-  logger.info({ onboardingId: id }, "Onboarding completed");
+  if (existingAdmin) {
+    adminCreds = { ...existingAdmin, password: "See reset flow" };
+  } else {
+    adminCreds = await userService.createSchoolAdmin(school, { id: userId });
+  }
+
+  const updated = await prisma.schoolOnboarding.update({
+    where: { id },
+    data: { status: "COMPLETED", schoolId, updatedBy: userId },
+  });
+
+  // Email credentials to the school admin
+  try {
+    await emailService.sendEmail({
+      to: onboarding.concernedEmail,
+      subject: `SchooliAT Account Created — ${school.name}`,
+      html: `
+        <p>Dear ${onboarding.pointOfContactName || "School Administrator"},</p>
+        <p>Your school has been onboarded to <strong>SchooliAT</strong>. Below are your administrator login credentials.</p>
+        <table>
+          <tr><td>School</td><td>${school.name}</td></tr>
+          <tr><td>School Code</td><td>${school.code}</td></tr>
+          <tr><td>Login Email</td><td>${onboarding.concernedEmail}</td></tr>
+          <tr><td>Public User ID</td><td>${adminCreds.publicUserId || ""}</td></tr>
+          <tr><td>Temporary Password</td><td>${adminCreds.password || "Reset via email"}</td></tr>
+        </table>
+        <p><strong>Note:</strong> Your account is currently <strong>Pending Activation</strong>. The SchooliAT team will activate it shortly. You will receive a confirmation email once active.</p>
+      `,
+    });
+  } catch (emailErr) {
+    logger.warn({ err: emailErr.message }, "Credentials email failed after onboarding completion");
+  }
+
+  logger.info({ onboardingId: id, schoolId }, "Onboarding completed, school + admin created");
+  return { ...updated, school, admin: { email: onboarding.concernedEmail, publicUserId: adminCreds.publicUserId, password: adminCreds.password } };
+};
+
+/**
+ * Super Admin activates the school account — grants platform access.
+ */
+const activateSchool = async (id, userId) => {
+  const onboarding = await prisma.schoolOnboarding.findFirst({
+    where: { id, deletedAt: null },
+  });
+  if (!onboarding) throw new Error("Onboarding not found");
+  if (onboarding.status !== "COMPLETED" && onboarding.status !== "CONTRACT_CONFIRMED") {
+    throw new Error(`Cannot activate onboarding in status: ${onboarding.status}`);
+  }
+  if (!onboarding.schoolId) {
+    throw new Error("Cannot activate — school record not created yet. Complete onboarding first.");
+  }
+
+  await prisma.school.update({
+    where: { id: onboarding.schoolId },
+    data: { activationStatus: "ACTIVE", updatedBy: userId },
+  });
+
+  const updated = await prisma.schoolOnboarding.update({
+    where: { id },
+    data: { status: "COMPLETED", schoolId: onboarding.schoolId, updatedBy: userId },
+  });
+
+  // Notify school admin that their account is now active
+  try {
+    await emailService.sendEmail({
+      to: onboarding.concernedEmail,
+      subject: `SchooliAT Account Activated — ${onboarding.schoolName}`,
+      html: `<p>Your SchooliAT account for <strong>${onboarding.schoolName}</strong> has been activated.</p><p>You can now log in to the platform with the credentials previously shared.</p>`,
+    });
+  } catch (emailErr) {
+    logger.warn({ err: emailErr.message }, "Activation confirmation email failed");
+  }
+
+  logger.info({ onboardingId: id, schoolId: onboarding.schoolId }, "School activated");
   return updated;
 };
 
@@ -340,16 +563,17 @@ const remove = async (id, userId) => {
 };
 
 const getStats = async () => {
-  const [total, byStatus] = await Promise.all([
+  const [total, byStatus, pendingActivation] = await Promise.all([
     prisma.schoolOnboarding.count({ where: { deletedAt: null } }),
     prisma.schoolOnboarding.groupBy({
       by: ["status"],
       where: { deletedAt: null },
       _count: true,
     }),
+    prisma.school.count({ where: { activationStatus: "PENDING_ACTIVATION", deletedAt: null } }),
   ]);
 
-  return { total, byStatus };
+  return { total, byStatus, pendingActivationSchools: pendingActivation };
 };
 
 const schoolOnboardingService = {
@@ -357,8 +581,9 @@ const schoolOnboardingService = {
   getById,
   list,
   generateContract,
-  confirmContract,
+  acceptContract,
   complete,
+  activateSchool,
   cancel,
   remove,
   getStats,

@@ -80,6 +80,7 @@ import platformFinanceRouter from "./routers/platform-finance.router.js";
 import feeDiscountRouter from "./routers/fee-discount.router.js";
 import quotationRouter from "./routers/quotation.router.js";
 import customRoleRouter from "./routers/custom-role.router.js";
+import studentDocumentRouter from "./routers/student-document.router.js";
 import bootstrapDataService from "./services/bootstrap-data.service.js";
 import logRequestStart from "./middlewares/log-request-start.middleware.js";
 import templateLoaderService from "./services/template-loader.service.js";
@@ -306,6 +307,7 @@ function addRouters(app) {
   app.use("/school-onboardings", schoolOnboardingRouter);
   app.use("/platform-finance", platformFinanceRouter);
   app.use("/fee-management", feeDiscountRouter);
+  app.use("/student-documents", studentDocumentRouter);
   app.use("/", quotationRouter);
   app.use("/", customRoleRouter);
   app.use("/", enhancedReportsRouter);
