@@ -441,9 +441,60 @@ export function useDeleteVendor() {
 
 // Letterhead
 export function useGenerateLetterhead() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (formData: GenerateLetterheadData) =>
       post("/letterhead/generate", { request: formData }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["letterheadHistory"] });
+    },
+  });
+}
+
+export function useLetterheadHistory(
+  params: { page?: number; limit?: number; search?: string } = {}
+) {
+  return useQuery({
+    queryKey: ["letterheadHistory", params],
+    queryFn: () =>
+      get("/letterhead/history", {
+        ...(params.page ? { page: params.page } : {}),
+        ...(params.limit ? { limit: params.limit } : {}),
+        ...(params.search ? { search: params.search } : {}),
+      }),
+    staleTime: 15 * 1000,
+  });
+}
+
+export function useLetterheadDetail(id: string) {
+  return useQuery({
+    queryKey: ["letterheadHistory", id],
+    queryFn: async () => {
+      const res = await get(`/letterhead/history/${id}`);
+      return res?.data ?? null;
+    },
+    enabled: !!id,
+    staleTime: 15 * 1000,
+  });
+}
+
+export function useIssueLetterhead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => post(`/letterhead/issue/${id}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["letterheadHistory"] });
+    },
+  });
+}
+
+export function useReprintLetterhead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => get(`/letterhead/reprint/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["letterheadHistory"] });
+    },
   });
 }
 
@@ -738,6 +789,9 @@ export interface GenerateLetterheadData {
   themeColor?: string | null;
   themeColorDark?: string | null;
   hideLogo?: boolean | null;
+  isDraft?: boolean;
+  documentType?: string;
+  mode?: string;
 }
 
 // Locations

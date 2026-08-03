@@ -1146,6 +1146,52 @@ router.patch(
   },
 );
 
+// Lightweight user list for the role-assignment picker (school-scoped; all users for super admin)
+router.get(
+  "/picker",
+  withPermission(Permission.GET_USERS),
+  async (req, res) => {
+    try {
+      const currentUser = req.context.user;
+      const search = String(req.query.search || "").trim();
+      const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+
+      const where = { deletedAt: null, deletedBy: null };
+      if (currentUser.schoolId) where.schoolId = currentUser.schoolId;
+
+      if (search) {
+        where.OR = [
+          { firstName: { contains: search, mode: "insensitive" } },
+          { lastName: { contains: search, mode: "insensitive" } },
+          { publicUserId: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+        ];
+      }
+
+      const users = await prisma.user.findMany({
+        where,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          publicUserId: true,
+          email: true,
+          userType: true,
+          roleId: true,
+          role: { select: { id: true, name: true } },
+          school: { select: { id: true, name: true } },
+        },
+      });
+
+      return res.status(200).json({ message: "Users retrieved", data: users });
+    } catch (error) {
+      return res.status(400).json({ message: error.message || "Failed to fetch users" });
+    }
+  },
+);
+
 // Bulk delete staff (single OTP)
 router.post(
   "/staff/bulk-delete",

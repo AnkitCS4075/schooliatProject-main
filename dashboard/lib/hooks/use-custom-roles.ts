@@ -25,6 +25,18 @@ function fetchAvailablePermissions() {
   return get("/permissions");
 }
 
+function fetchRoleTemplates() {
+  return get("/role-templates");
+}
+
+function fetchUserPicker(search: string) {
+  return get("/users/picker", { search, limit: 50 });
+}
+
+function applyRoleApi(roleId: string, userId: string) {
+  return post(`/roles/${roleId}/apply`, { request: { userId } });
+}
+
 function fetchUserPermissions(userId: string) {
   return get(`/users/${userId}/permissions`);
 }
@@ -86,6 +98,35 @@ export function useAvailablePermissions() {
     queryKey: ["permissions"],
     queryFn: fetchAvailablePermissions,
     staleTime: 5 * 60_000,
+  });
+}
+
+export function useRoleTemplates() {
+  return useQuery({
+    queryKey: ["role-templates"],
+    queryFn: fetchRoleTemplates,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useUserPicker(search: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["user-picker", search],
+    queryFn: () => fetchUserPicker(search),
+    enabled,
+    staleTime: 15_000,
+  });
+}
+
+export function useApplyRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ roleId, userId }: { roleId: string; userId: string }) =>
+      applyRoleApi(roleId, userId),
+    onSuccess: (_: any, variables: any) => {
+      queryClient.invalidateQueries({ queryKey: ["custom-roles"] });
+      queryClient.invalidateQueries({ queryKey: ["user-permissions", variables.userId] });
+    },
   });
 }
 

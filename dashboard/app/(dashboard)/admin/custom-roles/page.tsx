@@ -9,6 +9,7 @@ import {
   useAvailablePermissions,
 } from "@/lib/hooks/use-custom-roles";
 import { useToast } from "@/hooks/use-toast";
+import { RoleTemplates } from "@/components/admin/custom-roles/role-templates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -111,6 +112,8 @@ export default function CustomRolesPage() {
           <Plus className="mr-2 h-4 w-4" /> New Role
         </Button>
       </div>
+
+      <RoleTemplates />
 
       <Card>
         <CardContent className="p-0">
