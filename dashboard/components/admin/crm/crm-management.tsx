@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useCrmLeads, useCrmFunnel, useCreateCrmLead, useUpdateCrmLead, useAddCrmRemark, useDeleteCrmLead } from "@/lib/hooks/use-crm";
+import { useCrmLeads, useCrmFunnel, useCreateCrmLead, useUpdateCrmLead, useAddCrmRemark, useDeleteCrmLead, useCrmAssignableUsers } from "@/lib/hooks/use-crm";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,12 +27,14 @@ export function CrmManagement() {
   const [viewLead, setViewLead] = useState<any>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [remarkText, setRemarkText] = useState("");
-  const [form, setForm] = useState({ name: "", phone: "", source: "", category: "", remarks: "" });
+  const [form, setForm] = useState({ name: "", phone: "", source: "", category: "", assignedToId: "", remarks: "" });
   const { toast } = useToast();
 
   const filters = { page, limit: 15, ...(stageFilter && { stage: stageFilter }), ...(search && { search }) };
   const { data, isLoading } = useCrmLeads(filters);
   const { data: funnelData } = useCrmFunnel();
+  const { data: assignableUsers } = useCrmAssignableUsers();
+  const assignees = (assignableUsers ?? []) as { id: string; firstName: string; lastName?: string }[];
   const createLead = useCreateCrmLead();
   const updateLead = useUpdateCrmLead();
   const addRemark = useAddCrmRemark();
@@ -48,10 +50,10 @@ export function CrmManagement() {
       return;
     }
     try {
-      await createLead.mutateAsync(form);
+      await createLead.mutateAsync({ ...form, assignedToId: form.assignedToId && form.assignedToId !== "none" ? form.assignedToId : undefined });
       toast({ title: "Success", description: "Lead created" });
       setAddOpen(false);
-      setForm({ name: "", phone: "", source: "", category: "", remarks: "" });
+      setForm({ name: "", phone: "", source: "", category: "", assignedToId: "", remarks: "" });
     } catch {
       toast({ title: "Error", description: "Failed to create lead", variant: "destructive" });
     }
@@ -63,6 +65,15 @@ export function CrmManagement() {
       toast({ title: "Success", description: "Stage updated" });
     } catch {
       toast({ title: "Error", description: "Failed to update stage", variant: "destructive" });
+    }
+  };
+
+  const handleReassign = async (leadId: string, assignedToId: string) => {
+    try {
+      await updateLead.mutateAsync({ id: leadId, data: { assignedToId: assignedToId === "none" ? null : assignedToId } });
+      toast({ title: "Success", description: "Assignment updated" });
+    } catch {
+      toast({ title: "Error", description: "Failed to update assignment", variant: "destructive" });
     }
   };
 
@@ -106,6 +117,12 @@ export function CrmManagement() {
                 </Select>
               </div>
               <div><Label>Category</Label><Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Admission" /></div>
+              <div><Label>Assign To</Label>
+                <Select value={form.assignedToId} onValueChange={(v) => setForm({ ...form, assignedToId: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select teacher/staff" /></SelectTrigger>
+                  <SelectContent><SelectItem value="none">Unassigned</SelectItem>{assignees.map((u) => <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName || ""}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
               <div><Label>Initial Remark</Label><Input value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} placeholder="First note..." /></div>
               <Button onClick={handleCreate} disabled={createLead.isPending} className="w-full">{createLead.isPending ? "Creating..." : "Create Lead"}</Button>
             </div>
@@ -148,7 +165,15 @@ export function CrmManagement() {
                     <SelectContent>{STAGES.map((s) => <SelectItem key={s} value={s} className="text-xs">{STAGE_LABELS[s]}</SelectItem>)}</SelectContent>
                   </Select>
                 </TableCell>
-                <TableCell className="text-sm">{l.assignedTo ? `${l.assignedTo.firstName} ${l.assignedTo.lastName || ""}` : "-"}</TableCell>
+                <TableCell className="text-sm">
+                  <Select value={l.assignedToId ?? "none"} onValueChange={(v) => handleReassign(l.id, v)}>
+                    <SelectTrigger className="h-7 w-40 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Unassigned</SelectItem>
+                      {assignees.map((u) => <SelectItem key={u.id} value={u.id} className="text-xs">{u.firstName} {u.lastName || ""}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </TableCell>
                 <TableCell><Badge variant="secondary">{l._count?.remarks ?? 0}</Badge></TableCell>
                 <TableCell>
                   <div className="flex gap-1">

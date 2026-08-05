@@ -6,6 +6,18 @@ import logger from "../config/logger.js";
 
 const router = Router();
 
+// Resolve effective school: school-scoped users use their JWT schoolId;
+// platform users (super admin) must explicitly pass ?schoolId= (GET) or request.schoolId (POST).
+const resolveSchoolId = (req) => {
+  const currentUser = req.context.user;
+  if (currentUser.schoolId) return currentUser.schoolId;
+  const requested = req.query.schoolId ?? req.body?.request?.schoolId;
+  if (!requested) {
+    throw new Error("School context required: specify ?schoolId= (GET) or request.schoolId (POST)");
+  }
+  return requested;
+};
+
 // Bootstrap chart of accounts for school
 router.post(
   "/bootstrap",
@@ -13,7 +25,7 @@ router.post(
   async (req, res) => {
     try {
       const currentUser = req.context.user;
-      const count = await accountingService.bootstrapChartOfAccounts(currentUser.schoolId, currentUser.id);
+      const count = await accountingService.bootstrapChartOfAccounts(resolveSchoolId(req), currentUser.id);
       return res.json({ message: `Chart of accounts ready (${count} accounts)`, data: { count } });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to bootstrap accounts" });
@@ -28,7 +40,7 @@ router.get(
   async (req, res) => {
     try {
       const currentUser = req.context.user;
-      const accounts = await accountingService.getAccounts(currentUser.schoolId);
+      const accounts = await accountingService.getAccounts(resolveSchoolId(req));
       return res.json({ message: "Accounts retrieved", data: accounts });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to get accounts" });
@@ -43,7 +55,7 @@ router.post(
   async (req, res) => {
     try {
       const currentUser = req.context.user;
-      const account = await accountingService.createAccount(currentUser.schoolId, req.body.request, currentUser.id);
+      const account = await accountingService.createAccount(resolveSchoolId(req), req.body.request, currentUser.id);
       return res.status(201).json({ message: "Account created", data: account });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to create account" });
@@ -59,7 +71,7 @@ router.post(
     try {
       const currentUser = req.context.user;
       const entry = await accountingService.createJournalEntry(
-        currentUser.schoolId,
+        resolveSchoolId(req),
         req.body.request,
         currentUser.id,
       );
@@ -78,7 +90,7 @@ router.get(
     try {
       const currentUser = req.context.user;
       const { page, limit, dateFrom, dateTo } = req.query;
-      const result = await accountingService.getJournalEntries(currentUser.schoolId, {
+      const result = await accountingService.getJournalEntries(resolveSchoolId(req), {
         page: parseInt(page, 10) || 1,
         limit: parseInt(limit, 10) || 20,
         dateFrom,
@@ -98,7 +110,7 @@ router.get(
   async (req, res) => {
     try {
       const currentUser = req.context.user;
-      const balances = await accountingService.getAccountBalances(currentUser.schoolId);
+      const balances = await accountingService.getAccountBalances(resolveSchoolId(req));
       return res.json({ message: "Account balances retrieved", data: balances });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to get balances" });
@@ -114,7 +126,7 @@ router.get(
     try {
       const currentUser = req.context.user;
       const { dateFrom, dateTo } = req.query;
-      const report = await accountingService.getProfitAndLoss(currentUser.schoolId, dateFrom, dateTo);
+      const report = await accountingService.getProfitAndLoss(resolveSchoolId(req), dateFrom, dateTo);
       return res.json({ message: "P&L report generated", data: report });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to generate P&L" });
@@ -129,7 +141,7 @@ router.get(
   async (req, res) => {
     try {
       const currentUser = req.context.user;
-      const report = await accountingService.getBalanceSheet(currentUser.schoolId);
+      const report = await accountingService.getBalanceSheet(resolveSchoolId(req));
       return res.json({ message: "Balance sheet generated", data: report });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to generate balance sheet" });
@@ -145,7 +157,7 @@ router.post(
     try {
       const currentUser = req.context.user;
       const { accountId, amount, asOfDate } = req.body.request;
-      const ob = await accountingService.upsertOpeningBalance(currentUser.schoolId, accountId, amount, asOfDate, currentUser.id);
+      const ob = await accountingService.upsertOpeningBalance(resolveSchoolId(req), accountId, amount, asOfDate, currentUser.id);
       return res.json({ message: "Opening balance saved", data: ob });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to save opening balance" });
@@ -162,7 +174,7 @@ router.get(
       const currentUser = req.context.user;
       const prisma = (await import("../prisma/client.js")).default;
       const obs = await prisma.openingBalance.findMany({
-        where: { schoolId: currentUser.schoolId, deletedAt: null },
+        where: { schoolId: resolveSchoolId(req), deletedAt: null },
         include: { account: { select: { code: true, name: true } } },
       });
       return res.json({ message: "Opening balances retrieved", data: obs });

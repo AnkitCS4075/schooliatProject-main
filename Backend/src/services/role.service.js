@@ -641,7 +641,7 @@ const roleTemplates = [
     description: "Fee collection, receipts, invoices, salary reports and financial analytics.",
     permissions: [
       Permission.GET_STUDENTS, Permission.GET_CLASSES, Permission.GET_MY_SCHOOL, Permission.GET_DASHBOARD_STATS,
-      Permission.GET_SETTINGS, Permission.GET_FEES, Permission.RECORD_FEE_PAYMENT,
+      Permission.GET_SETTINGS, Permission.EDIT_SETTINGS, Permission.GET_FEES, Permission.RECORD_FEE_PAYMENT,
       Permission.GET_MESSAGES, Permission.SEND_MESSAGE,
       Permission.GET_ATTENDANCE_REPORTS, Permission.GET_FEE_ANALYTICS, Permission.GET_SALARY_REPORTS,
       Permission.GET_REPORTS, Permission.EXPORT_REPORTS,
@@ -815,12 +815,119 @@ const updateRolePermissions = async () => {
   }
 };
 
+/**
+ * Reconcile system role templates (customRole rows with schoolId null + isSystem true)
+ * against the `roleTemplates` definitions, and upgrade users who already carry a
+ * template's previous permission set (additive user.permissions snapshots) with any
+ * newly added permissions.
+ */
+const syncRoleTemplates = async () => {
+  const dbPermissions = await getDbPermissionValues();
+  const filter = (perms) =>
+    dbPermissions && dbPermissions.size > 0 ? perms.filter((p) => dbPermissions.has(p)) : perms;
+
+  const existing = await prisma.customRole.findMany({
+    where: { isSystem: true, schoolId: null, deletedAt: null },
+  });
+  const existingByName = new Map(existing.map((r) => [r.name, r]));
+
+  // Capture previous permission sets BEFORE overwriting, so we can upgrade users
+  // whose permission snapshots were built from the old template definitions.
+  const oldPermsByName = new Map(
+    roleTemplates.map((t) => [t.name, (existingByName.get(t.name)?.permissions ?? []).map(String)]),
+  );
+
+  const templateUpdates = [];
+  for (const template of roleTemplates) {
+    const expected = filter(template.permissions);
+    const current = existingByName.get(template.name);
+    if (current) {
+      const currentSet = new Set((current.permissions || []).map(String));
+      const needsUpdate =
+        expected.length !== (current.permissions || []).length ||
+        expected.some((p) => !currentSet.has(String(p))) ||
+        (current.permissions || []).some((p) => !expected.includes(String(p)));
+      if (needsUpdate) {
+        templateUpdates.push(
+          prisma.customRole.update({
+            where: { id: current.id },
+            data: { permissions: expected, updatedBy: "system" },
+          }),
+        );
+      }
+    } else {
+      templateUpdates.push(
+        prisma.customRole.create({
+          data: {
+            name: template.name,
+            displayName: template.displayName,
+            description: template.description,
+            schoolId: null,
+            isSystem: true,
+            permissions: expected,
+            createdBy: "system",
+          },
+        }),
+      );
+    }
+  }
+
+  if (templateUpdates.length > 0) {
+    await Promise.all(templateUpdates);
+    logger.info(`Synced ${templateUpdates.length} role template(s)`);
+  }
+
+  // Upgrade users whose additive permission set already covers a template's previous
+  // permissions: merge in the template's newly added permissions.
+  const users = await prisma.user.findMany({
+    where: { deletedAt: null, deletedBy: null },
+    select: { id: true, permissions: true },
+  });
+
+  const userUpdates = [];
+  for (const user of users) {
+    const userPerms = (user.permissions || []).map(String);
+    const userSet = new Set(userPerms);
+    let changed = false;
+    for (const template of roleTemplates) {
+      const oldPerms = oldPermsByName.get(template.name);
+      if (!oldPerms || oldPerms.length === 0) continue;
+      const carriesTemplate = oldPerms.every((p) => userSet.has(p));
+      if (!carriesTemplate) continue;
+      for (const p of filter(template.permissions)) {
+        const value = String(p);
+        if (!userSet.has(value)) {
+          userSet.add(value);
+          userPerms.push(value);
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      userUpdates.push(
+        prisma.user.update({
+          where: { id: user.id },
+          data: { permissions: userPerms, updatedBy: "system" },
+        }),
+      );
+    }
+  }
+
+  if (userUpdates.length > 0) {
+    await Promise.all(userUpdates);
+    logger.info(`Upgraded permissions for ${userUpdates.length} user(s) from role templates`);
+  }
+
+  return { templatesUpdated: templateUpdates.length, usersUpdated: userUpdates.length };
+};
+
 const roleService = {
   getRoleByName,
   getOrCreateRoleByName,
   createDefaultRoles,
   createRoleTemplates,
   updateRolePermissions,
+  syncRoleTemplates,
   defaultRolePermissionsMap,
   roleTemplates,
 };

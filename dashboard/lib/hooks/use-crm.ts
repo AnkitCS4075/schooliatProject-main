@@ -73,6 +73,34 @@ export function useCrmFunnel() {
   });
 }
 
+export interface AssignableUser {
+  id: string;
+  firstName: string;
+  lastName?: string;
+  designation?: string | null;
+}
+
+export function useCrmAssignableUsers() {
+  return useQuery({
+    queryKey: ["crmAssignableUsers"],
+    queryFn: async (): Promise<AssignableUser[]> => {
+      const [teachersRes, staffRes] = await Promise.all([
+        get("/users/teachers"),
+        get("/users/staff"),
+      ]);
+      const teachers = (teachersRes as any)?.data ?? [];
+      const staff = (staffRes as any)?.data ?? [];
+      return [...teachers, ...staff].map((u: any) => ({
+        id: u.id,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        designation: u.teacherProfile?.designation ?? u.staffProfile?.designation ?? null,
+      }));
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useCreateCrmLead() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -88,7 +116,7 @@ export function useCreateCrmLead() {
 export function useUpdateCrmLead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<{ stage: string; name: string; phone: string; category: string; assignedToId: string; nextFollowUpAt: string }> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<{ stage: string; name: string; phone: string; category: string; assignedToId: string | null; nextFollowUpAt: string }> }) =>
       patch(`/crm/${id}`, { request: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["crmLeads"] });
