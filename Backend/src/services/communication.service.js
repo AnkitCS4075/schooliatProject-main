@@ -92,7 +92,8 @@ const sendMessage = async (conversationId, senderId, content, attachments = []) 
       conversationId,
       senderId,
       content,
-      attachments,
+      attachments: attachments || [],
+      readBy: [],
       createdBy: senderId,
     },
     include: {
@@ -252,20 +253,21 @@ const getConversationMessages = async (conversationId, userId, options = {}) => 
   ]);
 
   // Mark messages as read
-  const messageIds = messages.map((m) => m.id);
-  await prisma.message.updateMany({
-    where: {
-      id: { in: messageIds },
-      readBy: {
-        hasNot: userId,
+  const unreadIds = messages
+    .filter((m) => !(m.readBy || []).includes(userId))
+    .map((m) => m.id);
+  if (unreadIds.length > 0) {
+    await prisma.message.updateMany({
+      where: {
+        id: { in: unreadIds },
       },
-    },
-    data: {
-      readBy: {
-        push: userId,
+      data: {
+        readBy: {
+          push: userId,
+        },
       },
-    },
-  });
+    });
+  }
 
   return {
     messages: messages.reverse(), // Reverse to show oldest first
@@ -405,12 +407,210 @@ const createAnnouncement = async (data) => {
   };
 };
 
+/**
+ * Resolve a Send-To target into a list of recipient user IDs within a school.
+ * @param {Object} params
+ * @param {string} params.type - INDIVIDUAL | CLASS | ALL_TEACHERS | ALL_STAFF | WHOLE_SCHOOL
+ * @param {string|null} params.userId - Recipient user ID (INDIVIDUAL)
+ * @param {string|null} params.classId - Class ID (CLASS)
+ * @param {string} params.schoolId - Sender's school ID
+ * @param {string} params.senderId - Sender user ID (excluded from recipients)
+ * @returns {Promise<{recipients: string[], conversationType: string, title: string, resolvedClassId: string|null}>}
+ */
+const resolveMessageTarget = async ({
+  type,
+  userId = null,
+  classId = null,
+  schoolId,
+  senderId,
+}) => {
+  let recipients = [];
+  let conversationType = ConversationType.GROUP;
+  let resolvedClassId = null;
+  let title = "";
+
+  if (type === "INDIVIDUAL") {
+    if (!userId) {
+      throw new Error("userId is required for INDIVIDUAL target");
+    }
+    const user = await prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      select: { id: true, firstName: true, lastName: true, schoolId: true },
+    });
+    if (!user) {
+      throw new Error("Recipient user not found");
+    }
+    if (schoolId && user.schoolId && user.schoolId !== schoolId) {
+      throw new Error("Recipient does not belong to your school");
+    }
+    recipients = [user.id];
+    conversationType = ConversationType.DIRECT;
+    title = `Message to ${`${user.firstName} ${user.lastName || ""}`.trim()}`;
+  } else if (type === "CLASS") {
+    let targetClassId = classId;
+    if (!targetClassId) {
+      // Teacher self-scope: use the class this teacher is class teacher of
+      const teacherClass = await prisma.class.findFirst({
+        where: { classTeacherId: senderId, deletedAt: null },
+        select: { id: true },
+      });
+      if (teacherClass) {
+        targetClassId = teacherClass.id;
+      }
+    }
+    if (!targetClassId) {
+      throw new Error("classId is required for CLASS target");
+    }
+    const classRow = await prisma.class.findFirst({
+      where: { id: targetClassId, deletedAt: null },
+      select: { id: true, grade: true, division: true, schoolId: true, classTeacherId: true },
+    });
+    if (!classRow) {
+      throw new Error("Class not found");
+    }
+    if (schoolId && classRow.schoolId !== schoolId) {
+      throw new Error("Class does not belong to your school");
+    }
+    const profiles = await prisma.studentProfile.findMany({
+      where: { classId: targetClassId },
+      select: { userId: true },
+    });
+    const studentIds = profiles.map((p) => p.userId);
+    if (classRow.classTeacherId) {
+      studentIds.push(classRow.classTeacherId);
+    }
+    recipients = [...new Set(studentIds)];
+    conversationType = ConversationType.CLASS;
+    resolvedClassId = targetClassId;
+    title = `Message to Class ${classRow.grade}${classRow.division ? `-${classRow.division}` : ""}`;
+  } else {
+    let users;
+    if (type === "WHOLE_SCHOOL") {
+      users = await prisma.user.findMany({
+        where: {
+          ...(schoolId ? { schoolId } : {}),
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+    } else {
+      const roleNames = type === "ALL_TEACHERS" ? [RoleName.TEACHER] : [RoleName.STAFF];
+      const roles = await prisma.role.findMany({
+        where: { name: { in: roleNames } },
+        select: { id: true },
+      });
+      const roleIds = roles.map((r) => r.id);
+      if (roleIds.length === 0) {
+        throw new Error("No users found for the selected target");
+      }
+      users = await prisma.user.findMany({
+        where: {
+          roleId: { in: roleIds },
+          ...(schoolId ? { schoolId } : {}),
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+    }
+    recipients = users.map((u) => u.id);
+    conversationType = ConversationType.SCHOOL;
+    title =
+      type === "ALL_TEACHERS"
+        ? "Message to All Teachers"
+        : type === "ALL_STAFF"
+          ? "Message to All Staff"
+          : "Message to Whole School";
+  }
+
+  recipients = recipients.filter((id) => id !== senderId);
+  if (recipients.length === 0) {
+    throw new Error("No recipients found for the selected target");
+  }
+
+  return { recipients, conversationType, title, resolvedClassId };
+};
+
+/**
+ * Send a targeted message to a group of recipients (Send To).
+ * Resolves the target to recipients, reuses/creates one conversation per target,
+ * writes the message once, and notifies every recipient.
+ * @param {Object} data
+ * @param {string} data.type - Target type
+ * @param {string|null} data.userId - Recipient user ID (INDIVIDUAL)
+ * @param {string|null} data.classId - Class ID (CLASS)
+ * @param {string} data.content - Message content
+ * @param {Array<string>} data.attachments - Attachment file IDs
+ * @param {string} data.senderId - Sender user ID
+ * @param {string} data.schoolId - Sender's school ID
+ * @param {string} data.channel - in_app | sms | email
+ * @returns {Promise<Object>} - { conversation, message, recipientCount, target }
+ */
+const sendTargetedMessage = async ({
+  type,
+  userId = null,
+  classId = null,
+  content,
+  attachments = [],
+  senderId,
+  schoolId,
+  channel = "in_app",
+}) => {
+  const resolved = await resolveMessageTarget({
+    type,
+    userId,
+    classId,
+    schoolId,
+    senderId,
+  });
+
+  const { recipients, conversationType, title, resolvedClassId } = resolved;
+  const recipientCount = recipients.length;
+
+  let conversation;
+  if (conversationType === ConversationType.DIRECT) {
+    conversation = await createConversation({
+      participants: [...recipients],
+      type: ConversationType.DIRECT,
+      title: title || null,
+      schoolId,
+      createdBy: senderId,
+    });
+  } else {
+    conversation = await prisma.conversation.create({
+      data: {
+        participants: [...new Set([...recipients, senderId])],
+        type: conversationType,
+        title: title || null,
+        schoolId,
+        createdBy: senderId,
+      },
+    });
+  }
+
+  const message = await sendMessage(conversation.id, senderId, content, attachments);
+
+  return {
+    conversation,
+    message,
+    recipientCount,
+    target: {
+      type,
+      userId: type === "INDIVIDUAL" ? userId : null,
+      classId: resolvedClassId,
+      title,
+      channel,
+    },
+  };
+};
+
 const communicationService = {
   createConversation,
   sendMessage,
   getUserConversations,
   getConversationMessages,
   createAnnouncement,
+  sendTargetedMessage,
+  resolveMessageTarget,
 };
 
 export default communicationService;

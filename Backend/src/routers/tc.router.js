@@ -25,7 +25,7 @@ const getTCsSchema = z.object({
   request: z.object({}),
   query: z.object({
     studentId: z.string().uuid().optional(),
-    status: z.enum(["ISSUED", "COLLECTED", "CANCELLED"]).optional(),
+    status: z.enum(["REQUESTED", "ISSUED", "COLLECTED", "CANCELLED"]).optional(),
     tcNumber: z.string().optional(),
     search: z.string().optional(),
     page: z.string().optional(),

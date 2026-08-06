@@ -17,6 +17,7 @@ import fileService from "../services/file.service.js";
 import { uploadFile } from "../config/storage/index.js";
 import logger from "../config/logger.js";
 import feeService from "../services/fee.service.js";
+import approvalsService from "../services/approvals.service.js";
 
 // Get current directory for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -1022,6 +1023,19 @@ router.patch(
       logger.error({ err, installmentId: id }, "recordFeePaymentWithLedger failed");
       return res.status(400).json({
         message: err.message || "Failed to record payment",
+      });
+    }
+
+    // Create an approval request for fee waivers in the unified approvals workflow
+    if (isWaiver && ledgerResult?.ledgerEntryId) {
+      await approvalsService.createApprovalRequest({
+        schoolId: currentUser.schoolId,
+        module: "FEE_WAIVER",
+        refId: ledgerResult.ledgerEntryId,
+        title: `Fee Waiver — ${student.firstName} ${student.lastName || ""}`.trim(),
+        description: `${appliedAmount.toLocaleString("en-IN")} waived on ${installment.paymentTitle || "fee installment"}.${remarks ? ` Remarks: ${remarks}` : ""}`,
+        requestedById: student.id,
+        createdBy: currentUser.id,
       });
     }
 

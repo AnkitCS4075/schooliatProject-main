@@ -53,6 +53,7 @@ import homeworkRouter from "./routers/homework.router.js";
 import marksRouter from "./routers/marks.router.js";
 import leaveRouter from "./routers/leave.router.js";
 import communicationRouter from "./routers/communication.router.js";
+import approvalsRouter from "./routers/approvals.router.js";
 import notificationsRouter from "./routers/notifications.router.js";
 import libraryRouter from "./routers/library.router.js";
 import notesRouter from "./routers/notes.router.js";
@@ -280,6 +281,7 @@ function addRouters(app) {
   app.use("/marks", marksRouter);
   app.use("/leave", leaveRouter);
   app.use("/communication", communicationRouter);
+  app.use("/approvals", approvalsRouter);
   app.use("/notifications", notificationsRouter);
   // Phase 2 Routers
   app.use("/library", libraryRouter);

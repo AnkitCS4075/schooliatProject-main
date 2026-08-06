@@ -1,6 +1,7 @@
 import prisma from "../prisma/client.js";
 import logger from "../config/logger.js";
 import { parsePagination } from "../utils/pagination.util.js";
+import approvalsService from "./approvals.service.js";
 import pkg from "../prisma/generated/index.js";
 const { GalleryPrivacy } = pkg || {};
 
@@ -38,6 +39,17 @@ const createGallery = async (data) => {
       createdBy,
       approvalStatus: "PENDING",
     },
+  });
+
+  // Create approval request in the unified approvals workflow
+  await approvalsService.createApprovalRequest({
+    schoolId,
+    module: "GALLERY",
+    refId: gallery.id,
+    title,
+    description: description || `Gallery album created for approval`,
+    requestedById: createdBy,
+    createdBy,
   });
 
   return gallery;

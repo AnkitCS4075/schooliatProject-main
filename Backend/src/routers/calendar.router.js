@@ -27,6 +27,7 @@ import createNoticeSchema from "../schemas/calendar/create-notice.schema.js";
 import { requireDeletionOTP } from "../middlewares/require-deletion-otp.middleware.js";
 import otpDeletionService from "../services/otp-deletion.service.js";
 import { resolveDeletionOtpRecipientEmail } from "../services/deletion-otp-recipient.service.js";
+import approvalsService from "../services/approvals.service.js";
 
 const router = Router();
 
@@ -94,6 +95,17 @@ router.post(
         createdBy: currentUser.id,
         approvalStatus: "PENDING",
       },
+    });
+
+    // Create approval request in the unified approvals workflow
+    await approvalsService.createApprovalRequest({
+      schoolId,
+      module: "EVENT",
+      refId: newEvent.id,
+      title: createData.title,
+      description: createData.description || `Event from ${new Date(createData.from).toLocaleDateString()} to ${new Date(createData.till).toLocaleDateString()}`,
+      requestedById: currentUser.id,
+      createdBy: currentUser.id,
     });
 
     return res.json({ message: "Event created!", data: newEvent });

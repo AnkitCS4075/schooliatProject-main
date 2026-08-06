@@ -43,6 +43,8 @@ import {
   Wallet,
   DoorOpen,
   Target,
+  CheckSquare,
+  Shield,
 } from "lucide-react";
 import { clearToken } from "@/lib/auth/storage";
 import {
@@ -96,6 +98,8 @@ const iconMap: Record<string, LucideIcon> = {
   Wallet,
   DoorOpen,
   Target,
+  CheckSquare,
+  Shield,
 };
 
 export function Sidebar() {

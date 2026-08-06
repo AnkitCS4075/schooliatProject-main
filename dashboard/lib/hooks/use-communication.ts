@@ -50,6 +50,21 @@ function createConversation(data: {
   return post("/communication/conversations", { request: data });
 }
 
+export type SendToTargetType = "INDIVIDUAL" | "CLASS" | "ALL_TEACHERS" | "ALL_STAFF" | "WHOLE_SCHOOL";
+
+function sendTargetedMessage(data: {
+  content: string;
+  target: { type: SendToTargetType; userId?: string; classId?: string };
+  attachments?: string[];
+  channel?: "in_app" | "sms" | "email";
+}) {
+  return post("/communication/messages/send", { request: data });
+}
+
+function fetchRecipients(search: string, limit = 50) {
+  return get("/communication/recipients", { search, limit });
+}
+
 export function useConversations() {
   return useQuery({
     queryKey: ["conversations"],
@@ -87,5 +102,24 @@ export function useCreateConversation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
+  });
+}
+
+export function useSendTargetedMessage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: sendTargetedMessage,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+  });
+}
+
+export function useRecipients(search: string) {
+  return useQuery({
+    queryKey: ["recipients", search],
+    queryFn: () => fetchRecipients(search),
+    staleTime: 30 * 1000,
   });
 }

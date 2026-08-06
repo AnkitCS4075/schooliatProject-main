@@ -2,6 +2,7 @@ import prisma from "../prisma/client.js";
 import logger from "../config/logger.js";
 import { parsePagination } from "../utils/pagination.util.js";
 import { TCStatus } from "../prisma/generated/index.js";
+import approvalsService from "./approvals.service.js";
 
 /**
  * Transfer Certificate (TC) Service
@@ -86,7 +87,7 @@ const createTC = async (data) => {
   });
   const tcNumber = `${school.code}/TC/${year}/${String(tcCount + 1).padStart(5, "0")}`;
 
-  // Create TC
+  // Create TC (requested state — requires approval before it is ISSUED)
   const tc = await prisma.transferCertificate.create({
     data: {
       studentId,
@@ -96,7 +97,7 @@ const createTC = async (data) => {
       transferDate: new Date(transferDate),
       destinationSchool,
       remarks,
-      status: "ISSUED",
+      status: "REQUESTED",
       createdBy,
     },
     include: {
@@ -112,7 +113,21 @@ const createTC = async (data) => {
     },
   });
 
-  logger.info({ tcId: tc.id, studentId, schoolId }, "Transfer Certificate created");
+  // Create approval request for document issuance (approver = school admin)
+  const studentName = `${student.firstName} ${student.lastName || ""}`.trim();
+  await approvalsService.createApprovalRequest({
+    schoolId,
+    module: "TRANSFER_CERTIFICATE",
+    refId: tc.id,
+    title: `Transfer Certificate — ${studentName}`,
+    description: `${reason || "Transfer"} effective ${new Date(
+      transferDate,
+    ).toLocaleDateString()}${destinationSchool ? ` to ${destinationSchool}` : ""}. TC Number: ${tcNumber}`,
+    requestedById: studentId,
+    createdBy,
+  });
+
+  logger.info({ tcId: tc.id, studentId, schoolId }, "Transfer Certificate requested");
 
   return tc;
 };

@@ -5,6 +5,7 @@ import { Permission } from "../prisma/generated/index.js";
 import validateRequest from "../middlewares/validate-request.middleware.js";
 import createConversationSchema from "../schemas/communication/create-conversation.schema.js";
 import sendMessageSchema from "../schemas/communication/send-message.schema.js";
+import sendTargetedMessageSchema from "../schemas/communication/send-targeted-message.schema.js";
 import createAnnouncementSchema from "../schemas/communication/create-announcement.schema.js";
 import communicationService from "../services/communication.service.js";
 import notificationService from "../services/notification.service.js";
@@ -118,6 +119,39 @@ router.post(
   handleSendMessage,
 );
 
+// Targeted send (Send To: Individual | Class | All Teachers | All Staff | Whole School)
+router.post(
+  "/messages/send",
+  withPermission([Permission.SEND_MESSAGE]),
+  validateRequest(sendTargetedMessageSchema),
+  async (req, res) => {
+    const currentUser = req.context.user;
+    const { content, target, attachments, channel } = req.body.request;
+    try {
+      const result = await communicationService.sendTargetedMessage({
+        type: target.type,
+        userId: target.userId || null,
+        classId: target.classId || null,
+        content,
+        attachments: attachments || [],
+        senderId: currentUser.id,
+        schoolId: currentUser.schoolId,
+        channel: channel || "in_app",
+      });
+      res.json({
+        message: "Message sent successfully",
+        data: result,
+      });
+    } catch (error) {
+      logger.error({ error, body: req.body }, "Failed to send targeted message");
+      res.status(400).json({
+        errorCode: "TARGETED_MESSAGE_SEND_FAILED",
+        message: error.message || "Failed to send message",
+      });
+    }
+  },
+);
+
 // Mobile API: POST /communication/conversations/:id/messages (conversationId in URL)
 router.post(
   "/conversations/:id/messages",
@@ -159,6 +193,69 @@ router.get(
       res.status(400).json({
         errorCode: "MESSAGES_FETCH_FAILED",
         message: error.message || "Failed to retrieve messages",
+      });
+    }
+  },
+);
+
+// Recipient search for the messaging composer (only requires SEND_MESSAGE, not GET_USERS)
+router.get(
+  "/recipients",
+  withPermission([Permission.SEND_MESSAGE]),
+  async (req, res) => {
+    const currentUser = req.context.user;
+    const search = String(req.query.search || "").trim();
+    const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+
+    const where = { deletedAt: null, deletedBy: null };
+    if (currentUser.schoolId) where.schoolId = currentUser.schoolId;
+
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: "insensitive" } },
+        { lastName: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+        { publicUserId: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    try {
+      const users = await prisma.user.findMany({
+        where,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          publicUserId: true,
+          email: true,
+          userType: true,
+          roleId: true,
+          role: { select: { id: true, name: true } },
+          school: { select: { id: true, name: true } },
+        },
+      });
+
+      const userIds = users.map((u) => u.id);
+      const profiles = await prisma.studentProfile.findMany({
+        where: { userId: { in: userIds } },
+        select: { userId: true, classId: true },
+      });
+      const profileMap = Object.fromEntries(profiles.map((p) => [p.userId, p.classId]));
+
+      const data = users.map((u) => ({
+        ...u,
+        role: u.role ? { id: u.role.id, name: u.role.name } : null,
+        classId: profileMap[u.id] || null,
+      }));
+
+      res.json({ message: "Recipients retrieved", data });
+    } catch (error) {
+      logger.error({ error }, "Failed to fetch recipients");
+      res.status(500).json({
+        errorCode: "RECIPIENTS_FETCH_FAILED",
+        message: error.message || "Failed to retrieve recipients",
       });
     }
   },

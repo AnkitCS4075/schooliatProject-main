@@ -6,6 +6,7 @@ import { buildQuotationHtmlDocument, getSettingsForQuotation } from "../billing/
 import { renderBillingHtmlToPdfBuffer, safeBillingFilenamePart } from "../billing/billing-html-to-pdf.service.js";
 import emailService from "../services/email.service.js";
 import logger from "../config/logger.js";
+import approvalsService from "../services/approvals.service.js";
 
 const router = Router();
 
@@ -26,6 +27,18 @@ router.post(
         schoolId,
         createdBy: currentUser.id,
       });
+
+      // Create approval request in the unified approvals workflow
+      await approvalsService.createApprovalRequest({
+        schoolId,
+        module: "QUOTATION",
+        refId: quotation.id,
+        title: `Quotation ${quotation.quotationNumber} — ${quotation.customerName}`,
+        description: `Total ${quotation.totalAmount !== undefined ? `₹${Number(quotation.totalAmount).toLocaleString("en-IN")}` : ""}`.trim(),
+        requestedById: currentUser.id,
+        createdBy: currentUser.id,
+      });
+
       return res.status(201).json({ message: "Quotation created", data: quotation });
     } catch (error) {
       logger.error({ error }, "Failed to create quotation");

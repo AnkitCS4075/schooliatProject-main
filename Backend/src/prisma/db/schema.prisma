@@ -879,6 +879,8 @@ model Fee {
   updatedAt            DateTime? @updatedAt @map("updated_at")
   deletedAt            DateTime? @map("deleted_at")
 
+  installments FeeInstallements[] @relation("FeeInstallementsFee")
+
   @@map("fees")
 }
 
@@ -904,6 +906,8 @@ model FeeInstallements {
   createdAt          DateTime          @default(now()) @map("created_at")
   updatedAt          DateTime?        @updatedAt @map("updated_at")
   deletedAt          DateTime?        @map("deleted_at")
+
+  fee Fee? @relation("FeeInstallementsFee", fields: [feeId], references: [id])
 
   @@index([schoolId, installementNumber, paymentStatus, deletedAt], map: "fee_installments_school_installment_status_idx")
   @@index([schoolId, deletedAt])
@@ -2484,6 +2488,7 @@ enum ChatbotIntent {
 }
 
 enum TCStatus {
+  REQUESTED
   ISSUED
   COLLECTED
   CANCELLED
@@ -2951,4 +2956,44 @@ model LetterheadHistory {
   @@index([createdBy])
   @@index([status])
   @@map("letterhead_history")
+}
+
+// ─── Unified Approvals Workflow ────────────────────────────────────────
+// Auto-created when a trigger action happens (leave request, event, gallery,
+// quotation, fee waiver, transfer certificate). Holds the approval trail with
+// timestamps and powers the unified approvals dashboard.
+
+enum ApprovalModule {
+  LEAVE
+  EVENT
+  GALLERY
+  QUOTATION
+  FEE_WAIVER
+  TRANSFER_CERTIFICATE
+
+  @@map("approval_module")
+}
+
+model ApprovalRequest {
+  id            String         @id @default(uuid())
+  schoolId      String         @map("school_id")
+  module        ApprovalModule @map("module")
+  refId         String         @map("ref_id")
+  title         String
+  description   String?
+  status        ApprovalStatus @default(PENDING)
+  requestedById String         @map("requested_by_id")
+  approverId    String?        @map("approver_id")
+  remarks       String?
+  decidedBy     String?        @map("decided_by")
+  decidedAt     DateTime?      @map("decided_at")
+  createdBy     String         @map("created_by")
+  updatedBy     String?        @map("updated_by")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime?      @updatedAt @map("updated_at")
+
+  @@index([schoolId, status, createdAt], map: "approval_requests_school_status_created_idx")
+  @@index([module, refId], map: "approval_requests_module_ref_idx")
+  @@index([approverId, status], map: "approval_requests_approver_status_idx")
+  @@map("approval_requests")
 }

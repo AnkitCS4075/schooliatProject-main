@@ -3,6 +3,7 @@ import { parsePagination } from "../utils/pagination.util.js";
 import { LeaveStatus } from "../prisma/generated/index.js";
 import logger from "../config/logger.js";
 import notificationService from "./notification.service.js";
+import approvalsService from "./approvals.service.js";
 
 const leaveBalanceCompoundUnique = (userId, leaveTypeId, year) => ({
   leave_balances_unique_user_type_year: {
@@ -84,6 +85,21 @@ const createLeaveRequest = async (data) => {
 
   // Send notification to approver (school admin)
   await notifyLeaveRequestCreated(leaveRequest, schoolId);
+
+  // Create approval request in the unified approvals workflow
+  const requesterName = `${leaveRequest.user.firstName} ${leaveRequest.user.lastName || ""}`.trim();
+  const leaveTypeName = leaveRequest.leaveType?.name || "Leave";
+  await approvalsService.createApprovalRequest({
+    schoolId,
+    module: "LEAVE",
+    refId: leaveRequest.id,
+    title: `${leaveTypeName} — ${requesterName}`,
+    description: `${new Date(leaveRequest.startDate).toLocaleDateString()} to ${new Date(
+      leaveRequest.endDate,
+    ).toLocaleDateString()}${reason ? ` — ${reason}` : ""}`,
+    requestedById: userId,
+    createdBy: createdBy || userId,
+  });
 
   return leaveRequest;
 };
