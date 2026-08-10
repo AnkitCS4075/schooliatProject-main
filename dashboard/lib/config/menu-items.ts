@@ -250,6 +250,11 @@ export const SUPER_ADMIN_MENU_ITEMS: MenuItem[] = [
     route: "/super-admin/onboarding",
   },
   {
+    name: "Quotations",
+    icon: "FileText",
+    route: "/super-admin/quotations",
+  },
+  {
     name: "Billing",
     icon: "Wallet",
     route: BILLING_BASE_PATH,
@@ -268,6 +273,11 @@ export const SUPER_ADMIN_MENU_ITEMS: MenuItem[] = [
     name: "Statistics",
     icon: "BarChart3",
     route: "/super-admin/statistics",
+  },
+  {
+    name: "Gate → CRM",
+    icon: "DoorOpen",
+    route: "/super-admin/gate-to-crm",
   },
   {
     name: "Employees",

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useCrmLeads, useCrmFunnel, useCreateCrmLead, useUpdateCrmLead, useAddCrmRemark, useDeleteCrmLead, useCrmAssignableUsers } from "@/lib/hooks/use-crm";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -11,26 +12,48 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Plus, Search, Eye, Trash2, MessageSquare, ArrowRight } from "lucide-react";
+import { Plus, Search, Eye, Trash2, Phone } from "lucide-react";
 
 const STAGES = ["NEW", "CONTACTABLE", "CONTACTED", "CONNECTED", "FOLLOW_UP_SCHEDULED", "ADMISSION_DONE", "LOST"];
 const STAGE_LABELS: Record<string, string> = { NEW: "New", CONTACTABLE: "Contactable", CONTACTED: "Contacted", CONNECTED: "Connected", FOLLOW_UP_SCHEDULED: "Follow-up", ADMISSION_DONE: "Admitted", LOST: "Lost" };
 const STAGE_COLORS: Record<string, string> = { NEW: "bg-gray-100 text-gray-800", CONTACTABLE: "bg-blue-100 text-blue-800", CONTACTED: "bg-yellow-100 text-yellow-800", CONNECTED: "bg-purple-100 text-purple-800", FOLLOW_UP_SCHEDULED: "bg-orange-100 text-orange-800", ADMISSION_DONE: "bg-green-100 text-green-800", LOST: "bg-red-100 text-red-800" };
-const SOURCES = ["STUDENT_REFERRAL", "PARENT_REFERRAL", "SALES_DEPARTMENT", "GATE_ENTRY"];
-const SOURCE_LABELS: Record<string, string> = { STUDENT_REFERRAL: "Student Referral", PARENT_REFERRAL: "Parent Referral", SALES_DEPARTMENT: "Sales Dept", GATE_ENTRY: "Gate Entry" };
+const SOURCES = ["STUDENT_REFERRAL", "PARENT_REFERRAL", "SALES_DEPARTMENT", "GATE_ENTRY", "GATE_WALK_IN"];
+const SOURCE_LABELS: Record<string, string> = { STUDENT_REFERRAL: "Student Referral", PARENT_REFERRAL: "Parent Referral", SALES_DEPARTMENT: "Sales Dept", GATE_ENTRY: "Gate Entry", GATE_WALK_IN: "Gate Walk-in" };
+const FOLLOW_UP_STATUSES = ["PENDING", "INTERESTED", "NOT_INTERESTED", "CONVERTED", "LOST"];
+const FOLLOW_UP_LABELS: Record<string, string> = { PENDING: "Pending", INTERESTED: "Interested", NOT_INTERESTED: "Not Interested", CONVERTED: "Converted", LOST: "Lost" };
+const FOLLOW_UP_COLORS: Record<string, string> = { PENDING: "bg-gray-100 text-gray-800", INTERESTED: "bg-green-100 text-green-800", NOT_INTERESTED: "bg-yellow-100 text-yellow-800", CONVERTED: "bg-blue-100 text-blue-800", LOST: "bg-red-100 text-red-800" };
+const SORT_OPTIONS = [
+  { value: "date", label: "Date" },
+  { value: "class", label: "Class Interested" },
+  { value: "followUpStatus", label: "Follow-up Status" },
+  { value: "assignedStaff", label: "Assigned Staff" },
+];
 
 export function CrmManagement() {
+  const searchParams = useSearchParams();
+  const leadParam = searchParams.get("lead");
   const [page, setPage] = useState(1);
   const [stageFilter, setStageFilter] = useState("");
+  const [followUpFilter, setFollowUpFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("date");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [addOpen, setAddOpen] = useState(false);
   const [viewLead, setViewLead] = useState<any>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [remarkText, setRemarkText] = useState("");
-  const [form, setForm] = useState({ name: "", phone: "", source: "", category: "", assignedToId: "", remarks: "" });
+  const [form, setForm] = useState({ name: "", phone: "", source: "", category: "", classInterestedIn: "", purposeOfVisit: "", assignedToId: "", remarks: "" });
   const { toast } = useToast();
 
-  const filters = { page, limit: 15, ...(stageFilter && { stage: stageFilter }), ...(search && { search }) };
+  const filters = {
+    page,
+    limit: 15,
+    sortBy,
+    sortOrder,
+    ...(stageFilter && { stage: stageFilter }),
+    ...(followUpFilter && { followUpStatus: followUpFilter }),
+    ...(search && { search }),
+  };
   const { data, isLoading } = useCrmLeads(filters);
   const { data: funnelData } = useCrmFunnel();
   const { data: assignableUsers } = useCrmAssignableUsers();
@@ -44,6 +67,15 @@ export function CrmManagement() {
   const totalPages = (data as any)?.totalPages ?? 1;
   const funnel = (funnelData as any)?.data;
 
+  useEffect(() => {
+    if (!leadParam) return;
+    const match = leads.find((l: any) => l.id === leadParam);
+    if (match) {
+      setViewLead(match);
+      setViewOpen(true);
+    }
+  }, [leadParam, leads]);
+
   const handleCreate = async () => {
     if (!form.name || !form.phone || !form.source) {
       toast({ title: "Validation Error", description: "Name, phone, and source are required", variant: "destructive" });
@@ -53,7 +85,7 @@ export function CrmManagement() {
       await createLead.mutateAsync({ ...form, assignedToId: form.assignedToId && form.assignedToId !== "none" ? form.assignedToId : undefined });
       toast({ title: "Success", description: "Lead created" });
       setAddOpen(false);
-      setForm({ name: "", phone: "", source: "", category: "", assignedToId: "", remarks: "" });
+      setForm({ name: "", phone: "", source: "", category: "", classInterestedIn: "", purposeOfVisit: "", assignedToId: "", remarks: "" });
     } catch {
       toast({ title: "Error", description: "Failed to create lead", variant: "destructive" });
     }
@@ -65,6 +97,15 @@ export function CrmManagement() {
       toast({ title: "Success", description: "Stage updated" });
     } catch {
       toast({ title: "Error", description: "Failed to update stage", variant: "destructive" });
+    }
+  };
+
+  const handleFollowUpChange = async (leadId: string, newStatus: string) => {
+    try {
+      await updateLead.mutateAsync({ id: leadId, data: { followUpStatus: newStatus } });
+      toast({ title: "Success", description: "Follow-up status updated" });
+    } catch {
+      toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
     }
   };
 
@@ -117,6 +158,8 @@ export function CrmManagement() {
                 </Select>
               </div>
               <div><Label>Category</Label><Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Admission" /></div>
+              <div><Label>Class Interested In</Label><Input value={form.classInterestedIn} onChange={(e) => setForm({ ...form, classInterestedIn: e.target.value })} placeholder="e.g. Nursery, Grade 1" /></div>
+              <div><Label>Purpose of Visit</Label><Input value={form.purposeOfVisit} onChange={(e) => setForm({ ...form, purposeOfVisit: e.target.value })} placeholder="e.g. Admission enquiry" /></div>
               <div><Label>Assign To</Label>
                 <Select value={form.assignedToId} onValueChange={(v) => setForm({ ...form, assignedToId: v })}>
                   <SelectTrigger><SelectValue placeholder="Select teacher/staff" /></SelectTrigger>
@@ -143,21 +186,28 @@ export function CrmManagement() {
         </div>
       )}
 
-      <div className="flex gap-3 items-center">
+      <div className="flex gap-3 items-center flex-wrap">
         <div className="relative flex-1 max-w-sm"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input className="pl-9" placeholder="Search name or phone..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} /></div>
         <Select value={stageFilter} onValueChange={(v) => { setStageFilter(v === "ALL" ? "" : v); setPage(1); }}><SelectTrigger className="w-44"><SelectValue placeholder="All stages" /></SelectTrigger><SelectContent><SelectItem value="ALL">All Stages</SelectItem>{STAGES.map((s) => <SelectItem key={s} value={s}>{STAGE_LABELS[s]}</SelectItem>)}</SelectContent></Select>
+        <Select value={followUpFilter} onValueChange={(v) => { setFollowUpFilter(v === "ALL" ? "" : v); setPage(1); }}><SelectTrigger className="w-48"><SelectValue placeholder="All follow-ups" /></SelectTrigger><SelectContent><SelectItem value="ALL">All Follow-ups</SelectItem>{FOLLOW_UP_STATUSES.map((s) => <SelectItem key={s} value={s}>{FOLLOW_UP_LABELS[s]}</SelectItem>)}</SelectContent></Select>
+        <Select value={sortBy} onValueChange={(v) => { setSortBy(v); setPage(1); }}><SelectTrigger className="w-48"><SelectValue placeholder="Sort by" /></SelectTrigger><SelectContent>{SORT_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>Sort: {s.label}</SelectItem>)}</SelectContent></Select>
+        <Button variant="outline" size="sm" onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}>{sortOrder === "desc" ? "Newest First" : "Oldest First"}</Button>
       </div>
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Phone</TableHead><TableHead>Source</TableHead><TableHead>Stage</TableHead><TableHead>Assigned To</TableHead><TableHead>Remarks</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Phone</TableHead><TableHead>Source</TableHead><TableHead>Stage</TableHead><TableHead>Follow-up</TableHead><TableHead>Class</TableHead><TableHead>Assigned To</TableHead><TableHead>Notes</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
           <TableBody>
-            {isLoading ? <TableRow><TableCell colSpan={7} className="text-center py-8">Loading...</TableCell></TableRow>
-            : leads.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No leads found</TableCell></TableRow>
+            {isLoading ? <TableRow><TableCell colSpan={9} className="text-center py-8">Loading...</TableCell></TableRow>
+            : leads.length === 0 ? <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No leads found</TableCell></TableRow>
             : leads.map((l: any) => (
               <TableRow key={l.id}>
                 <TableCell className="font-medium">{l.name}</TableCell>
-                <TableCell>{l.phone}</TableCell>
+                <TableCell>
+                  <a href={`tel:${l.phone}`} className="inline-flex items-center gap-1 text-primary hover:underline">
+                    <Phone className="h-3.5 w-3.5" />{l.phone}
+                  </a>
+                </TableCell>
                 <TableCell><Badge variant="outline">{SOURCE_LABELS[l.source] || l.source}</Badge></TableCell>
                 <TableCell>
                   <Select value={l.stage} onValueChange={(v) => handleStageChange(l.id, v)}>
@@ -165,6 +215,14 @@ export function CrmManagement() {
                     <SelectContent>{STAGES.map((s) => <SelectItem key={s} value={s} className="text-xs">{STAGE_LABELS[s]}</SelectItem>)}</SelectContent>
                   </Select>
                 </TableCell>
+                <TableCell>
+                  <Select value={l.followUpStatus || "PENDING"} onValueChange={(v) => handleFollowUpChange(l.id, v)}>
+                    <SelectTrigger className="h-7 w-36 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{FOLLOW_UP_STATUSES.map((s) => <SelectItem key={s} value={s} className="text-xs">{FOLLOW_UP_LABELS[s]}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <div className="mt-1"><Badge className={FOLLOW_UP_COLORS[l.followUpStatus || "PENDING"]}>{FOLLOW_UP_LABELS[l.followUpStatus || "PENDING"]}</Badge></div>
+                </TableCell>
+                <TableCell className="text-sm">{l.classInterestedIn || "-"}</TableCell>
                 <TableCell className="text-sm">
                   <Select value={l.assignedToId ?? "none"} onValueChange={(v) => handleReassign(l.id, v)}>
                     <SelectTrigger className="h-7 w-40 text-xs"><SelectValue /></SelectTrigger>
@@ -190,7 +248,17 @@ export function CrmManagement() {
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Lead: {viewLead?.name}</DialogTitle></DialogHeader>
-          <div className="space-y-3 max-h-80 overflow-y-auto">
+          <div className="space-y-2 text-sm">
+            <div><span className="font-medium">Phone:</span> <a href={`tel:${viewLead?.phone}`} className="text-primary">{viewLead?.phone}</a></div>
+            <div><span className="font-medium">Source:</span> {SOURCE_LABELS[viewLead?.source] || viewLead?.source}</div>
+            <div><span className="font-medium">Follow-up Status:</span> {FOLLOW_UP_LABELS[viewLead?.followUpStatus] || viewLead?.followUpStatus}</div>
+            {viewLead?.classInterestedIn && <div><span className="font-medium">Class Interested In:</span> {viewLead.classInterestedIn}</div>}
+            {viewLead?.purposeOfVisit && <div><span className="font-medium">Purpose of Visit:</span> {viewLead.purposeOfVisit}</div>}
+            {viewLead?.nextFollowUpAt && <div><span className="font-medium">Next Follow-up:</span> {new Date(viewLead.nextFollowUpAt).toLocaleString("en-IN")}</div>}
+            {viewLead?.gateEntries?.length > 0 && <div><span className="font-medium">Gate Entries:</span> {viewLead.gateEntries.map((g: any) => `#${g.serialNo}`).join(", ")}</div>}
+          </div>
+          <div className="border-t pt-3 space-y-3 max-h-72 overflow-y-auto">
+            <div className="text-sm font-medium">Call Notes & Remarks</div>
             {viewLead?.remarks?.map((r: any) => (
               <div key={r.id} className="border rounded p-2 text-sm">
                 <div className="font-medium">{r.author?.firstName} {r.author?.lastName}</div>

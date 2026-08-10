@@ -1,13 +1,21 @@
 import { Router } from "express";
 import withPermission from "../middlewares/with-permission.middleware.js";
 import validateRequest from "../middlewares/validate-request.middleware.js";
-import { Permission } from "../prisma/generated/index.js";
+import { Permission, RoleName } from "../prisma/generated/index.js";
 import gateEntryService from "../services/gate-entry.service.js";
 import createGateEntrySchema from "../schemas/gate-entry/create-gate-entry.schema.js";
 import updateGateEntrySchema from "../schemas/gate-entry/update-gate-entry.schema.js";
 import listGateEntriesSchema from "../schemas/gate-entry/list-gate-entries.schema.js";
 
 const router = Router();
+
+function requireSuperAdmin(req, res, next) {
+  const roleName = req.context.user?.role?.name;
+  if (roleName !== RoleName.SUPER_ADMIN) {
+    return res.status(403).json({ message: "Only Super Admin can access this report" });
+  }
+  next();
+}
 
 router.post(
   "/",
@@ -38,6 +46,27 @@ router.get(
     const currentUser = req.context.user;
     const stats = await gateEntryService.getStats(currentUser.schoolId);
     res.json({ message: "Gate entry stats retrieved", data: stats });
+  },
+);
+
+router.post(
+  "/sync-crm",
+  withPermission(Permission.GET_GATE_ENTRIES),
+  async (req, res) => {
+    const currentUser = req.context.user;
+    const result = await gateEntryService.syncMissingLeads(currentUser.schoolId);
+    res.json({ message: "CRM sync completed", data: result });
+  },
+);
+
+router.get(
+  "/report/conversion",
+  requireSuperAdmin,
+  withPermission(Permission.GET_STATISTICS),
+  async (req, res) => {
+    const { schoolId, startDate, endDate } = req.query;
+    const report = await gateEntryService.getConversionReport({ schoolId, startDate, endDate });
+    res.json({ message: "Gate-to-CRM conversion report fetched", data: report });
   },
 );
 

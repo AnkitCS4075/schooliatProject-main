@@ -80,6 +80,7 @@ import schoolOnboardingRouter from "./routers/school-onboarding.router.js";
 import platformFinanceRouter from "./routers/platform-finance.router.js";
 import feeDiscountRouter from "./routers/fee-discount.router.js";
 import quotationRouter from "./routers/quotation.router.js";
+import platformQuotationRouter from "./routers/platform-quotation.router.js";
 import customRoleRouter from "./routers/custom-role.router.js";
 import studentDocumentRouter from "./routers/student-document.router.js";
 import bootstrapDataService from "./services/bootstrap-data.service.js";
@@ -307,6 +308,7 @@ function addRouters(app) {
   app.use("/accounting", accountingRouter);
   // Super Admin Routers
   app.use("/school-onboardings", schoolOnboardingRouter);
+  app.use("/platform-quotations", platformQuotationRouter);
   app.use("/platform-finance", platformFinanceRouter);
   app.use("/fee-management", feeDiscountRouter);
   app.use("/student-documents", studentDocumentRouter);

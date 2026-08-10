@@ -10,12 +10,13 @@ interface GateEntry {
   name: string;
   phone: string;
   reason?: string;
+  classInterestedIn?: string;
   personToMeet?: string;
   photoFileId?: string;
   inTime: string;
   outTime?: string;
   linkedLeadId?: string;
-  linkedLead?: { id: string; name: string; stage: string };
+  linkedLead?: { id: string; name: string; stage: string; followUpStatus: string; source: string };
   creator?: { id: string; firstName: string; lastName?: string };
   createdAt: string;
 }
@@ -24,6 +25,7 @@ interface GateEntryStats {
   totalToday: number;
   byCategory: { category: string; _count: number }[];
   currentlyInside: number;
+  crmLeadsToday: number;
 }
 
 interface GateEntryListResponse {
@@ -70,7 +72,7 @@ export function useGateEntry(id: string) {
 export function useCreateGateEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { category: string; name: string; phone: string; reason?: string; personToMeet?: string }) =>
+    mutationFn: (data: { category: string; name: string; phone: string; reason?: string; classInterestedIn?: string; personToMeet?: string }) =>
       post("/gate-entries", { request: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["gateEntries"] });
@@ -99,6 +101,31 @@ export function useDeleteGateEntry() {
       queryClient.invalidateQueries({ queryKey: ["gateEntries"] });
       queryClient.invalidateQueries({ queryKey: ["gateEntryStats"] });
     },
+  });
+}
+
+export interface GateCrmConversionReport {
+  totalEntries: number;
+  totalLeads: number;
+  overallConversionRate: number;
+  status: { PENDING: number; INTERESTED: number; NOT_INTERESTED: number; CONVERTED: number; LOST: number };
+  schools: {
+    schoolId: string;
+    schoolName: string;
+    schoolCode?: string;
+    entries: number;
+    leads: number;
+    conversionRate: number;
+    status: { PENDING: number; INTERESTED: number; NOT_INTERESTED: number; CONVERTED: number; LOST: number };
+  }[];
+  daily: { date: string; entries: number; leads: number }[];
+}
+
+export function useGateCrmConversionReport(filters?: { schoolId?: string; startDate?: string; endDate?: string }) {
+  return useQuery({
+    queryKey: ["gateCrmConversionReport", filters],
+    queryFn: () => get("/gate-entries/report/conversion", filters),
+    staleTime: 60 * 1000,
   });
 }
 

@@ -275,6 +275,7 @@ model User {
   receivedOtherIncomes       OtherIncome[]
   managedOnboardings         SchoolOnboarding[]
   studentDocuments           StudentDocument[]
+  createdPlatformQuotations  PlatformQuotation[]    @relation("PlatformQuotationCreator")
 
   @@index([schoolId, deletedAt])
   @@index([roleId, userType, deletedAt])
@@ -2498,6 +2499,7 @@ enum TCStatus {
 
 enum GateEntryCategory {
   ADMISSION_ENQUIRY
+  VISITOR
   PARENT
   VENDOR
   STAFF_IN_OUT
@@ -2523,8 +2525,19 @@ enum CrmLeadSource {
   PARENT_REFERRAL
   SALES_DEPARTMENT
   GATE_ENTRY
+  GATE_WALK_IN
 
   @@map("crm_lead_source")
+}
+
+enum CrmLeadFollowUpStatus {
+  PENDING
+  INTERESTED
+  NOT_INTERESTED
+  CONVERTED
+  LOST
+
+  @@map("crm_lead_follow_up_status")
 }
 
 enum BonafidePurpose {
@@ -2538,13 +2551,14 @@ enum BonafidePurpose {
 }
 
 model GateEntry {
-  id              String              @id @default(uuid())
-  serialNo        Int                 @map("serial_no")
-  category        GateEntryCategory
-  name            String
-  phone           String
-  reason          String?
-  personToMeet    String?             @map("person_to_meet")
+  id                String              @id @default(uuid())
+  serialNo          Int                 @map("serial_no")
+  category          GateEntryCategory
+  name              String
+  phone             String
+  reason            String?
+  classInterestedIn String?             @map("class_interested_in")
+  personToMeet      String?             @map("person_to_meet")
   photoFileId     String?             @map("photo_file_id")
   inTime          DateTime            @default(now()) @map("in_time")
   outTime         DateTime?           @map("out_time")
@@ -2568,13 +2582,16 @@ model GateEntry {
 }
 
 model CrmLead {
-  id                String         @id @default(uuid())
+  id                String                @id @default(uuid())
   name              String
   phone             String
   source            CrmLeadSource
-  stage             CrmLeadStage   @default(NEW)
+  stage             CrmLeadStage          @default(NEW)
   category          String?
-  assignedToId      String?        @map("assigned_to_id")
+  classInterestedIn String?               @map("class_interested_in")
+  purposeOfVisit    String?               @map("purpose_of_visit")
+  followUpStatus    CrmLeadFollowUpStatus @default(PENDING) @map("follow_up_status")
+  assignedToId      String?               @map("assigned_to_id")
   admittedStudentId String?        @map("admitted_student_id")
   schoolId          String         @map("school_id")
   nextFollowUpAt    DateTime?      @map("next_follow_up_at")
@@ -2674,6 +2691,7 @@ model SchoolOnboarding {
   school               School?          @relation(fields: [schoolId], references: [id])
   relationshipManager  User?            @relation(fields: [relationshipManagerId], references: [id])
   contractFile         File?            @relation(fields: [contractFileId], references: [id])
+  platformQuotations   PlatformQuotation[]
 
   @@index([status, deletedAt])
   @@index([schoolId, deletedAt])
@@ -2882,6 +2900,75 @@ model QuotationComment {
 
   @@index([quotationId])
   @@map("quotation_comments")
+}
+
+// ─── Super Admin (Platform) Quotations for prospective schools ───────
+
+enum PlatformQuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+
+  @@map("platform_quotation_status")
+}
+
+model PlatformQuotation {
+  id                 String                  @id @default(uuid())
+  quotationNumber    String                  @unique @map("quotation_number")
+  schoolName         String                  @map("school_name")
+  contactPerson      String?                 @map("contact_person")
+  contactEmail       String?                 @map("contact_email")
+  contactPhone       String?                 @map("contact_phone")
+  modulesSelected    Json?                   @map("modules_selected")
+  subtotal           Decimal                 @default(0) @db.Decimal(12, 2)
+  discountPercent    Decimal                 @default(0) @db.Decimal(5, 2) @map("discount_percent")
+  discountAmount     Decimal                 @default(0) @db.Decimal(12, 2) @map("discount_amount")
+  taxPercent         Decimal                 @default(0) @db.Decimal(5, 2) @map("tax_percent")
+  taxAmount          Decimal                 @default(0) @db.Decimal(12, 2) @map("tax_amount")
+  totalAmount        Decimal                 @default(0) @db.Decimal(12, 2) @map("total_amount")
+  validityDays       Int                     @default(30) @map("validity_days")
+  validUntil         DateTime?               @map("valid_until")
+  termsAndConditions String?                 @map("terms_and_conditions")
+  notes              String?
+  status             PlatformQuotationStatus @default(DRAFT)
+  rejectionReason    String?                 @map("rejection_reason")
+  sentAt             DateTime?               @map("sent_at")
+  acceptedAt         DateTime?               @map("accepted_at")
+  rejectedAt         DateTime?               @map("rejected_at")
+  onboardingId       String?                 @map("onboarding_id")
+  createdBy          String                  @map("created_by")
+  updatedBy          String?                 @map("updated_by")
+  deletedBy          String?                 @map("deleted_by")
+  createdAt          DateTime                @default(now()) @map("created_at")
+  updatedAt          DateTime?               @updatedAt @map("updated_at")
+  deletedAt          DateTime?               @map("deleted_at")
+
+  items             PlatformQuotationItem[]
+  onboarding        SchoolOnboarding?        @relation(fields: [onboardingId], references: [id])
+  creator           User?                    @relation("PlatformQuotationCreator", fields: [createdBy], references: [id])
+
+  @@index([status])
+  @@index([schoolName])
+  @@map("platform_quotations")
+}
+
+model PlatformQuotationItem {
+  id                  String             @id @default(uuid())
+  platformQuotationId String             @map("platform_quotation_id")
+  moduleName          String             @map("module_name")
+  description         String?
+  quantity            Int                @default(1)
+  unitPrice           Decimal            @default(0) @db.Decimal(12, 2) @map("unit_price")
+  totalAmount         Decimal            @default(0) @db.Decimal(12, 2) @map("total_amount")
+  sortOrder           Int                @default(0) @map("sort_order")
+  createdAt           DateTime           @default(now()) @map("created_at")
+
+  platformQuotation   PlatformQuotation  @relation(fields: [platformQuotationId], references: [id], onDelete: Cascade)
+
+  @@index([platformQuotationId])
+  @@map("platform_quotation_items")
 }
 
 // ─── Custom Roles ─────────────────────────────────────────────────────

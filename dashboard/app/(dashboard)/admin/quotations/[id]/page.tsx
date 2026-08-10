@@ -1,14 +1,14 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useQuotation, useApproveQuotation, useRejectQuotation, useCancelQuotation, useConvertToInvoice, useDownloadQuotationPdf, useSendQuotationEmail } from "@/lib/hooks/use-quotations";
+import { useQuotation, useApproveQuotation, useRejectQuotation, useCancelQuotation, useConvertToInvoice, useDownloadQuotationPdf, useSendQuotationEmail, useQuotationPreview } from "@/lib/hooks/use-quotations";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Pencil, Download, Send, Check, X, RefreshCw } from "lucide-react";
+import { ArrowLeft, Pencil, Download, Send, Check, X, RefreshCw, Eye, AlertTriangle } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-700",
@@ -33,6 +33,7 @@ export default function QuotationDetailPage() {
   const convertToInvoice = useConvertToInvoice();
   const downloadPdf = useDownloadQuotationPdf();
   const sendEmail = useSendQuotationEmail();
+  const preview = useQuotationPreview(id);
 
   const quotation = data?.data;
   if (isLoading) {
@@ -43,6 +44,8 @@ export default function QuotationDetailPage() {
   }
 
   const items = quotation.items || [];
+  const previewData = preview.data?.data;
+  const previewWarnings: string[] = previewData?.warnings || [];
 
   const handleAction = async (action: string) => {
     try {
@@ -79,6 +82,14 @@ export default function QuotationDetailPage() {
     }
   };
 
+  const handlePreview = () => {
+    if (previewData?.printUrl) {
+      window.open(previewData.printUrl, "_blank");
+    } else {
+      toast({ title: "Preview not ready", description: "Could not load quotation preview." });
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
@@ -94,6 +105,9 @@ export default function QuotationDetailPage() {
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={handlePreview} disabled={!previewData?.printUrl}>
+            <Eye className="mr-2 h-4 w-4" /> Preview
+          </Button>
           {quotation.status === "DRAFT" && (
             <>
               <Button variant="outline" onClick={() => router.push(`/admin/quotations/${id}/edit`)}>
@@ -126,6 +140,18 @@ export default function QuotationDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Branding warnings (e.g. missing GST in School Settings) */}
+      {previewWarnings.length > 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="space-y-1">
+            {previewWarnings.map((w, i) => (
+              <p key={i}>{w}</p>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Customer Info */}
       <Card>

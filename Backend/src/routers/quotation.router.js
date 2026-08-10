@@ -265,8 +265,8 @@ router.get(
       if (!quotation) return res.status(404).json({ message: "Quotation not found" });
 
       const settings = await getSettingsForQuotation(quotation.schoolId);
-      const { html, printUrl } = await buildQuotationHtmlDocument(quotation, settings);
-      return res.status(200).json({ message: "Preview generated", data: { html, printUrl } });
+      const { html, printUrl, warnings } = await buildQuotationHtmlDocument(quotation, settings);
+      return res.status(200).json({ message: "Preview generated", data: { html, printUrl, warnings } });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to generate preview" });
     }

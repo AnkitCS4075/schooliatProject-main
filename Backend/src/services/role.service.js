@@ -151,6 +151,9 @@ const defaultRolePermissionsMap = {
     // Custom Roles & User Permissions
     Permission.MANAGE_CUSTOM_ROLES,
     Permission.ASSIGN_USER_PERMISSIONS,
+    // Onboarding
+    Permission.MANAGE_ONBOARDING,
+    Permission.GET_ONBOARDING,
     // System
     Permission.MANAGE_DATABASE_BACKUP,
     Permission.MANAGE_SUBSCRIPTION,

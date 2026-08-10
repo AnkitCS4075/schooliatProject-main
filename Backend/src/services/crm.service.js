@@ -9,6 +9,8 @@ const createLead = async (data, schoolId, userId) => {
         phone: data.phone,
         source: data.source,
         category: data.category || null,
+        classInterestedIn: data.classInterestedIn || null,
+        purposeOfVisit: data.purposeOfVisit || null,
         assignedToId: data.assignedToId || null,
         schoolId,
         createdBy: userId,
@@ -49,6 +51,7 @@ const listLeads = async (schoolId, filters = {}, options = {}) => {
   const where = { schoolId, deletedAt: null };
   if (filters.stage) where.stage = filters.stage;
   if (filters.source) where.source = filters.source;
+  if (filters.followUpStatus) where.followUpStatus = filters.followUpStatus;
   if (filters.assignedToId) where.assignedToId = filters.assignedToId;
   if (filters.search) {
     where.OR = [
@@ -57,14 +60,17 @@ const listLeads = async (schoolId, filters = {}, options = {}) => {
     ];
   }
 
+  const orderBy = buildOrderBy(filters.sortBy, filters.sortOrder);
+
   const [leads, total] = await Promise.all([
     prisma.crmLead.findMany({
       where,
       skip,
       take: limit,
-      orderBy: { createdAt: "desc" },
+      orderBy,
       include: {
         assignedTo: { select: { id: true, firstName: true, lastName: true } },
+        gateEntries: { select: { id: true, serialNo: true, inTime: true } },
         _count: { select: { remarks: true } },
       },
     }),
@@ -74,6 +80,23 @@ const listLeads = async (schoolId, filters = {}, options = {}) => {
   return { leads, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 };
 
+const buildOrderBy = (sortBy, sortOrder = "desc") => {
+  const dir = sortOrder === "asc" ? "asc" : "desc";
+  switch (sortBy) {
+    case "class":
+      return [{ classInterestedIn: dir }, { createdAt: dir }];
+    case "followUpStatus":
+      return [{ followUpStatus: dir }, { createdAt: dir }];
+    case "assignedStaff":
+      return [{ assignedTo: { firstName: dir } }, { createdAt: dir }];
+    case "followUpDate":
+      return [{ nextFollowUpAt: dir }, { createdAt: dir }];
+    case "date":
+    default:
+      return [{ createdAt: dir }];
+  }
+};
+
 const updateLead = async (id, data, schoolId) => {
   const existing = await prisma.crmLead.findFirst({ where: { id, schoolId, deletedAt: null } });
   if (!existing) throw new Error("Lead not found");
@@ -81,12 +104,22 @@ const updateLead = async (id, data, schoolId) => {
   const updateData = {};
   if (data.name !== undefined) updateData.name = data.name;
   if (data.phone !== undefined) updateData.phone = data.phone;
+  if (data.source !== undefined) updateData.source = data.source;
   if (data.stage !== undefined) updateData.stage = data.stage;
   if (data.category !== undefined) updateData.category = data.category;
+  if (data.classInterestedIn !== undefined) updateData.classInterestedIn = data.classInterestedIn;
+  if (data.purposeOfVisit !== undefined) updateData.purposeOfVisit = data.purposeOfVisit;
+  if (data.followUpStatus !== undefined) updateData.followUpStatus = data.followUpStatus;
   if (data.assignedToId !== undefined) updateData.assignedToId = data.assignedToId;
   if (data.nextFollowUpAt !== undefined) updateData.nextFollowUpAt = data.nextFollowUpAt;
 
-  return prisma.crmLead.update({ where: { id }, data: updateData });
+  return prisma.crmLead.update({
+    where: { id },
+    data: updateData,
+    include: {
+      assignedTo: { select: { id: true, firstName: true, lastName: true } },
+    },
+  });
 };
 
 const addRemark = async (leadId, content, userId, schoolId) => {

@@ -62,6 +62,10 @@ function addQuotationCommentApi(id: string, text: string) {
   return post(`/quotations/${id}/comments`, { request: { text } });
 }
 
+function fetchQuotationPreview(id: string) {
+  return get(`/quotations/${id}/preview`);
+}
+
 function downloadQuotationPdf(id: string) {
   return downloadFromApi(`/quotations/${id}/pdf`);
 }
@@ -215,5 +219,14 @@ export function useAddQuotationComment() {
 export function useDownloadQuotationPdf() {
   return useMutation({
     mutationFn: (id: string) => downloadQuotationPdf(id),
+  });
+}
+
+export function useQuotationPreview(id: string) {
+  return useQuery({
+    queryKey: ["quotation-preview", id],
+    queryFn: () => fetchQuotationPreview(id),
+    enabled: !!id,
+    staleTime: 30_000,
   });
 }

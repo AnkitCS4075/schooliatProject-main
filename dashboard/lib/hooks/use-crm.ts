@@ -10,6 +10,9 @@ interface CrmLead {
   source: string;
   stage: string;
   category?: string;
+  classInterestedIn?: string;
+  purposeOfVisit?: string;
+  followUpStatus: string;
   assignedToId?: string;
   nextFollowUpAt?: string;
   assignedTo?: { id: string; firstName: string; lastName?: string };
@@ -43,7 +46,10 @@ interface CrmFunnelStats {
 interface CrmLeadFilters {
   stage?: string;
   source?: string;
+  followUpStatus?: string;
   assignedToId?: string;
+  sortBy?: string;
+  sortOrder?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -104,7 +110,7 @@ export function useCrmAssignableUsers() {
 export function useCreateCrmLead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name: string; phone: string; source: string; category?: string; assignedToId?: string; remarks?: string }) =>
+    mutationFn: (data: { name: string; phone: string; source: string; category?: string; classInterestedIn?: string; purposeOfVisit?: string; assignedToId?: string; remarks?: string }) =>
       post("/crm", { request: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["crmLeads"] });
@@ -116,7 +122,7 @@ export function useCreateCrmLead() {
 export function useUpdateCrmLead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<{ stage: string; name: string; phone: string; category: string; assignedToId: string | null; nextFollowUpAt: string }> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<{ stage: string; name: string; phone: string; source: string; category: string; classInterestedIn: string | null; purposeOfVisit: string | null; followUpStatus: string; assignedToId: string | null; nextFollowUpAt: string | null }> }) =>
       patch(`/crm/${id}`, { request: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["crmLeads"] });

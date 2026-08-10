@@ -7,6 +7,7 @@ import {
   numberToWordsIndian,
 } from "./billing.helpers.js";
 import prisma from "../prisma/client.js";
+import fileService from "../services/file.service.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -145,11 +146,60 @@ export async function buildQuotationHtmlDocument(quotation, settings) {
   return {
     html,
     printUrl: `data:text/html;base64,${base64HTML}`,
+    warnings: settings?.warnings || [],
+  };
+}
+
+async function resolveLogoUrl(fileId) {
+  if (!fileId) return "";
+  try {
+    const file = await fileService.getFileById(fileId);
+    if (!file) return "";
+    return fileService.attachFileURL(file).url || "";
+  } catch {
+    return "";
+  }
+}
+
+// Merges School Settings branding with School master data so the quotation
+// always reflects the latest company name/address/phone/email/GST/logo.
+export async function getQuotationBranding(schoolId) {
+  const [settings, school] = await Promise.all([
+    prisma.settings.findFirst({ where: { schoolId, deletedAt: null } }),
+    schoolId ? prisma.school.findUnique({ where: { id: schoolId } }) : null,
+  ]);
+
+  const gstNumber = settings?.companyGstin?.trim() || school?.gstNumber?.trim() || "";
+  const logoId = settings?.logoId || school?.logoId || null;
+
+  const warnings = [];
+  if (!gstNumber) {
+    warnings.push(
+      "GST number is not set in School Settings. It will appear blank on the quotation — please update School Settings.",
+    );
+  }
+
+  const companyLogoUrl = await resolveLogoUrl(logoId);
+
+  return {
+    ...settings,
+    companyName: settings?.companyName || school?.name || "SchooliAT",
+    companyAddress:
+      settings?.companyAddress ||
+      (school?.address && school.address.length ? school.address.join(", ") : ""),
+    companyGstin: gstNumber,
+    companyPhone: settings?.companyPhone || school?.phone || "",
+    companyEmail: settings?.companyEmail || school?.email || "",
+    companyWebsite: settings?.companyWebsite || "",
+    companyLogoUrl,
+    signatureName: settings?.signatureName || "",
+    signatureDesignation: settings?.signatureDesignation || "",
+    signatureImageUrl: settings?.signatureImageUrl || "",
+    stampImageUrl: settings?.stampImageUrl || "",
+    warnings,
   };
 }
 
 export async function getSettingsForQuotation(schoolId) {
-  return prisma.settings.findFirst({
-    where: { schoolId, deletedAt: null },
-  });
+  return getQuotationBranding(schoolId);
 }

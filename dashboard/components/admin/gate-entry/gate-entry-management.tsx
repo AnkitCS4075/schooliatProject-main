@@ -11,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Plus, LogOut, Trash2, Search, Users, DoorOpen, ClipboardList } from "lucide-react";
+import { Plus, LogOut, Trash2, Search, Users, DoorOpen, ClipboardList, PhoneCall } from "lucide-react";
 
 const CATEGORIES = [
   { value: "ADMISSION_ENQUIRY", label: "Admission Enquiry" },
+  { value: "VISITOR", label: "Visitor" },
   { value: "PARENT", label: "Parent" },
   { value: "VENDOR", label: "Vendor" },
   { value: "STAFF_IN_OUT", label: "Staff In/Out" },
@@ -23,6 +24,7 @@ const CATEGORIES = [
 
 const categoryColor: Record<string, string> = {
   ADMISSION_ENQUIRY: "bg-blue-100 text-blue-800",
+  VISITOR: "bg-indigo-100 text-indigo-800",
   PARENT: "bg-green-100 text-green-800",
   VENDOR: "bg-orange-100 text-orange-800",
   STAFF_IN_OUT: "bg-purple-100 text-purple-800",
@@ -34,7 +36,7 @@ export function GateEntryManagement() {
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [search, setSearch] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [form, setForm] = useState({ category: "", name: "", phone: "", reason: "", personToMeet: "" });
+  const [form, setForm] = useState({ category: "", name: "", phone: "", reason: "", classInterestedIn: "", personToMeet: "" });
   const { toast } = useToast();
 
   const filters = { page, limit: 15, ...(categoryFilter && { category: categoryFilter }), ...(search && { search }) };
@@ -55,9 +57,9 @@ export function GateEntryManagement() {
     }
     try {
       await createEntry.mutateAsync(form);
-      toast({ title: "Success", description: "Gate entry recorded" });
+      toast({ title: "Success", description: form.category === "ADMISSION_ENQUIRY" || form.category === "VISITOR" ? "Gate entry recorded — CRM lead auto-created" : "Gate entry recorded" });
       setAddDialogOpen(false);
-      setForm({ category: "", name: "", phone: "", reason: "", personToMeet: "" });
+      setForm({ category: "", name: "", phone: "", reason: "", classInterestedIn: "", personToMeet: "" });
     } catch {
       toast({ title: "Error", description: "Failed to create entry", variant: "destructive" });
     }
@@ -104,6 +106,7 @@ export function GateEntryManagement() {
               <div><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Visitor name" /></div>
               <div><Label>Phone *</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone number" /></div>
               <div><Label>Reason</Label><Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder="Purpose of visit" /></div>
+              <div><Label>Class Interested In</Label><Input value={form.classInterestedIn} onChange={(e) => setForm({ ...form, classInterestedIn: e.target.value })} placeholder="e.g. Nursery, Grade 1" /></div>
               <div><Label>Person to Meet</Label><Input value={form.personToMeet} onChange={(e) => setForm({ ...form, personToMeet: e.target.value })} placeholder="Department / person" /></div>
               <Button onClick={handleCreate} disabled={createEntry.isPending} className="w-full">{createEntry.isPending ? "Saving..." : "Save Entry"}</Button>
             </div>
@@ -111,9 +114,10 @@ export function GateEntryManagement() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Today's Entries</CardTitle><ClipboardList className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{stats?.totalToday ?? 0}</div></CardContent></Card>
         <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Currently Inside</CardTitle><DoorOpen className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{stats?.currentlyInside ?? 0}</div></CardContent></Card>
+        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">CRM Leads Created</CardTitle><PhoneCall className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{stats?.crmLeadsToday ?? 0}</div></CardContent></Card>
         <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Categories Today</CardTitle><Users className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{stats?.byCategory?.length ?? 0}</div></CardContent></Card>
       </div>
 
@@ -124,20 +128,28 @@ export function GateEntryManagement() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader><TableRow><TableHead>#</TableHead><TableHead>Date &amp; Time</TableHead><TableHead>Category</TableHead><TableHead>Name</TableHead><TableHead>Phone</TableHead><TableHead>Reason</TableHead><TableHead>Person to Meet</TableHead><TableHead>Out Time</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead>#</TableHead><TableHead>Date &amp; Time</TableHead><TableHead>Category</TableHead><TableHead>Name</TableHead><TableHead>Phone</TableHead><TableHead>Reason</TableHead><TableHead>Class</TableHead><TableHead>Person to Meet</TableHead><TableHead>Out Time</TableHead><TableHead>CRM Lead</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
           <TableBody>
-            {isLoading ? <TableRow><TableCell colSpan={9} className="text-center py-8">Loading...</TableCell></TableRow>
-            : entries.length === 0 ? <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No entries found</TableCell></TableRow>
+            {isLoading ? <TableRow><TableCell colSpan={11} className="text-center py-8">Loading...</TableCell></TableRow>
+            : entries.length === 0 ? <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">No entries found</TableCell></TableRow>
             : entries.map((e: any) => (
               <TableRow key={e.id}>
                 <TableCell className="font-mono">{e.serialNo}</TableCell>
                 <TableCell className="text-sm">{formatTime(e.inTime)}</TableCell>
                 <TableCell><Badge variant="outline" className={categoryColor[e.category] || ""}>{e.category.replace(/_/g, " ")}</Badge></TableCell>
                 <TableCell className="font-medium">{e.name}</TableCell>
-                <TableCell>{e.phone}</TableCell>
+                <TableCell><a href={`tel:${e.phone}`} className="text-primary hover:underline">{e.phone}</a></TableCell>
                 <TableCell className="text-sm text-muted-foreground max-w-[150px] truncate">{e.reason || "-"}</TableCell>
+                <TableCell className="text-sm">{e.classInterestedIn || "-"}</TableCell>
                 <TableCell className="text-sm">{e.personToMeet || "-"}</TableCell>
                 <TableCell>{e.outTime ? formatTime(e.outTime) : <Badge variant="secondary">Inside</Badge>}</TableCell>
+                <TableCell>
+                  {e.linkedLead ? (
+                    <a href={`/admin/crm?lead=${e.linkedLead.id}`}><Badge className="bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer">Lead Created</Badge></a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     {!e.outTime && <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleMarkOut(e.id)}><LogOut className="h-3.5 w-3.5" /></Button>}
