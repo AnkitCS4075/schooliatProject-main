@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const generateBonafideSchema = z.object({
+const previewBonafideSchema = z.object({
   request: z.object({
     studentId: z.string().uuid("Student ID must be a valid UUID"),
     purpose: z.enum(["PASSPORT", "SCHOLARSHIP", "BANK", "VISA", "GENERAL"], {
@@ -12,4 +12,4 @@ const generateBonafideSchema = z.object({
   params: z.object({}),
 });
 
-export default generateBonafideSchema;
+export default previewBonafideSchema;

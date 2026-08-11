@@ -2632,6 +2632,7 @@ model BonafideCertificate {
   schoolId          String           @map("school_id")
   purpose           BonafidePurpose
   certificateNumber String           @unique @map("certificate_number")
+  isDuplicate       Boolean          @default(false) @map("is_duplicate")
   issueDate         DateTime         @default(now()) @map("issue_date")
   fileId            String?          @map("file_id")
   createdBy         String           @map("created_by")

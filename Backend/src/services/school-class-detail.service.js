@@ -166,6 +166,7 @@ export async function listStudentsInClass({
         email: true,
         contact: true,
         publicUserId: true,
+        dateOfBirth: true,
         createdAt: true,
         studentProfile: {
           select: {
@@ -173,6 +174,9 @@ export async function listStudentsInClass({
             rollNumber: true,
             apaarId: true,
             classId: true,
+            fatherName: true,
+            motherName: true,
+            class: { select: { grade: true, division: true } },
           },
         },
       },
