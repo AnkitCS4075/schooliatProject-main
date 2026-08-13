@@ -23,6 +23,7 @@ import { staffSchema, StaffFormData } from "@/lib/schemas/staff-schema";
 import { FormCard } from "@/components/forms/form-card";
 import { RadioGroup } from "@/components/forms/radio-group";
 import { PhotoUpload } from "@/components/forms/photo-upload";
+import { RoleAssignmentSelector } from "@/components/admin/custom-roles/role-assignment-selector";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { UserPlus, Copy, KeyRound } from "lucide-react";
@@ -69,6 +70,7 @@ export default function StaffPage() {
             registrationPhotoId: null,
             aadhaarId: "",
             designation: "",
+            customRoleId: "",
         },
         mode: "onBlur",
     });
@@ -303,6 +305,15 @@ export default function StaffPage() {
                                                 />
                                             </div>
                                         </div>
+                                    </FormCard>
+
+                                    {/* Role Assignment — inline custom role with read-only permission preview */}
+                                    <FormCard title="Role & Permissions" className="md:col-span-2">
+                                        <RoleAssignmentSelector
+                                            value={staffForm.watch("customRoleId") || ""}
+                                            onChange={(roleId) => staffForm.setValue("customRoleId", roleId, { shouldValidate: true })}
+                                            hint="Selecting a role grants the listed permissions immediately and emails the staff member their login credentials."
+                                        />
                                     </FormCard>
                                 </div>
                             </form>

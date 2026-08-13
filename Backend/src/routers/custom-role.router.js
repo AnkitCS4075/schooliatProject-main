@@ -3,8 +3,25 @@ import { Permission } from "../prisma/generated/index.js";
 import withPermission from "../middlewares/with-permission.middleware.js";
 import prisma from "../prisma/client.js";
 import logger from "../config/logger.js";
+import rolePermissionService from "../services/role-permission.service.js";
 
 const router = Router();
+
+// Permission matrix definition (modules × levels) used by the dashboard grid
+router.get(
+  "/matrix",
+  withPermission(Permission.GET_ROLES),
+  async (req, res) => {
+    try {
+      return res.status(200).json({
+        message: "Permission matrix retrieved",
+        data: rolePermissionService.getMatrixDefinition(),
+      });
+    } catch (error) {
+      return res.status(400).json({ message: error.message || "Failed to fetch permission matrix" });
+    }
+  },
+);
 
 // List role templates (pre-built custom roles usable by any school)
 router.get(
@@ -117,7 +134,7 @@ router.post(
   async (req, res) => {
     try {
       const currentUser = req.context.user;
-      const { name, displayName, description, permissions } = req.body.request || {};
+      const { name, displayName, description, permissions, matrix } = req.body.request || {};
       if (!name || !displayName) {
         return res.status(400).json({ message: "Name and displayName are required" });
       }
@@ -125,17 +142,30 @@ router.post(
       const existing = await prisma.customRole.findFirst({ where: { name } });
       if (existing) return res.status(400).json({ message: "Role name already exists" });
 
+      // Granular matrix takes precedence; otherwise flatten the provided permissions.
+      const resolvedPermissions = Array.isArray(matrix)
+        ? rolePermissionService.matrixToPermissions(matrix)
+        : (Array.isArray(permissions) ? permissions : []);
+      const resolvedMatrix = Array.isArray(matrix) ? matrix : null;
+
       const role = await prisma.customRole.create({
         data: {
           name,
           displayName,
           description: description || null,
           schoolId: currentUser.schoolId,
-          permissions: permissions || [],
+          permissions: resolvedPermissions,
           createdBy: currentUser.id,
         },
       });
-      return res.status(201).json({ message: "Custom role created", data: role });
+
+      await rolePermissionService.syncRolePermissions(role.id, resolvedMatrix, currentUser.id);
+
+      const roleWithMatrix = {
+        ...role,
+        matrix: await rolePermissionService.resolveRoleMatrix(role.id, role.permissions),
+      };
+      return res.status(201).json({ message: "Custom role created", data: roleWithMatrix });
     } catch (error) {
       logger.error({ error }, "Failed to create custom role");
       return res.status(400).json({ message: error.message || "Failed to create role" });
@@ -153,7 +183,8 @@ router.get(
         where: { id: req.params.id, deletedAt: null },
       });
       if (!role) return res.status(404).json({ message: "Role not found" });
-      return res.status(200).json({ message: "Role retrieved", data: role });
+      const matrix = await rolePermissionService.resolveRoleMatrix(role.id, role.permissions);
+      return res.status(200).json({ message: "Role retrieved", data: { ...role, matrix } });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to fetch role" });
     }
@@ -166,7 +197,7 @@ router.patch(
   withPermission(Permission.MANAGE_CUSTOM_ROLES),
   async (req, res) => {
     try {
-      const { displayName, description, permissions } = req.body.request || {};
+      const { displayName, description, permissions, matrix } = req.body.request || {};
       const currentUser = req.context.user;
 
       const role = await prisma.customRole.findFirst({
@@ -175,16 +206,31 @@ router.patch(
       if (!role) return res.status(404).json({ message: "Role not found" });
       if (role.isSystem) return res.status(400).json({ message: "Cannot modify system roles" });
 
+      const resolvedPermissions = Array.isArray(matrix)
+        ? rolePermissionService.matrixToPermissions(matrix)
+        : (Array.isArray(permissions) ? permissions : undefined);
+
       const updated = await prisma.customRole.update({
         where: { id: req.params.id },
         data: {
           ...(displayName !== undefined && { displayName }),
           ...(description !== undefined && { description }),
-          ...(permissions !== undefined && { permissions }),
+          ...(resolvedPermissions !== undefined && { permissions: resolvedPermissions }),
           updatedBy: currentUser.id,
         },
       });
-      return res.status(200).json({ message: "Role updated", data: updated });
+
+      if (Array.isArray(matrix)) {
+        await rolePermissionService.syncRolePermissions(updated.id, matrix, currentUser.id);
+      } else if (resolvedPermissions !== undefined) {
+        await rolePermissionService.syncRolePermissions(updated.id, null, currentUser.id);
+      }
+
+      const roleWithMatrix = {
+        ...updated,
+        matrix: await rolePermissionService.resolveRoleMatrix(updated.id, updated.permissions),
+      };
+      return res.status(200).json({ message: "Role updated", data: roleWithMatrix });
     } catch (error) {
       return res.status(400).json({ message: error.message || "Failed to update role" });
     }

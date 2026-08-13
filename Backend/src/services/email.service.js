@@ -466,6 +466,75 @@ const sendAdmissionFormUpdatedEmail = async ({
   });
 };
 
+/**
+ * Consolidated welcome email sent on EVERY account creation (students, teachers,
+ * staff, school admins). Uses the single required subject format and includes the
+ * Login ID, Password, App Name and Play Store download link.
+ */
+const sendAccountWelcomeEmail = async ({
+  to,
+  name,
+  schoolName,
+  loginId,
+  loginEmail,
+  password,
+  attachments,
+  appName = process.env.SCHOOLIAT_APP_NAME || "SchooliAt",
+}) => {
+  const playStoreLink =
+    process.env.SCHOOLIAT_APP_LINK ||
+    "https://play.google.com/store/apps/details?id=com.schooliat.app";
+  const dashboardLink = process.env.FRONTEND_URL || "http://localhost:3000";
+  const subject = `Welcome to ${String(schoolName || "SchooliAt").slice(0, 80)} — Your Schooliat Account Details`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${escapeHtml(subject)}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #6f8f3e; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0;">${escapeHtml(appName)}</h1>
+        <p style="margin: 5px 0 0; font-size: 13px;">Your account is ready</p>
+      </div>
+      <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0;">
+        <h2 style="color: #6f8f3e; margin-top: 0;">Welcome${name ? `, ${escapeHtml(name)}` : ""}</h2>
+        <p>Your account for <strong>${escapeHtml(schoolName || "your school")}</strong> has been created on <strong>${escapeHtml(appName)}</strong>. Use the credentials below to sign in to the app and dashboard.</p>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: white; border: 1px solid #e0e0e0;">
+          <tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Login ID</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace; border-bottom: 1px solid #eee;">${escapeHtml(loginId || loginEmail || "")}</td></tr>
+          ${loginEmail && loginEmail !== loginId ? `<tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Email</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(loginEmail)}</td></tr>` : ""}
+          <tr><td style="padding: 10px 12px; color: #666;">Temporary password</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace;">${escapeHtml(password)}</td></tr>
+        </table>
+        ${attachments && attachments.length > 0 ? "<p>A copy of your admission form is attached to this email.</p>" : ""}
+        <p style="margin: 24px 0 8px;"><strong>Get the ${escapeHtml(appName)} app</strong></p>
+        <div style="text-align: center; margin: 12px 0;">
+          <a href="${playStoreLink}" style="background-color: #6f8f3e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Download from the Google Play Store</a>
+        </div>
+        <p style="text-align: center; color: #666; font-size: 13px; margin: 8px 0 24px;">
+          Available on the Google Play Store
+        </p>
+        <p>Or log in from the web dashboard: <a href="${dashboardLink}" style="color: #6f8f3e;">${dashboardLink}</a></p>
+        <p style="color: #666; font-size: 14px;">Please change the password after first login.</p>
+        <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+        <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+          This is an automated message from ${escapeHtml(appName)}. Please do not reply to this email.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject,
+    html,
+    ...(Array.isArray(attachments) && attachments.length > 0 ? { attachments } : {}),
+  });
+};
+
 const emailService = {
   sendEmail,
   sendOTPEmail,
@@ -473,6 +542,7 @@ const emailService = {
   sendSchoolAdminWelcomeEmail,
   sendEmployeeWelcomeEmail,
   sendStudentWelcomeEmail,
+  sendAccountWelcomeEmail,
   sendAdmissionFormUpdatedEmail,
   verifySmtpIfConfigured,
   resetEmailTransporter,

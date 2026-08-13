@@ -29,6 +29,10 @@ function fetchRoleTemplates() {
   return get("/role-templates");
 }
 
+function fetchPermissionMatrix() {
+  return get("/matrix");
+}
+
 function fetchUserPicker(search: string) {
   return get("/users/picker", { search, limit: 50 });
 }
@@ -107,6 +111,27 @@ export function useRoleTemplates() {
     queryFn: fetchRoleTemplates,
     staleTime: 5 * 60_000,
   });
+}
+
+/**
+ * Feature permission matrix definition (modules × levels) served by GET /matrix.
+ * Each module lists the permission levels that exist for it plus the runtime
+ * Permission enum values granted by each level.
+ */
+export function usePermissionMatrix() {
+  return useQuery({
+    queryKey: ["permission-matrix"],
+    queryFn: fetchPermissionMatrix,
+    staleTime: 5 * 60_000,
+  });
+}
+
+/**
+ * Convert a matrix (array of { module, levels }) into the payload sent to
+ * POST/PATCH /roles — the backend flattens it into runtime permissions.
+ */
+export function matrixToPayload(matrix: { module: string; levels: string[] }[]) {
+  return matrix.filter((m) => m && Array.isArray(m.levels) && m.levels.length > 0);
 }
 
 export function useUserPicker(search: string, enabled: boolean) {

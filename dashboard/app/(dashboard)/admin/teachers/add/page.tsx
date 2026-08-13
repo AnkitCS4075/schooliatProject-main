@@ -17,6 +17,7 @@ import { RadioGroup } from "@/components/forms/radio-group";
 import { ChipGroup } from "@/components/forms/chip-group";
 import { TransportDropdown } from "@/components/forms/transport-dropdown";
 import { PhotoUpload } from "@/components/forms/photo-upload";
+import { RoleAssignmentSelector } from "@/components/admin/custom-roles/role-assignment-selector";
 import {
   Dialog,
   DialogContent,
@@ -70,6 +71,7 @@ export default function AddTeacherPage() {
       aadhaarId: "",
       panCardNumber: "",
       subjects: "",
+      customRoleId: "",
     },
     mode: "onBlur",
   });
@@ -462,6 +464,15 @@ export default function AddTeacherPage() {
                   )}
                 </div>
               </div>
+            </FormCard>
+
+            {/* Role Assignment — inline custom role with read-only permission preview */}
+            <FormCard title="Role & Permissions">
+              <RoleAssignmentSelector
+                value={methods.watch("customRoleId") || ""}
+                onChange={(roleId) => methods.setValue("customRoleId", roleId, { shouldValidate: true })}
+                hint="Selecting a role grants the listed permissions immediately and sends the teacher their login credentials by email."
+              />
             </FormCard>
 
             {/* Additional Information */}

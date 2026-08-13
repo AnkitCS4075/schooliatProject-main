@@ -29,6 +29,7 @@ export const staffSchema = z.object({
     designation: z.string().trim().optional(),
     basicSalary: z.number().min(0, "Salary cannot be negative").optional(),
     publicUserId: z.string().trim().optional(),
+    customRoleId: z.string().trim().optional(),
 });
 
 export const editStaffSchema = staffSchema.extend({

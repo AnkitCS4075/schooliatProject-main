@@ -25,6 +25,7 @@ export interface AddTeacherFormData {
   subjects: string;
   basicSalary?: number;
   publicUserId?: string;
+  customRoleId?: string;
 }
 
 /** Edit form uses `dateOfBirth` (yyyy-MM-dd); add flow uses `dob`. Identity docs are not edited here — omit from type and validation. */
@@ -94,6 +95,8 @@ const baseTeacherSchema = z.object({
     z.number().min(0, "Salary cannot be negative").optional()
   ),
   publicUserId: z.string().trim().optional(),
+  /** Optional inline custom role (template or school role) assigned at creation. */
+  customRoleId: z.string().trim().optional(),
 });
 
 // Schema for adding a teacher

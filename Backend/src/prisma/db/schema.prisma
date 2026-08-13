@@ -232,6 +232,8 @@ model User {
   updatedAt                  DateTime?             @updatedAt @map("updated_at")
   deletedAt                  DateTime?             @map("deleted_at")
   permissions                Permission[]          @default([])
+  customRoleId               String?                @map("custom_role_id")
+  customRole                 CustomRole?            @relation("UserCustomRole", fields: [customRoleId], references: [id])
   markedAttendances          Attendance[]          @relation("MarkedAttendances")
   studentAttendances         Attendance[]          @relation("StudentAttendances")
   auditLogs                  AuditLog[]            @relation("AuditLogs")
@@ -2203,6 +2205,17 @@ enum Permission {
   @@map("permission")
 }
 
+enum PermissionLevel {
+  VIEW
+  CREATE
+  EDIT
+  DELETE
+  EXPORT
+  APPROVE
+
+  @@map("permission_level")
+}
+
 enum UserType {
   APP
   SCHOOL
@@ -2975,22 +2988,48 @@ model PlatformQuotationItem {
 // ─── Custom Roles ─────────────────────────────────────────────────────
 
 model CustomRole {
-  id              String       @id @default(uuid())
-  name            String       @unique
-  displayName     String       @map("display_name")
+  id              String           @id @default(uuid())
+  name            String           @unique
+  displayName     String           @map("display_name")
   description     String?
-  schoolId        String?      @map("school_id")
-  isSystem        Boolean      @default(false) @map("is_system")
+  schoolId        String?          @map("school_id")
+  isSystem        Boolean          @default(false) @map("is_system")
   permissions     Permission[]
-  createdBy       String       @map("created_by")
-  updatedBy       String?      @map("updated_by")
-  deletedBy       String?      @map("deleted_by")
-  createdAt       DateTime     @default(now()) @map("created_at")
-  updatedAt       DateTime?    @updatedAt @map("updated_at")
-  deletedAt       DateTime?    @map("deleted_at")
+  rolePermissions RolePermission[]
+  users           User[]           @relation("UserCustomRole")
+  createdBy       String           @map("created_by")
+  updatedBy       String?          @map("updated_by")
+  deletedBy       String?          @map("deleted_by")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime?        @updatedAt @map("updated_at")
+  deletedAt       DateTime?        @map("deleted_at")
 
   @@index([schoolId, deletedAt])
   @@map("custom_roles")
+}
+
+// ─── Granular role permissions (module × permission level) ─────────────
+// Backing store for the feature permission matrix. Each row grants one
+// permission level for one module to a custom role. The `permissions` array
+// on CustomRole remains the flattened Permission[] view used by the runtime
+// `withPermission` middleware (kept in sync by role-permission.service.js).
+
+model RolePermission {
+  id              String         @id @default(uuid())
+  customRoleId    String         @map("custom_role_id")
+  moduleName      String         @map("module_name")
+  permissionLevel PermissionLevel @map("permission_level")
+  createdBy       String         @map("created_by")
+  updatedBy       String?        @map("updated_by")
+  deletedBy       String?        @map("deleted_by")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime?      @updatedAt @map("updated_at")
+  deletedAt       DateTime?      @map("deleted_at")
+  customRole      CustomRole     @relation(fields: [customRoleId], references: [id], onDelete: Cascade)
+
+  @@unique([customRoleId, moduleName, permissionLevel])
+  @@index([moduleName])
+  @@map("role_permissions")
 }
 
 // ─── Report Templates ─────────────────────────────────────────────────

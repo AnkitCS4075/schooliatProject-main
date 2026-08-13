@@ -48,6 +48,9 @@ function createTeacherApi(form: any) {
       ...(form.publicUserId?.trim()
         ? { publicUserId: form.publicUserId.trim() }
         : {}),
+      ...(form.customRoleId?.trim()
+        ? { customRoleId: form.customRoleId.trim() }
+        : {}),
     },
   };
   return post("/users/teachers", payload);

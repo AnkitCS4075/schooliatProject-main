@@ -233,11 +233,12 @@ router.post(
           .json({ message: "School administrator account not found." });
       }
 
-      await emailService.sendSchoolAdminWelcomeEmail({
+      await emailService.sendAccountWelcomeEmail({
         to: admin.email,
+        name: `${admin.firstName} ${admin.lastName || ""}`.trim(),
         schoolName: school.name,
+        loginId: admin.publicUserId,
         loginEmail: admin.email,
-        publicUserId: admin.publicUserId,
         password,
       });
 

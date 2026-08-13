@@ -2,6 +2,7 @@ import prisma from "../prisma/client.js";
 import { RoleName, Permission } from "../prisma/generated/index.js";
 import logger from "../config/logger.js";
 import cacheService from "./cache.service.js";
+import rolePermissionService from "./role-permission.service.js";
 
 /** Return set of permission enum labels present in the DB (so we never write invalid enum values). */
 async function getDbPermissionValues() {
@@ -692,6 +693,18 @@ const roleTemplates = [
       Permission.GET_ATTENDANCE_REPORTS, Permission.GET_REPORTS,
     ],
   },
+  {
+    name: "TEMPLATE_GATE_OPERATOR",
+    displayName: "Gate Operator",
+    description: "Manages visitor/vehicle gate entries and couriers at the school gate.",
+    permissions: [
+      Permission.GET_MY_SCHOOL, Permission.GET_DASHBOARD_STATS,
+      Permission.GET_MESSAGES, Permission.SEND_MESSAGE, Permission.SEND_NOTIFICATION,
+      Permission.CREATE_GATE_ENTRY, Permission.GET_GATE_ENTRIES, Permission.UPDATE_GATE_ENTRY, Permission.DELETE_GATE_ENTRY,
+      Permission.GET_COURIERS, Permission.CREATE_COURIER_ENTRY, Permission.UPDATE_COURIER_ENTRY, Permission.DELETE_COURIER_ENTRY,
+      Permission.GET_STUDENTS, Permission.GET_CLASSES,
+    ],
+  },
 ];
 
 const createRoleTemplates = async () => {
@@ -878,6 +891,27 @@ const syncRoleTemplates = async () => {
   if (templateUpdates.length > 0) {
     await Promise.all(templateUpdates);
     logger.info(`Synced ${templateUpdates.length} role template(s)`);
+  }
+
+  // Sync the granular module × level matrix rows (role_permissions) for every
+  // template so the dashboard grid + role preview always reflect the template.
+  const templatesAfterSync = await prisma.customRole.findMany({
+    where: { isSystem: true, schoolId: null, deletedAt: null },
+    select: { id: true, name: true, permissions: true },
+  });
+  const roleIdByName = new Map(templatesAfterSync.map((r) => [r.name, r.id]));
+  for (const template of roleTemplates) {
+    const roleId = roleIdByName.get(template.name);
+    if (!roleId) continue;
+    try {
+      await rolePermissionService.syncRolePermissions(
+        roleId,
+        rolePermissionService.permissionsToMatrix(template.permissions),
+        "system",
+      );
+    } catch (error) {
+      logger.warn({ err: error, roleId, template: template.name }, "Failed to sync role matrix rows");
+    }
   }
 
   // Upgrade users whose additive permission set already covers a template's previous

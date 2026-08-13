@@ -180,6 +180,26 @@ router.post(
         });
       }
 
+      // Optional inline custom role assignment: grants the role's permissions
+      // additively and records the role on the user for the permission preview.
+      const customRoleId = request.customRoleId || null;
+      let customRole = null;
+      let additivePermissions = [];
+      if (customRoleId) {
+        customRole = await prisma.customRole.findFirst({
+          where: {
+            id: customRoleId,
+            deletedAt: null,
+            OR: [{ schoolId: currentUser.schoolId }, { schoolId: null }],
+          },
+          select: { id: true, name: true, displayName: true, permissions: true },
+        });
+        if (!customRole) {
+          return res.status(400).json({ message: "Selected custom role was not found" });
+        }
+        additivePermissions = customRole.permissions || [];
+      }
+
       const reviveCandidate = [existingByEmail, existingByPublicUserId, existingByAadhaar]
         .filter(Boolean)
         .find(
@@ -214,6 +234,13 @@ router.post(
               deletedAt: null,
               deletedBy: null,
               updatedBy: currentUser.id,
+              permissions: [
+                ...new Set([
+                  ...(reviveCandidate.permissions || []),
+                  ...additivePermissions,
+                ]),
+              ],
+              ...(customRoleId ? { customRoleId } : {}),
             },
             select: userService.getTeacherSelect(),
           });
@@ -282,6 +309,8 @@ router.post(
             schoolId: currentUser.schoolId,
             registrationPhotoId: registrationPhotoId || null,
             idPhotoId: request.idPhotoId || null,
+            permissions: additivePermissions,
+            ...(customRoleId ? { customRoleId } : {}),
             createdBy: currentUser.id,
           },
           select: userService.getTeacherSelect(),
@@ -322,9 +351,32 @@ router.post(
       );
       await userService.attachTeacherListMetrics(usersWithUrls, currentUser.schoolId);
 
+      // Consolidated SMTP welcome email with login credentials on every creation
+      try {
+        if (user.email && !user.email.includes("@placeholder.schooliat.local")) {
+          await emailService.sendAccountWelcomeEmail({
+            to: user.email,
+            name: `${user.firstName} ${user.lastName || ""}`.trim(),
+            schoolName: school.name,
+            loginId: user.publicUserId,
+            loginEmail: user.email,
+            password: generatedPassword,
+          });
+        }
+      } catch (emailErr) {
+        logger.warn({ err: emailErr, userId: user.id }, "Teacher created but welcome email failed");
+      }
+
       return res.status(201).json({
         message: "Teacher created!",
-        data: { ...withTeacherSubjects(usersWithUrls[0]), password: generatedPassword },
+        data: {
+          ...withTeacherSubjects(usersWithUrls[0]),
+          password: generatedPassword,
+          customRole: customRole
+            ? { id: customRole.id, name: customRole.name, displayName: customRole.displayName }
+            : null,
+          permissions: additivePermissions,
+        },
       });
     } catch (error) {
       if (error.code === "P2002") {
@@ -858,6 +910,25 @@ router.post(
         publicUserId = await allocateStaffPublicUserId(school.code, school.id, staffRole.id);
       }
 
+      // Optional inline custom role assignment (same semantics as teachers)
+      const customRoleId = request.customRoleId || null;
+      let customRole = null;
+      let additivePermissions = [];
+      if (customRoleId) {
+        customRole = await prisma.customRole.findFirst({
+          where: {
+            id: customRoleId,
+            deletedAt: null,
+            OR: [{ schoolId: currentUser.schoolId }, { schoolId: null }],
+          },
+          select: { id: true, name: true, displayName: true, permissions: true },
+        });
+        if (!customRole) {
+          return res.status(400).json({ message: "Selected custom role was not found" });
+        }
+        additivePermissions = customRole.permissions || [];
+      }
+
       // Create user
       const user = await prisma.user.create({
         data: {
@@ -876,6 +947,8 @@ router.post(
           schoolId: currentUser.schoolId,
           registrationPhotoId: registrationPhotoId || null,
           idPhotoId: request.idPhotoId || null,
+          permissions: additivePermissions,
+          ...(customRoleId ? { customRoleId } : {}),
           createdBy: currentUser.id,
         },
         select: userService.getStaffSelect(),
@@ -894,9 +967,32 @@ router.post(
       // Attach file URLs
       const usersWithUrls = await userService.attachFileURLs([user]);
 
+      // Consolidated SMTP welcome email with login credentials on every creation
+      try {
+        if (user.email && !user.email.includes("@placeholder.schooliat.local")) {
+          await emailService.sendAccountWelcomeEmail({
+            to: user.email,
+            name: `${user.firstName} ${user.lastName || ""}`.trim(),
+            schoolName: school.name,
+            loginId: user.publicUserId,
+            loginEmail: user.email,
+            password: generatedPassword,
+          });
+        }
+      } catch (emailErr) {
+        logger.warn({ err: emailErr, userId: user.id }, "Staff created but welcome email failed");
+      }
+
       return res.status(201).json({
         message: "Staff member created!",
-        data: { ...usersWithUrls[0], password: generatedPassword },
+        data: {
+          ...usersWithUrls[0],
+          password: generatedPassword,
+          customRole: customRole
+            ? { id: customRole.id, name: customRole.name, displayName: customRole.displayName }
+            : null,
+          permissions: additivePermissions,
+        },
       });
     } catch (error) {
       if (error.code === "P2002") {
@@ -1499,18 +1595,22 @@ router.post(
             logger.warn({ err: pdfErr, studentId: user.id }, "Admission form PDF generation failed for welcome email");
           }
 
-          await emailService.sendStudentWelcomeEmail({
+          await emailService.sendAccountWelcomeEmail({
             to: user.email,
-            studentName: `${user.firstName} ${user.lastName || ""}`.trim(),
-            parentName: request.fatherName || request.motherName || "",
+            name: `${user.firstName} ${user.lastName || ""}`.trim(),
             schoolName: school?.name || "",
+            loginId: user.publicUserId,
             loginEmail: user.email,
-            publicUserId: user.publicUserId,
             password: generatedPassword,
-            className: classLabel ? `${classLabel.grade}${classLabel.division ? ` - ${classLabel.division}` : ""}` : "",
-            rollNumber,
-            admissionFormBuffer,
-            admissionFormName: `Admission-Form-${user.publicUserId || ""}.pdf`,
+            attachments: admissionFormBuffer
+              ? [
+                  {
+                    filename: admissionFormName || `Admission-Form-${user.publicUserId || ""}.pdf`,
+                    content: admissionFormBuffer,
+                    contentType: "application/pdf",
+                  },
+                ]
+              : [],
           });
         }
       } catch (emailErr) {

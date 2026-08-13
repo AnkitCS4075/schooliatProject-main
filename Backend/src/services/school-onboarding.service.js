@@ -472,23 +472,16 @@ const complete = async (id, userId) => {
     data: { status: "COMPLETED", schoolId, updatedBy: userId },
   });
 
-  // Email credentials to the school admin
+  // Email credentials to the school admin (consolidated welcome email used by
+  // every account creation flow: students, teachers, staff, school admins)
   try {
-    await emailService.sendEmail({
+    await emailService.sendAccountWelcomeEmail({
       to: onboarding.concernedEmail,
-      subject: `SchooliAT Account Created — ${school.name}`,
-      html: `
-        <p>Dear ${onboarding.pointOfContactName || "School Administrator"},</p>
-        <p>Your school has been onboarded to <strong>SchooliAT</strong>. Below are your administrator login credentials.</p>
-        <table>
-          <tr><td>School</td><td>${school.name}</td></tr>
-          <tr><td>School Code</td><td>${school.code}</td></tr>
-          <tr><td>Login Email</td><td>${onboarding.concernedEmail}</td></tr>
-          <tr><td>Public User ID</td><td>${adminCreds.publicUserId || ""}</td></tr>
-          <tr><td>Temporary Password</td><td>${adminCreds.password || "Reset via email"}</td></tr>
-        </table>
-        <p><strong>Note:</strong> Your account is currently <strong>Pending Activation</strong>. The SchooliAT team will activate it shortly. You will receive a confirmation email once active.</p>
-      `,
+      name: onboarding.pointOfContactName || "School Administrator",
+      schoolName: school.name,
+      loginId: adminCreds.publicUserId || "",
+      loginEmail: onboarding.concernedEmail,
+      password: adminCreds.password || "Reset via email",
     });
   } catch (emailErr) {
     logger.warn({ err: emailErr.message }, "Credentials email failed after onboarding completion");
