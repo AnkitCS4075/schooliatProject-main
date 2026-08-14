@@ -123,6 +123,7 @@ router.post(
       schoolId: user.schoolId ?? null,
       role,
       school: school ?? undefined,
+      mustChangePassword: user.mustChangePassword ?? false,
     };
     const jwtToken = jwt.sign(
       { data: { user: safeUser } },
@@ -298,10 +299,10 @@ router.post(
     // Hash new password
     const hashedPassword = await passwordUtil.hashPassword(password);
 
-    // Update user password
+    // Update user password + clear the first-login forced-change flag
     await prisma.user.update({
       where: { id: resetToken.userId },
-      data: { password: hashedPassword },
+      data: { password: hashedPassword, mustChangePassword: false },
     });
 
     // Mark reset token as used
@@ -358,10 +359,10 @@ router.post(
     // Hash new password
     const hashedPassword = await passwordUtil.hashPassword(newPassword);
 
-    // Update password
+    // Update password + clear the first-login forced-change flag
     await prisma.user.update({
       where: { id: userId },
-      data: { password: hashedPassword },
+      data: { password: hashedPassword, mustChangePassword: false },
     });
 
     res.json({

@@ -591,6 +591,87 @@ const sendAccountWelcomeEmail = async ({
   });
 };
 
+/**
+ * Welcome email for newly created Teacher/Staff accounts.
+ * Includes full name, role, employee/login ID, password, school name, app name, Play Store
+ * link (from settings), and a one-time password reset link (forces a password change on
+ * first login). Recipient is the staff email; extra recipients can be CC'd.
+ */
+const sendStaffWelcomeEmail = async ({
+  to,
+  cc,
+  fullName,
+  roleLabel,
+  employeeId,
+  loginId,
+  loginEmail,
+  password,
+  schoolName,
+  schoolId,
+  resetLink,
+  appName = process.env.SCHOOLIAT_APP_NAME || "SchooliAt",
+}) => {
+  const appStoreLink = await resolveAppStoreLink(schoolId || null);
+  const dashboardLink = process.env.FRONTEND_URL || "http://localhost:3000";
+  const subject = `Welcome to ${String(schoolName || "Your School").slice(0, 80)} — Your Schooliat Staff Access Details`;
+  const displayEmployeeId = employeeId || loginId || "";
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${escapeHtml(subject)}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #6f8f3e; color: white; padding: 24px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0; font-size: 24px;">${escapeHtml(appName)}</h1>
+        <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Complete Education Institution Management</p>
+      </div>
+      <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0;">
+        <h2 style="color: #6f8f3e; margin-top: 0;">Welcome to ${escapeHtml(schoolName || "Our School")}</h2>
+        <p>Dear ${escapeHtml(fullName || "Staff Member")},</p>
+        <p>Your ${roleLabel ? `${escapeHtml(roleLabel)} ` : ""}account at <strong>${escapeHtml(schoolName || "our school")}</strong> has been created on <strong>${escapeHtml(appName)}</strong>. Use the credentials below to sign in to the app and web dashboard.</p>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: white; border: 1px solid #e0e0e0;">
+          <tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Full Name</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(fullName || "")}</td></tr>
+          ${roleLabel ? `<tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Role</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(roleLabel)}</td></tr>` : ""}
+          ${displayEmployeeId ? `<tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Employee ID / Login ID</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace; border-bottom: 1px solid #eee;">${escapeHtml(displayEmployeeId)}</td></tr>` : ""}
+          ${loginEmail && loginEmail !== loginId ? `<tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Login Email</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(loginEmail)}</td></tr>` : ""}
+          <tr><td style="padding: 10px 12px; color: #666;">Temporary Password</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace;">${escapeHtml(password || "")}</td></tr>
+        </table>
+        ${resetLink ? `
+          <p style="color: #666; font-size: 14px;">For security, please set your own password on first login:</p>
+          <div style="text-align: center; margin: 16px 0;">
+            <a href="${resetLink}" style="background-color: #6f8f3e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Set Your Password</a>
+          </div>
+          <p style="text-align: center; color: #666; font-size: 12px;">This link expires in 30 minutes.</p>
+        ` : `<p style="color: #666; font-size: 14px;">Please change the password after the first login.</p>`}
+        <p style="margin: 24px 0 8px;"><strong>Get the ${escapeHtml(appName)} app</strong></p>
+        <div style="text-align: center; margin: 12px 0;">
+          <a href="${appStoreLink}" style="background-color: #6f8f3e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Download the ${escapeHtml(appName)} App</a>
+        </div>
+        <p style="text-align: center; color: #666; font-size: 13px; margin: 8px 0 24px;">
+          Available on the Google Play Store
+        </p>
+        <p>Or log in from the web dashboard: <a href="${dashboardLink}" style="color: #6f8f3e;">${dashboardLink}</a></p>
+        <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+        <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+          This is an automated message from ${escapeHtml(appName)}. Please do not reply to this email.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject,
+    html,
+    ...(Array.isArray(cc) && cc.length > 0 ? { cc } : {}),
+  });
+};
+
 const emailService = {
   sendEmail,
   sendOTPEmail,
@@ -598,6 +679,7 @@ const emailService = {
   sendSchoolAdminWelcomeEmail,
   sendEmployeeWelcomeEmail,
   sendStudentWelcomeEmail,
+  sendStaffWelcomeEmail,
   sendAccountWelcomeEmail,
   sendAdmissionFormUpdatedEmail,
   verifySmtpIfConfigured,

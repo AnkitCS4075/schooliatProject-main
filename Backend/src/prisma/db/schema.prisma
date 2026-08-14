@@ -232,8 +232,10 @@ model User {
   updatedAt                  DateTime?             @updatedAt @map("updated_at")
   deletedAt                  DateTime?             @map("deleted_at")
   permissions                Permission[]          @default([])
-  customRoleId               String?                @map("custom_role_id")
-  customRole                 CustomRole?            @relation("UserCustomRole", fields: [customRoleId], references: [id])
+  customRoleId               String?               @map("custom_role_id")
+  customRole                 CustomRole?           @relation("UserCustomRole", fields: [customRoleId], references: [id])
+  /// Onboarding security flag: when true the user must set a new password at first login.
+  mustChangePassword         Boolean               @default(false) @map("must_change_password")
   markedAttendances          Attendance[]          @relation("MarkedAttendances")
   studentAttendances         Attendance[]          @relation("StudentAttendances")
   auditLogs                  AuditLog[]            @relation("AuditLogs")

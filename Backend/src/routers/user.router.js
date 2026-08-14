@@ -1,4 +1,5 @@
 import { Router } from "express";
+import crypto from "crypto";
 import prisma from "../prisma/client.js";
 import withPermission from "../middlewares/with-permission.middleware.js";
 import { Permission, RoleName, UserType, NotificationType } from "../prisma/generated/index.js";
@@ -46,6 +47,21 @@ import {
 } from "../utils/bulk-user-import.util.js";
 
 const router = Router();
+
+/**
+ * Create a one-time password-reset token for a user (deletes any previous token first).
+ * Used by the staff/teacher welcome email to force a password change on first login.
+ * @returns {Promise<string>} raw reset token
+ */
+async function createPasswordResetTokenForUser(userId) {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+  await prisma.passwordResetToken.deleteMany({ where: { userId } });
+  await prisma.passwordResetToken.create({
+    data: { userId, token: resetToken, expiresAt },
+  });
+  return resetToken;
+}
 
 /** List/detail UIs expect `teacher.subjects`; data lives on `teacherProfile.subjects`. */
 function withTeacherSubjects(user) {
@@ -241,6 +257,7 @@ router.post(
                   ...additivePermissions,
                 ]),
               ],
+              mustChangePassword: true,
               ...(customRoleId ? { customRoleId } : {}),
             },
             select: userService.getTeacherSelect(),
@@ -311,6 +328,7 @@ router.post(
             registrationPhotoId: registrationPhotoId || null,
             idPhotoId: request.idPhotoId || null,
             permissions: additivePermissions,
+            mustChangePassword: true,
             ...(customRoleId ? { customRoleId } : {}),
             createdBy: currentUser.id,
           },
@@ -352,17 +370,41 @@ router.post(
       );
       await userService.attachTeacherListMetrics(usersWithUrls, currentUser.schoolId);
 
-      // Consolidated SMTP welcome email with login credentials on every creation
+      // SMTP welcome email with credentials + one-time reset link on every creation
       try {
         if (user.email && !user.email.includes("@placeholder.schooliat.local")) {
-          await emailService.sendAccountWelcomeEmail({
+          const resetToken = await createPasswordResetTokenForUser(user.id);
+          const resetLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
+          const roleLabel =
+            [customRole?.displayName, request.designation?.trim()].filter(Boolean).join(" · ") ||
+            "Teacher";
+
+          await emailService.sendStaffWelcomeEmail({
             to: user.email,
-            name: `${user.firstName} ${user.lastName || ""}`.trim(),
-            schoolName: school.name,
+            fullName: `${user.firstName} ${user.lastName || ""}`.trim(),
+            roleLabel,
+            employeeId: user.publicUserId,
             loginId: user.publicUserId,
             loginEmail: user.email,
             password: generatedPassword,
+            schoolName: school.name,
+            schoolId: currentUser.schoolId,
+            resetLink,
           });
+
+          // Log the sent email in the user's communication history (in-app notification)
+          try {
+            await notificationService.createNotification({
+              userId: user.id,
+              title: "Welcome — Your Schooliat Staff Access Details",
+              content: `Welcome email with login credentials and a password reset link sent to ${user.email}. Login ID: ${user.publicUserId}.`,
+              type: NotificationType.GENERAL,
+              schoolId: currentUser.schoolId,
+              createdBy: currentUser.id,
+            });
+          } catch (notifErr) {
+            logger.warn({ err: notifErr, userId: user.id }, "Teacher welcome notification log failed");
+          }
         }
       } catch (emailErr) {
         logger.warn({ err: emailErr, userId: user.id }, "Teacher created but welcome email failed");
@@ -949,6 +991,7 @@ router.post(
           registrationPhotoId: registrationPhotoId || null,
           idPhotoId: request.idPhotoId || null,
           permissions: additivePermissions,
+          mustChangePassword: true,
           ...(customRoleId ? { customRoleId } : {}),
           createdBy: currentUser.id,
         },
@@ -968,17 +1011,41 @@ router.post(
       // Attach file URLs
       const usersWithUrls = await userService.attachFileURLs([user]);
 
-      // Consolidated SMTP welcome email with login credentials on every creation
+      // SMTP welcome email with credentials + one-time reset link on every creation
       try {
         if (user.email && !user.email.includes("@placeholder.schooliat.local")) {
-          await emailService.sendAccountWelcomeEmail({
+          const resetToken = await createPasswordResetTokenForUser(user.id);
+          const resetLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
+          const roleLabel =
+            [customRole?.displayName, request.designation?.trim()].filter(Boolean).join(" · ") ||
+            "Staff";
+
+          await emailService.sendStaffWelcomeEmail({
             to: user.email,
-            name: `${user.firstName} ${user.lastName || ""}`.trim(),
-            schoolName: school.name,
+            fullName: `${user.firstName} ${user.lastName || ""}`.trim(),
+            roleLabel,
+            employeeId: user.publicUserId,
             loginId: user.publicUserId,
             loginEmail: user.email,
             password: generatedPassword,
+            schoolName: school.name,
+            schoolId: currentUser.schoolId,
+            resetLink,
           });
+
+          // Log the sent email in the user's communication history (in-app notification)
+          try {
+            await notificationService.createNotification({
+              userId: user.id,
+              title: "Welcome — Your Schooliat Staff Access Details",
+              content: `Welcome email with login credentials and a password reset link sent to ${user.email}. Login ID: ${user.publicUserId}.`,
+              type: NotificationType.GENERAL,
+              schoolId: currentUser.schoolId,
+              createdBy: currentUser.id,
+            });
+          } catch (notifErr) {
+            logger.warn({ err: notifErr, userId: user.id }, "Staff welcome notification log failed");
+          }
         }
       } catch (emailErr) {
         logger.warn({ err: emailErr, userId: user.id }, "Staff created but welcome email failed");
@@ -2561,6 +2628,7 @@ router.post(
                 roleId: teacherRole.id,
                 schoolId: currentUser.schoolId,
                 publicUserId,
+                mustChangePassword: true,
                 createdBy: currentUser.id,
                 aadhaarId: aadhaarNormalized,
               },
