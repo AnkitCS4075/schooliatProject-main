@@ -1,7 +1,52 @@
 import nodemailer from "nodemailer";
 import config from "../config.js";
 import logger from "../config/logger.js";
+import prisma from "../prisma/client.js";
 import * as smtpConfigService from "./smtp-config.service.js";
+
+const DEFAULT_APP_STORE_LINK = "https://play.google.com/store/apps/details?id=com.schoolit";
+
+/**
+ * Resolve the mobile app store link for an email.
+ * Priority: school Settings.platformConfig (white-label override) → platform Settings.platformConfig
+ * (Super Admin settings) → SCHOOLIAT_APP_LINK env → default Schooliat Play Store URL.
+ * @param {string|null} [schoolId] - Optional school to check for a white-labeled link
+ * @returns {Promise<string>}
+ */
+async function resolveAppStoreLink(schoolId = null) {
+  const linkFromSettings = (row) => {
+    const cfg = row?.platformConfig;
+    if (!cfg || typeof cfg !== "object") return null;
+    return (
+      cfg.appStoreLink ||
+      cfg.system?.appStoreLink ||
+      cfg.app?.storeLink ||
+      cfg.app?.appStoreLink ||
+      null
+    );
+  };
+
+  try {
+    if (schoolId) {
+      const schoolRow = await prisma.settings.findFirst({
+        where: { schoolId, deletedAt: null },
+        select: { platformConfig: true },
+      });
+      const schoolLink = linkFromSettings(schoolRow);
+      if (schoolLink) return schoolLink;
+    }
+    const platformRow = await prisma.settings.findFirst({
+      where: { schoolId: null, deletedAt: null },
+      select: { platformConfig: true },
+    });
+    const platformLink = linkFromSettings(platformRow);
+    if (platformLink) return platformLink;
+  } catch (error) {
+    logger.warn({ err: error }, "Failed to resolve app store link from settings; using fallback");
+  }
+
+  return process.env.SCHOOLIAT_APP_LINK || DEFAULT_APP_STORE_LINK;
+}
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -319,25 +364,34 @@ const sendEmployeeWelcomeEmail = async ({
 };
 
 /**
- * Welcome email for new student (admission confirmation).
- * Includes app link + login credentials + optional admission form PDF attachment.
+ * Welcome email for new student admission (student/parent portal access).
+ * Includes school welcome, login credentials (ID + password), app name, Play Store
+ * download link (resolved from Super Admin settings, white-label per school), and the
+ * admission form PDF attachment. Recipient is the student email; linked parent/guardian
+ * emails can be CC'd.
  */
 const sendStudentWelcomeEmail = async ({
   to,
+  cc,
   studentName,
   parentName,
   schoolName,
+  schoolId,
   loginEmail,
   publicUserId,
   password,
   className,
+  section,
   rollNumber,
   admissionFormBuffer,
   admissionFormName,
+  appName = process.env.SCHOOLIAT_APP_NAME || "SchooliAt",
 }) => {
-  const appStoreLink = process.env.SCHOOLIAT_APP_LINK || "https://play.google.com/store/apps";
-  const dashboardLink =
-    process.env.FRONTEND_URL || "http://localhost:3000";
+  const appStoreLink = await resolveAppStoreLink(schoolId || null);
+  const dashboardLink = process.env.FRONTEND_URL || "http://localhost:3000";
+  const subject = `Welcome to ${String(schoolName || "Your School").slice(0, 80)} — Your Schooliat Student Portal Access`;
+  const classAndSection = [className, section].filter((v) => v && String(v).trim()).join(" - ");
+  const greetingName = parentName || studentName || "Parent";
 
   const html = `
     <!DOCTYPE html>
@@ -345,39 +399,38 @@ const sendStudentWelcomeEmail = async ({
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Admission Confirmed</title>
+      <title>${escapeHtml(subject)}</title>
     </head>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="background-color: #6f8f3e; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0;">SchooliAt</h1>
-        <p style="margin: 5px 0 0; font-size: 13px;">Admission Confirmation</p>
+      <div style="background-color: #6f8f3e; color: white; padding: 24px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0; font-size: 24px;">${escapeHtml(appName)}</h1>
+        <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Complete Education Institution Management</p>
       </div>
       <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0;">
-        <h2 style="color: #6f8f3e; margin-top: 0;">Admission Confirmed!</h2>
-        <p>Dear ${escapeHtml(parentName || "Parent")},</p>
-        <p>We are pleased to confirm the admission of <strong>${escapeHtml(studentName)}</strong> to <strong>${escapeHtml(schoolName || "our school")}</strong>.</p>
-        ${className ? `<p><strong>Class:</strong> ${escapeHtml(className)}</p>` : ""}
-        ${rollNumber ? `<p><strong>Roll Number:</strong> ${escapeHtml(String(rollNumber))}</p>` : ""}
-        <p>Below are the login credentials for the student portal:</p>
+        <h2 style="color: #6f8f3e; margin-top: 0;">Welcome to ${escapeHtml(schoolName || "Our School")}</h2>
+        <p>Dear ${escapeHtml(greetingName)},</p>
+        <p>We are delighted to confirm the admission of <strong>${escapeHtml(studentName)}</strong> to <strong>${escapeHtml(schoolName || "our school")}</strong>. The student portal account has been created successfully — use the credentials below to sign in to the ${escapeHtml(appName)} app and web dashboard.</p>
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: white; border: 1px solid #e0e0e0;">
-          <tr><td style="padding: 8px 12px; color: #666; border-bottom: 1px solid #eee;">Student Name</td><td style="padding: 8px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(studentName)}</td></tr>
-          <tr><td style="padding: 8px 12px; color: #666; border-bottom: 1px solid #eee;">Admission No</td><td style="padding: 8px 12px; font-weight: bold; font-family: monospace; border-bottom: 1px solid #eee;">${escapeHtml(publicUserId)}</td></tr>
-          <tr><td style="padding: 8px 12px; color: #666; border-bottom: 1px solid #eee;">Login Email</td><td style="padding: 8px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(loginEmail)}</td></tr>
-          <tr><td style="padding: 8px 12px; color: #666;">Temporary Password</td><td style="padding: 8px 12px; font-weight: bold; font-family: monospace;">${escapeHtml(password)}</td></tr>
+          <tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Student Name</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(studentName)}</td></tr>
+          ${classAndSection ? `<tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Class &amp; Section</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(classAndSection)}</td></tr>` : ""}
+          ${rollNumber ? `<tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Roll Number</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(String(rollNumber))}</td></tr>` : ""}
+          <tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Admission No / Login ID</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace; border-bottom: 1px solid #eee;">${escapeHtml(publicUserId || "")}</td></tr>
+          <tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Login Email</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(loginEmail || "")}</td></tr>
+          <tr><td style="padding: 10px 12px; color: #666;">Temporary Password</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace;">${escapeHtml(password || "")}</td></tr>
         </table>
+        <p style="color: #666; font-size: 14px;">Please change the password after the first login.</p>
         ${admissionFormBuffer ? `<p>A copy of the admission form is attached to this email for your records.</p>` : ""}
-        <p style="margin: 24px 0 8px;"><strong>Get the SchooliAt app</strong></p>
+        <p style="margin: 24px 0 8px;"><strong>Get the ${escapeHtml(appName)} app</strong></p>
         <div style="text-align: center; margin: 12px 0;">
-          <a href="${appStoreLink}" style="background-color: #6f8f3e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Download the SchooliAt App</a>
+          <a href="${appStoreLink}" style="background-color: #6f8f3e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Download the ${escapeHtml(appName)} App</a>
         </div>
         <p style="text-align: center; color: #666; font-size: 13px; margin: 8px 0 24px;">
-          Available on Google Play Store
+          Available on the Google Play Store
         </p>
         <p>Or log in from the web dashboard: <a href="${dashboardLink}" style="color: #6f8f3e;">${dashboardLink}</a></p>
-        <p style="color: #666; font-size: 14px;">Please change the password after first login.</p>
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
         <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
-          This is an automated message from SchooliAt.
+          This is an automated message from ${escapeHtml(appName)}. Please do not reply to this email.
         </p>
       </div>
     </body>
@@ -386,8 +439,9 @@ const sendStudentWelcomeEmail = async ({
 
   return sendEmail({
     to,
-    subject: `Admission Confirmed - ${studentName} | ${schoolName || "SchooliAt"}`,
+    subject,
     html,
+    ...(Array.isArray(cc) && cc.length > 0 ? { cc } : {}),
     ...(admissionFormBuffer
       ? {
           attachments: [
@@ -407,6 +461,7 @@ const sendStudentWelcomeEmail = async ({
  */
 const sendAdmissionFormUpdatedEmail = async ({
   to,
+  cc,
   studentName,
   schoolName,
   loginEmail,
@@ -452,6 +507,7 @@ const sendAdmissionFormUpdatedEmail = async ({
     to,
     subject: `Admission Form Updated - ${studentName}`,
     html,
+    ...(Array.isArray(cc) && cc.length > 0 ? { cc } : {}),
     ...(admissionFormBuffer
       ? {
           attachments: [
@@ -473,6 +529,7 @@ const sendAdmissionFormUpdatedEmail = async ({
  */
 const sendAccountWelcomeEmail = async ({
   to,
+  cc,
   name,
   schoolName,
   loginId,
@@ -481,9 +538,7 @@ const sendAccountWelcomeEmail = async ({
   attachments,
   appName = process.env.SCHOOLIAT_APP_NAME || "SchooliAt",
 }) => {
-  const playStoreLink =
-    process.env.SCHOOLIAT_APP_LINK ||
-    "https://play.google.com/store/apps/details?id=com.schooliat.app";
+  const playStoreLink = process.env.SCHOOLIAT_APP_LINK || DEFAULT_APP_STORE_LINK;
   const dashboardLink = process.env.FRONTEND_URL || "http://localhost:3000";
   const subject = `Welcome to ${String(schoolName || "SchooliAt").slice(0, 80)} — Your Schooliat Account Details`;
 
@@ -531,6 +586,7 @@ const sendAccountWelcomeEmail = async ({
     to,
     subject,
     html,
+    ...(Array.isArray(cc) && cc.length > 0 ? { cc } : {}),
     ...(Array.isArray(attachments) && attachments.length > 0 ? { attachments } : {}),
   });
 };

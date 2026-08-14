@@ -1,13 +1,14 @@
 import { Router } from "express";
 import prisma from "../prisma/client.js";
 import withPermission from "../middlewares/with-permission.middleware.js";
-import { Permission, RoleName, UserType } from "../prisma/generated/index.js";
+import { Permission, RoleName, UserType, NotificationType } from "../prisma/generated/index.js";
 import userService from "../services/user.service.js";
 import validateRequest from "../middlewares/validate-request.middleware.js";
 import paginateUtil from "../utils/paginate.util.js";
 import bcryptjs from "bcryptjs";
 import stringUtil from "../utils/string.util.js";
 import emailService from "../services/email.service.js";
+import notificationService from "../services/notification.service.js";
 import logger from "../config/logger.js";
 import fileService from "../services/file.service.js";
 import roleService from "../services/role.service.js";
@@ -1575,12 +1576,42 @@ router.post(
         );
       }
 
-      // Auto-send admission confirmation email to parent (with credentials + admission form PDF)
+      // Auto-send admission welcome email to the student/parent (credentials + admission form PDF)
       try {
-        if (user.email && !user.email.includes("@placeholder.schooliat.local")) {
-          const school = await prisma.school.findUnique({ where: { id: currentUser.schoolId }, select: { name: true } });
+        // Linked parent/guardian accounts (if any) are CC'd on the email
+        const parentLinks = await prisma.parentChildLink.findMany({
+          where: { childId: user.id, deletedAt: null },
+          select: { parent: { select: { email: true } } },
+        });
+        const parentEmails = [
+          ...new Set(
+            parentLinks
+              .map((link) => link.parent?.email)
+              .filter((email) => email && !email.includes("@placeholder.schooliat.local")),
+          ),
+        ];
+
+        const studentEmailValid =
+          user.email && !user.email.includes("@placeholder.schooliat.local");
+        const primaryRecipient = studentEmailValid
+          ? user.email
+          : parentEmails[0] || null;
+        const ccEmails = studentEmailValid
+          ? parentEmails.filter(
+              (email) => email.toLowerCase() !== String(user.email || "").toLowerCase(),
+            )
+          : parentEmails.slice(1);
+
+        if (primaryRecipient) {
+          const school = await prisma.school.findUnique({
+            where: { id: currentUser.schoolId },
+            select: { name: true },
+          });
           const classLabel = request.classId
-            ? (await prisma.class.findUnique({ where: { id: request.classId }, select: { grade: true, division: true } }))
+            ? await prisma.class.findUnique({
+                where: { id: request.classId },
+                select: { grade: true, division: true },
+              })
             : null;
 
           let admissionFormBuffer = null;
@@ -1590,28 +1621,43 @@ router.post(
               select: userService.getStudentSelect(),
             });
             const withSchool = { ...fullForPdf, school: school ?? null };
-            admissionFormBuffer = await admissionFormService.renderAdmissionFormPdf({ student: withSchool });
+            admissionFormBuffer = await admissionFormService.renderAdmissionFormPdf({
+              student: withSchool,
+            });
           } catch (pdfErr) {
             logger.warn({ err: pdfErr, studentId: user.id }, "Admission form PDF generation failed for welcome email");
           }
 
-          await emailService.sendAccountWelcomeEmail({
-            to: user.email,
-            name: `${user.firstName} ${user.lastName || ""}`.trim(),
+          await emailService.sendStudentWelcomeEmail({
+            to: primaryRecipient,
+            cc: ccEmails.length ? ccEmails : undefined,
+            studentName: `${user.firstName} ${user.lastName || ""}`.trim(),
+            parentName: normalizedRequest.fatherName || normalizedRequest.motherName || "",
             schoolName: school?.name || "",
-            loginId: user.publicUserId,
+            schoolId: currentUser.schoolId,
             loginEmail: user.email,
+            publicUserId: user.publicUserId,
             password: generatedPassword,
-            attachments: admissionFormBuffer
-              ? [
-                  {
-                    filename: admissionFormName || `Admission-Form-${user.publicUserId || ""}.pdf`,
-                    content: admissionFormBuffer,
-                    contentType: "application/pdf",
-                  },
-                ]
-              : [],
+            className: classLabel?.grade || "",
+            section: classLabel?.division || "",
+            rollNumber,
+            admissionFormBuffer,
+            admissionFormName: `Admission-Form-${user.publicUserId || ""}.pdf`,
           });
+
+          // Log the sent email in the student's communication history (in-app notification)
+          try {
+            await notificationService.createNotification({
+              userId: user.id,
+              title: "Welcome — Your Schooliat Student Portal Access",
+              content: `Welcome email with login credentials${admissionFormBuffer ? " and admission form" : ""} sent to ${primaryRecipient}${ccEmails.length ? ` (CC: ${ccEmails.join(", ")})` : ""}. Login ID: ${user.publicUserId}.`,
+              type: NotificationType.GENERAL,
+              schoolId: currentUser.schoolId,
+              createdBy: currentUser.id,
+            });
+          } catch (notifErr) {
+            logger.warn({ err: notifErr, studentId: user.id }, "Welcome email notification log failed");
+          }
         }
       } catch (emailErr) {
         logger.warn({ err: emailErr, studentId: user.id }, "Student created but welcome email failed");
@@ -2145,6 +2191,20 @@ router.patch(
         try {
           if (refreshedStudent.email && !refreshedStudent.email.includes("@placeholder.schooliat.local")) {
             const schoolInfo = await prisma.school.findUnique({ where: { id: currentUser.schoolId }, select: { name: true } });
+
+            // Linked parent/guardian accounts are CC'd on the update email too
+            const parentLinks = await prisma.parentChildLink.findMany({
+              where: { childId: id, deletedAt: null },
+              select: { parent: { select: { email: true } } },
+            });
+            const ccEmails = [
+              ...new Set(
+                parentLinks
+                  .map((link) => link.parent?.email)
+                  .filter((email) => email && !email.includes("@placeholder.schooliat.local")),
+              ),
+            ].filter((email) => email.toLowerCase() !== String(refreshedStudent.email || "").toLowerCase());
+
             let admissionFormBuffer = null;
             try {
               admissionFormBuffer = await admissionFormService.renderAdmissionFormPdf({
@@ -2155,6 +2215,7 @@ router.patch(
             }
             await emailService.sendAdmissionFormUpdatedEmail({
               to: refreshedStudent.email,
+              cc: ccEmails.length ? ccEmails : undefined,
               studentName: `${refreshedStudent.firstName} ${refreshedStudent.lastName || ""}`.trim(),
               schoolName: schoolInfo?.name || "",
               loginEmail: refreshedStudent.email,
@@ -2163,6 +2224,20 @@ router.patch(
               admissionFormBuffer,
               admissionFormName: `Admission-Form-${refreshedStudent.publicUserId || ""}-Updated.pdf`,
             });
+
+            // Log the update email in the student's communication history
+            try {
+              await notificationService.createNotification({
+                userId: id,
+                title: "Admission Form Updated",
+                content: `Updated admission form email sent to ${refreshedStudent.email}${ccEmails.length ? ` (CC: ${ccEmails.join(", ")})` : ""}.`,
+                type: NotificationType.GENERAL,
+                schoolId: currentUser.schoolId,
+                createdBy: currentUser.id,
+              });
+            } catch (notifErr) {
+              logger.warn({ err: notifErr, studentId: id }, "Admission form updated notification log failed");
+            }
           }
         } catch (emailErr) {
           logger.warn({ err: emailErr, studentId: id }, "Admission form updated email failed");
