@@ -28,6 +28,14 @@ function confirmContract(id: string) {
   return post(`/school-onboardings/${id}/confirm`, {});
 }
 
+function activateOnboarding(id: string) {
+  return post(`/school-onboardings/${id}/activate`, {});
+}
+
+function fetchContractHtml(id: string) {
+  return get(`/school-onboardings/${id}/contract`);
+}
+
 function completeOnboarding(id: string) {
   return post(`/school-onboardings/${id}/complete`, {});
 }
@@ -88,6 +96,27 @@ export function useConfirmContract() {
       qc.invalidateQueries({ queryKey: ["onboardings"] });
       qc.invalidateQueries({ queryKey: ["onboardings", id] });
     },
+  });
+}
+
+export function useActivateOnboarding() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: activateOnboarding,
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: ["onboardings"] });
+      qc.invalidateQueries({ queryKey: ["onboardings", id] });
+      qc.invalidateQueries({ queryKey: ["schools"] });
+    },
+  });
+}
+
+export function useContractHtml(id: string) {
+  return useQuery({
+    queryKey: ["onboardings", id, "contract"],
+    queryFn: () => fetchContractHtml(id),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

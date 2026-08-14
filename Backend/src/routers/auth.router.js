@@ -108,8 +108,30 @@ router.post(
     if (user.schoolId) {
       school = await prisma.school.findUnique({
         where: { id: user.schoolId },
-        select: { id: true, name: true, code: true },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          activationStatus: true,
+          contractStatus: true,
+        },
       });
+
+      // Contract gate: a school ID can only be used once the contract is accepted AND the
+      // Super Admin has activated the account (intentional manual activation step).
+      if (school && school.contractStatus !== "ACTIVE") {
+        const err =
+          school.contractStatus === "SUSPENDED"
+            ? new Error(
+                "Your school account has been suspended. Please contact SchooliAT support.",
+              )
+            : new Error(
+                "Your account is pending activation. Please wait for confirmation.",
+              );
+        err.statusCode = 403;
+        err.errorCode = "SA002";
+        throw err;
+      }
     }
     const safeUser = {
       id: user.id,
@@ -122,7 +144,15 @@ router.post(
       roleId: user.roleId,
       schoolId: user.schoolId ?? null,
       role,
-      school: school ?? undefined,
+      school: school
+        ? {
+            id: school.id,
+            name: school.name,
+            code: school.code,
+            activationStatus: school.activationStatus,
+            contractStatus: school.contractStatus,
+          }
+        : undefined,
       mustChangePassword: user.mustChangePassword ?? false,
     };
     const jwtToken = jwt.sign(

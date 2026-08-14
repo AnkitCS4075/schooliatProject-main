@@ -29,6 +29,7 @@ import roleService from "../services/role.service.js";
 import sendSchoolAdminWelcomeSchema from "../schemas/school/send-school-admin-welcome.schema.js";
 import { getSchoolMasterOverview } from "../services/school-master-overview.service.js";
 import { getDefaultSchoolRegionIdForNewSchool } from "../services/school-region-reconciliation.service.js";
+import schoolOnboardingService from "../services/school-onboarding.service.js";
 
 /** Empty array or null clears class-level fee breakdown in DB. */
 function coerceDefaultFeeComponents(v) {
@@ -173,9 +174,25 @@ router.post(
         currentUser,
       );
 
+      // Auto-onboarding: create the contract record, generate the contract PDF, and email
+      // the school the contract + login credentials + accept-contract link (non-fatal on failure).
+      let onboarding = null;
+      try {
+        onboarding = await schoolOnboardingService.autoOnboardSchool(
+          newSchool,
+          schoolAdmin,
+          currentUser.id,
+        );
+      } catch (onboardingErr) {
+        logger.warn(
+          { err: onboardingErr, schoolId: newSchool.id },
+          "Auto-onboarding email failed (school still created)",
+        );
+      }
+
       return res.status(201).json({
         message: "School created!",
-        data: { ...newSchool, admin: schoolAdmin },
+        data: { ...newSchool, admin: schoolAdmin, onboarding },
       });
     } catch (error) {
       if (error.code === "P2002") {
@@ -305,6 +322,10 @@ router.get(
         phone: true,
         address: true,
         regionId: true,
+        contractAccepted: true,
+        contractAcceptedAt: true,
+        contractStatus: true,
+        activationStatus: true,
         region: {
           select: {
             id: true,
@@ -699,6 +720,10 @@ router.get(
         upiId: true,
         regionId: true,
         region: { select: { id: true, name: true } },
+        contractAccepted: true,
+        contractAcceptedAt: true,
+        contractStatus: true,
+        activationStatus: true,
         createdAt: true,
       },
     });

@@ -672,6 +672,152 @@ const sendStaffWelcomeEmail = async ({
   });
 };
 
+/**
+ * Onboarding email sent to a school when it is created by the Super Admin: service
+ * contract PDF attached, login ID + temporary password, and a secure link to review
+ * and accept the contract (the acceptance gate before activation).
+ */
+const sendSchoolContractEmail = async ({
+  to,
+  schoolName,
+  pointOfContactName,
+  loginId,
+  loginEmail,
+  password,
+  acceptUrl,
+  contractBuffer,
+  contractName,
+  appName = process.env.SCHOOLIAT_APP_NAME || "SchooliAt",
+}) => {
+  const dashboardLink = process.env.FRONTEND_URL || "http://localhost:3000";
+  const subject = `Welcome to ${String(schoolName || "Your School").slice(0, 80)} — Your Schooliat Service Contract & Account Details`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${escapeHtml(subject)}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #6f8f3e; color: white; padding: 24px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0; font-size: 24px;">${escapeHtml(appName)}</h1>
+        <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Complete Education Institution Management</p>
+      </div>
+      <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0;">
+        <h2 style="color: #6f8f3e; margin-top: 0;">Welcome to ${escapeHtml(schoolName || "Your School")}</h2>
+        <p>Dear ${escapeHtml(pointOfContactName || "School Administrator")},</p>
+        <p>Your school <strong>${escapeHtml(schoolName || "")}</strong> has been onboarded onto <strong>${escapeHtml(appName)}</strong>. Your <strong>Service Contract</strong> is attached to this email — please review it, then click the button below to <strong>accept the contract</strong> and complete your onboarding.</p>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: white; border: 1px solid #e0e0e0;">
+          <tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Login ID</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace; border-bottom: 1px solid #eee;">${escapeHtml(loginId || "")}</td></tr>
+          ${loginEmail && loginEmail !== loginId ? `<tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Login Email</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(loginEmail)}</td></tr>` : ""}
+          <tr><td style="padding: 10px 12px; color: #666;">Temporary Password</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace;">${escapeHtml(password || "")}</td></tr>
+        </table>
+        <p style="color: #666; font-size: 14px;">Your account will be usable only after the contract is accepted <strong>and</strong> your school ID is activated by the SchooliAT team (you will receive a separate email once active).</p>
+        ${acceptUrl ? `
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${acceptUrl}" style="background-color: #6f8f3e; color: white; padding: 14px 32px; text-decoration: none; border-radius: 4px; display: inline-block;">Review &amp; Accept Contract</a>
+          </div>
+          <p style="text-align: center; color: #666; font-size: 12px;">This link is unique to your school and requires no password.</p>
+        ` : ""}
+        <p>Web dashboard: <a href="${dashboardLink}" style="color: #6f8f3e;">${dashboardLink}</a></p>
+        <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+        <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+          This is an automated message from ${escapeHtml(appName)}. Please do not reply to this email.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject,
+    html,
+    ...(contractBuffer
+      ? {
+          attachments: [
+            {
+              filename: contractName || "SchooliAT-Service-Contract.pdf",
+              content: contractBuffer,
+              contentType: "application/pdf",
+            },
+          ],
+        }
+      : {}),
+  });
+};
+
+/**
+ * Sent to the school admin when the Super Admin activates the school ID after the
+ * contract has been accepted. Includes login details and the app download link.
+ */
+const sendSchoolActivatedEmail = async ({
+  to,
+  schoolName,
+  pointOfContactName,
+  loginId,
+  loginEmail,
+  resetLink,
+  schoolId,
+  appName = process.env.SCHOOLIAT_APP_NAME || "SchooliAt",
+}) => {
+  const appStoreLink = await resolveAppStoreLink(schoolId || null);
+  const dashboardLink = process.env.FRONTEND_URL || "http://localhost:3000";
+  const subject = `Your Schooliat account is now active! Welcome aboard. — ${String(schoolName || "").slice(0, 60)}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${escapeHtml(subject)}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #6f8f3e; color: white; padding: 24px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0; font-size: 24px;">${escapeHtml(appName)}</h1>
+        <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Complete Education Institution Management</p>
+      </div>
+      <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0;">
+        <h2 style="color: #6f8f3e; margin-top: 0;">🎉 Your Schooliat account is now active!</h2>
+        <p>Dear ${escapeHtml(pointOfContactName || "School Administrator")},</p>
+        <p>Great news — the contract for <strong>${escapeHtml(schoolName || "your school")}</strong> has been accepted and your school ID has been <strong>activated</strong> by the SchooliAT team. Welcome aboard!</p>
+        <p>Use the credentials below to sign in to the ${escapeHtml(appName)} app and web dashboard:</p>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: white; border: 1px solid #e0e0e0;">
+          <tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Login ID</td><td style="padding: 10px 12px; font-weight: bold; font-family: monospace; border-bottom: 1px solid #eee;">${escapeHtml(loginId || "")}</td></tr>
+          ${loginEmail && loginEmail !== loginId ? `<tr><td style="padding: 10px 12px; color: #666; border-bottom: 1px solid #eee;">Login Email</td><td style="padding: 10px 12px; font-weight: bold; border-bottom: 1px solid #eee;">${escapeHtml(loginEmail)}</td></tr>` : ""}
+        </table>
+        ${resetLink ? `
+          <p style="color: #666; font-size: 14px;">For security, set your own password now:</p>
+          <div style="text-align: center; margin: 16px 0;">
+            <a href="${resetLink}" style="background-color: #6f8f3e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Set Your Password</a>
+          </div>
+          <p style="text-align: center; color: #666; font-size: 12px;">This link expires in 30 minutes.</p>
+        ` : ""}
+        <p style="margin: 24px 0 8px;"><strong>Get the ${escapeHtml(appName)} app</strong></p>
+        <div style="text-align: center; margin: 12px 0;">
+          <a href="${appStoreLink}" style="background-color: #6f8f3e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Download the ${escapeHtml(appName)} App</a>
+        </div>
+        <p style="text-align: center; color: #666; font-size: 13px; margin: 8px 0 24px;">Available on the Google Play Store</p>
+        <p>Web dashboard: <a href="${dashboardLink}" style="color: #6f8f3e;">${dashboardLink}</a></p>
+        <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+        <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+          This is an automated message from ${escapeHtml(appName)}. Please do not reply to this email.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject,
+    html,
+  });
+};
+
 const emailService = {
   sendEmail,
   sendOTPEmail,
@@ -682,6 +828,8 @@ const emailService = {
   sendStaffWelcomeEmail,
   sendAccountWelcomeEmail,
   sendAdmissionFormUpdatedEmail,
+  sendSchoolContractEmail,
+  sendSchoolActivatedEmail,
   verifySmtpIfConfigured,
   resetEmailTransporter,
 };

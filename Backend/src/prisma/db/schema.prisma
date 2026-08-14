@@ -125,6 +125,8 @@ model School {
   contractAcceptedAt      DateTime?             @map("contract_accepted_at")
   contractVersion         Int?                  @default(1) @map("contract_version")
   activationStatus        SchoolActivationStatus @default(PENDING_ACTIVATION) @map("activation_status")
+  /// Contract lifecycle status: pending_contract → contract_accepted → active (or suspended).
+  contractStatus          SchoolContractStatus   @default(PENDING_CONTRACT) @map("contract_status")
   circulars               Circular[]
   schoolEmergencyContacts EmergencyContact[]    @relation("SchoolEmergencyContacts")
   faqs                    FAQ[]
@@ -377,6 +379,15 @@ enum SchoolActivationStatus {
   SUSPENDED
 
   @@map("school_activation_status")
+}
+
+enum SchoolContractStatus {
+  PENDING_CONTRACT
+  CONTRACT_ACCEPTED
+  ACTIVE
+  SUSPENDED
+
+  @@map("school_contract_status")
 }
 
 model TeacherProfile {
@@ -2696,6 +2707,9 @@ model SchoolOnboarding {
   status               OnboardingStatus @default(DRAFT)
   contractFileId       String?          @map("contract_file_id")
   contractAcceptedAt   DateTime?        @map("contract_accepted_at")
+  acceptedByEmail      String?          @map("accepted_by_email")
+  acceptedByIp         String?          @map("accepted_by_ip")
+  acceptedByName       String?          @map("accepted_by_name")
   schoolId             String?          @map("school_id")
   notes                String?
   createdBy            String           @map("created_by")

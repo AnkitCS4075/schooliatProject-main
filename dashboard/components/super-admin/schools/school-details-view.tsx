@@ -266,6 +266,53 @@ export function SchoolDetailsView({ schoolId }: SchoolDetailsViewProps) {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Contract &amp; Activation
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500">Contract Status</span>
+              <Badge variant="outline">
+                {(school as any).contractStatus?.replace("_", " ") || "—"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500">Activation</span>
+              <Badge variant="outline">
+                {(school as any).activationStatus?.replace("_", " ") || "—"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500">Contract Accepted</span>
+              <Badge
+                variant={(school as any).contractAccepted ? "default" : "secondary"}
+              >
+                {(school as any).contractAccepted ? "Yes" : "No"}
+              </Badge>
+            </div>
+            {(school as any).contractAcceptedAt && (
+              <div>
+                <p className="text-xs text-gray-500">Accepted On</p>
+                <p className="text-sm font-medium">
+                  {format(new Date((school as any).contractAcceptedAt), "MMM dd, yyyy hh:mm a")}
+                </p>
+              </div>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => router.push("/super-admin/contracts")}
+            >
+              View in Contracts
+            </Button>
+          </CardContent>
+        </Card>
+
         {(school as any).bankName || (school as any).bankAccountNumber || (school as any).upiId ? (
           <Card>
             <CardHeader>

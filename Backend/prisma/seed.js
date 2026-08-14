@@ -287,6 +287,9 @@ async function seedSchools() {
       school = await prisma.school.create({
         data: {
           ...schoolData,
+          // Demo schools pre-date the contract workflow — treat them as already active.
+          activationStatus: "ACTIVE",
+          contractStatus: "ACTIVE",
           createdBy: "seed",
         },
       });

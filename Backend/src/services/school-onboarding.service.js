@@ -1,12 +1,22 @@
 import prisma from "../prisma/client.js";
 import logger from "../config/logger.js";
 import emailService from "./email.service.js";
+import notificationService from "./notification.service.js";
 import userService from "./user.service.js";
 import roleService from "./role.service.js";
-import { RoleName, UserType, Gender } from "../prisma/generated/index.js";
+import { RoleName, UserType, Gender, NotificationType } from "../prisma/generated/index.js";
 import { renderBillingHtmlToPdfBuffer } from "../billing/billing-html-to-pdf.service.js";
 import { uploadFile } from "../config/storage/index.js";
 import crypto from "crypto";
+
+/** Generate a one-time password-reset link (30 min expiry) reusing the PasswordResetToken mechanism. */
+async function createPasswordResetTokenForUser(userId) {
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+  await prisma.passwordResetToken.deleteMany({ where: { userId } });
+  await prisma.passwordResetToken.create({ data: { userId, token, expiresAt } });
+  return `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password?token=${token}`;
+}
 
 const COMPANY_DETAILS = {
   name: "Winforge Private Limited",
@@ -244,12 +254,21 @@ const create = async (data, userId) => {
 
 const getById = async (id) => {
   const onboarding = await prisma.schoolOnboarding.findFirst({
-    where: { id, deletedAt: null },
-    include: {
-      relationshipManager: { select: { id: true, firstName: true, lastName: true, email: true } },
-      school: { select: { id: true, name: true, code: true, activationStatus: true, contractAccepted: true } },
-      contractFile: { select: { id: true, name: true, extension: true } },
-    },
+    where: { id, deletedAt: null },      include: {
+        relationshipManager: { select: { id: true, firstName: true, lastName: true, email: true } },
+        school: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            activationStatus: true,
+            contractAccepted: true,
+            contractStatus: true,
+            contractAcceptedAt: true,
+          },
+        },
+        contractFile: { select: { id: true, name: true, extension: true } },
+      },
   });
   if (!onboarding) throw new Error("Onboarding not found");
   return onboarding;
@@ -277,7 +296,16 @@ const list = async (filters = {}, options = {}) => {
       orderBy: { createdAt: "desc" },
       include: {
         relationshipManager: { select: { id: true, firstName: true, lastName: true } },
-        school: { select: { id: true, code: true, activationStatus: true } },
+        school: {
+          select: {
+            id: true,
+            code: true,
+            activationStatus: true,
+            contractStatus: true,
+            contractAcceptedAt: true,
+          },
+        },
+        contractFile: { select: { id: true, name: true, extension: true } },
       },
     }),
     prisma.schoolOnboarding.count({ where }),
@@ -288,8 +316,11 @@ const list = async (filters = {}, options = {}) => {
 
 /**
  * Generate contract PDF, store it, email it to the school, and set status CONTRACT_SENT.
+ * When `opts.sendOnboardingEmail` is provided ({ to, loginId, loginEmail, password, pointOfContactName }),
+ * a combined onboarding email (contract PDF + login credentials + accept link) is sent instead of
+ * the plain contract-only email.
  */
-const generateContract = async (id, userId) => {
+const generateContract = async (id, userId, opts = {}) => {
   const onboarding = await prisma.schoolOnboarding.findFirst({
     where: { id, deletedAt: null },
     include: {
@@ -328,25 +359,42 @@ const generateContract = async (id, userId) => {
     },
   });
 
-  // Email the contract PDF to the school authority
+  const contractFileName = `SchooliAT-Contract-${onboarding.schoolName.replace(/[^\w]+/g, "-")}.pdf`;
+  const acceptUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/contract-accept?token=${onboarding.id}`;
+
+  // Email the contract PDF to the school authority (combined onboarding email when credentials are provided)
   try {
-    await emailService.sendEmail({
-      to: onboarding.concernedEmail,
-      subject: `SchooliAT Service Contract — ${onboarding.schoolName}`,
-      html: `
-        <p>Dear ${onboarding.pointOfContactName || "School Administrator"},</p>
-        <p>Your service contract with <strong>SchooliAT (${COMPANY_DETAILS.name})</strong> has been generated.</p>
-        <p>Please find the contract attached. Review the terms and accept it to complete your onboarding.</p>
-        <p>Once accepted, the SchooliAT team will activate your school account and you will receive your login credentials.</p>
-      `,
-      attachments: [
-        {
-          filename: `SchooliAT-Contract-${onboarding.schoolName.replace(/[^\w]+/g, "-")}.pdf`,
-          content: pdfBuffer,
-          contentType: "application/pdf",
-        },
-      ],
-    });
+    if (opts.sendOnboardingEmail) {
+      await emailService.sendSchoolContractEmail({
+        to: onboarding.concernedEmail,
+        schoolName: onboarding.schoolName,
+        pointOfContactName: opts.sendOnboardingEmail.pointOfContactName || onboarding.pointOfContactName || "School Administrator",
+        loginId: opts.sendOnboardingEmail.loginId || "",
+        loginEmail: opts.sendOnboardingEmail.loginEmail || onboarding.concernedEmail,
+        password: opts.sendOnboardingEmail.password || "Reset via email",
+        acceptUrl,
+        contractBuffer: pdfBuffer,
+        contractName: contractFileName,
+      });
+    } else {
+      await emailService.sendEmail({
+        to: onboarding.concernedEmail,
+        subject: `SchooliAT Service Contract — ${onboarding.schoolName}`,
+        html: `
+          <p>Dear ${onboarding.pointOfContactName || "School Administrator"},</p>
+          <p>Your service contract with <strong>SchooliAT (${COMPANY_DETAILS.name})</strong> has been generated.</p>
+          <p>Please find the contract attached. Review the terms and accept it to complete your onboarding.</p>
+          <p>Once accepted, the SchooliAT team will activate your school account and you will receive your login credentials.</p>
+        `,
+        attachments: [
+          {
+            filename: contractFileName,
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ],
+      });
+    }
   } catch (emailErr) {
     logger.warn({ err: emailErr.message }, "Contract email failed (contract still generated)");
   }
@@ -356,10 +404,11 @@ const generateContract = async (id, userId) => {
 };
 
 /**
- * School accepts the contract digitally (checkbox or OTP confirmation).
- * Records acceptance timestamp on onboarding AND linked school, and notifies the super admin to activate.
+ * School accepts the contract digitally (public link).
+ * Records acceptance (with email/IP/datetime) on the onboarding AND linked school, and
+ * notifies the Super Admin team to activate the school ID.
  */
-const acceptContract = async (id, { acceptedBy, acceptedAt }) => {
+const acceptContract = async (id, { acceptedBy, acceptedAt, acceptedByEmail, acceptedByIp, acceptedByName }) => {
   const onboarding = await prisma.schoolOnboarding.findFirst({
     where: { id, deletedAt: null },
   });
@@ -375,6 +424,9 @@ const acceptContract = async (id, { acceptedBy, acceptedAt }) => {
     data: {
       status: "CONTRACT_CONFIRMED",
       contractAcceptedAt: now,
+      acceptedByEmail: acceptedByEmail || null,
+      acceptedByIp: acceptedByIp || null,
+      acceptedByName: acceptedByName || null,
       updatedBy: acceptedBy,
     },
   });
@@ -383,14 +435,36 @@ const acceptContract = async (id, { acceptedBy, acceptedAt }) => {
   if (onboarding.schoolId) {
     await prisma.school.update({
       where: { id: onboarding.schoolId },
-      data: { contractAccepted: true, contractAcceptedAt: now, updatedBy: acceptedBy },
+      data: {
+        contractAccepted: true,
+        contractAcceptedAt: now,
+        contractStatus: "CONTRACT_ACCEPTED",
+        updatedBy: acceptedBy,
+      },
     });
   }
 
-  // Notify the super admin / SchooliAT team to activate the school ID
+  // Notify the Super Admin team to activate the school ID (in-app + email)
   try {
+    const superAdmins = await prisma.user.findMany({
+      where: { role: { name: RoleName.SUPER_ADMIN }, deletedAt: null },
+      select: { id: true, email: true },
+    });
+    if (superAdmins.length > 0) {
+      await notificationService.createBulkNotifications(
+        superAdmins.map((u) => u.id),
+        {
+          title: `${onboarding.schoolName} accepted the contract — activate their account`,
+          content: `${onboarding.schoolName} has accepted the contract. Activate their school ID from the Super Admin Contracts panel.`,
+          type: NotificationType.GENERAL,
+          actionUrl: "/super-admin/contracts",
+          schoolId: onboarding.schoolId || null,
+          createdBy: "system",
+        },
+      );
+    }
     await emailService.sendEmail({
-      to: "admin@schooliat.com",
+      to: superAdmins[0]?.email || "admin@schooliat.com",
       subject: `[Action Required] Contract accepted by ${onboarding.schoolName} — Activate school`,
       html: `
         <p><strong>${onboarding.schoolName}</strong> has digitally accepted the SchooliAT service contract.</p>
@@ -398,6 +472,7 @@ const acceptContract = async (id, { acceptedBy, acceptedAt }) => {
         <table>
           <tr><td>School</td><td>${onboarding.schoolName}</td></tr>
           <tr><td>Email</td><td>${onboarding.concernedEmail}</td></tr>
+          <tr><td>Accepted by</td><td>${acceptedByName || acceptedByEmail || "—"}${acceptedByEmail && acceptedByEmail !== acceptedByName ? ` (${acceptedByEmail})` : ""}</td></tr>
           <tr><td>Accepted at</td><td>${now.toISOString()}</td></tr>
         </table>
       `,
@@ -493,6 +568,8 @@ const complete = async (id, userId) => {
 
 /**
  * Super Admin activates the school account — grants platform access.
+ * Sets the school contract status to ACTIVE, emails the school admin
+ * ("Your Schooliat account is now active! Welcome aboard.") and fires an in-app notification.
  */
 const activateSchool = async (id, userId) => {
   const onboarding = await prisma.schoolOnboarding.findFirst({
@@ -506,9 +583,9 @@ const activateSchool = async (id, userId) => {
     throw new Error("Cannot activate — school record not created yet. Complete onboarding first.");
   }
 
-  await prisma.school.update({
+  const school = await prisma.school.update({
     where: { id: onboarding.schoolId },
-    data: { activationStatus: "ACTIVE", updatedBy: userId },
+    data: { activationStatus: "ACTIVE", contractStatus: "ACTIVE", updatedBy: userId },
   });
 
   const updated = await prisma.schoolOnboarding.update({
@@ -516,13 +593,48 @@ const activateSchool = async (id, userId) => {
     data: { status: "COMPLETED", schoolId: onboarding.schoolId, updatedBy: userId },
   });
 
-  // Notify school admin that their account is now active
+  // Notify the school admin: activation email + in-app notification
   try {
-    await emailService.sendEmail({
-      to: onboarding.concernedEmail,
-      subject: `SchooliAT Account Activated — ${onboarding.schoolName}`,
-      html: `<p>Your SchooliAT account for <strong>${onboarding.schoolName}</strong> has been activated.</p><p>You can now log in to the platform with the credentials previously shared.</p>`,
+    const schoolAdminRole = await roleService.getRoleByName(RoleName.SCHOOL_ADMIN);
+    const admin = await prisma.user.findFirst({
+      where: {
+        schoolId: onboarding.schoolId,
+        roleId: schoolAdminRole.id,
+        deletedAt: null,
+      },
+      orderBy: { createdAt: "asc" },
     });
+
+    if (admin) {
+      const resetLink = await createPasswordResetTokenForUser(admin.id);
+      await emailService.sendSchoolActivatedEmail({
+        to: onboarding.concernedEmail,
+        schoolName: school.name,
+        pointOfContactName:
+          onboarding.pointOfContactName ||
+          `${admin.firstName} ${admin.lastName || ""}`.trim() ||
+          "School Administrator",
+        loginId: admin.publicUserId,
+        loginEmail: admin.email,
+        resetLink,
+        schoolId: school.id,
+      });
+      await notificationService.createNotification({
+        userId: admin.id,
+        title: "Your Schooliat account is now active! Welcome aboard.",
+        content: `${school.name} has been activated. You can now log in to the platform.`,
+        type: NotificationType.GENERAL,
+        actionUrl: "/login",
+        schoolId: school.id,
+        createdBy: userId,
+      });
+    } else {
+      await emailService.sendEmail({
+        to: onboarding.concernedEmail,
+        subject: `Your Schooliat account is now active! Welcome aboard. — ${school.name}`,
+        html: `<p>Your SchooliAT account for <strong>${school.name}</strong> has been activated.</p><p>You can now log in to the platform with the credentials previously shared.</p>`,
+      });
+    }
   } catch (emailErr) {
     logger.warn({ err: emailErr.message }, "Activation confirmation email failed");
   }
@@ -555,6 +667,65 @@ const remove = async (id, userId) => {
   });
 };
 
+/**
+ * View a contract (HTML) without regenerating or re-emailing the PDF.
+ */
+const getContractHtml = async (id) => {
+  const onboarding = await prisma.schoolOnboarding.findFirst({
+    where: { id, deletedAt: null },
+  });
+  if (!onboarding) throw new Error("Onboarding not found");
+  return { ...onboarding, contractHtml: generateContractHtml(onboarding) };
+};
+
+/**
+ * Auto-onboard a school that was just created by the Super Admin:
+ * create the linked SchoolOnboarding record, generate the contract PDF, and send the
+ * combined onboarding email (contract PDF + Login ID + temporary password + accept link).
+ */
+const autoOnboardSchool = async (school, admin, userId) => {
+  const onboarding = await prisma.schoolOnboarding.create({
+    data: {
+      schoolName: school.name,
+      schoolAddress: Array.isArray(school.address) ? school.address.join(", ") : String(school.address || ""),
+      schoolContactNumber: school.phone || "",
+      principalPhone: school.principalPhone || null,
+      managementPhone: null,
+      pointOfContactName: school.principalName || null,
+      pointOfContactDesignation: school.principalName ? "Principal" : null,
+      concernedEmail: school.email,
+      pricingPerStudent: null,
+      pricingPerMonth: null,
+      relationshipManagerId: null,
+      contractDurationYears: 1,
+      paymentMode: null,
+      paymentTermsDays: null,
+      terminationNoticePeriod: null,
+      notes: "Auto-created on school registration",
+      status: "DRAFT",
+      schoolId: school.id,
+      createdBy: userId,
+    },
+  });
+
+  await generateContract(onboarding.id, userId, {
+    sendOnboardingEmail: {
+      to: school.email,
+      pointOfContactName: school.principalName || "School Administrator",
+      loginId: admin.publicUserId,
+      loginEmail: school.email,
+      password: admin.password || "Reset via email",
+    },
+  });
+
+  const withFile = await prisma.schoolOnboarding.findFirst({
+    where: { id: onboarding.id },
+    include: { contractFile: { select: { id: true, name: true } } },
+  });
+  logger.info({ onboardingId: onboarding.id, schoolId: school.id }, "School auto-onboarded (contract generated + emailed)");
+  return withFile;
+};
+
 const getStats = async () => {
   const [total, byStatus, pendingActivation] = await Promise.all([
     prisma.schoolOnboarding.count({ where: { deletedAt: null } }),
@@ -580,6 +751,9 @@ const schoolOnboardingService = {
   cancel,
   remove,
   getStats,
+  getContractHtml,
+  autoOnboardSchool,
+  createPasswordResetTokenForUser,
   COMPANY_DETAILS,
   generateContractHtml,
 };

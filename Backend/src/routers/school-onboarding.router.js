@@ -1,7 +1,16 @@
 import { Router } from "express";
 import schoolOnboardingService from "../services/school-onboarding.service.js";
+import { RoleName } from "../prisma/generated/index.js";
 
 const router = Router();
+
+// The entire onboarding/contracts module is Super Admin only.
+router.use((req, res, next) => {
+  if (req.context?.user?.role?.name !== RoleName.SUPER_ADMIN) {
+    return res.status(403).json({ message: "Only Super Admin can manage school onboarding/contracts." });
+  }
+  next();
+});
 
 router.get("/stats", async (req, res, next) => {
   try {
@@ -28,6 +37,16 @@ router.get("/", async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
   try {
     const item = await schoolOnboardingService.getById(req.params.id);
+    res.json({ status: 200, data: item });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// View the contract HTML without regenerating/re-emailing the PDF
+router.get("/:id/contract", async (req, res, next) => {
+  try {
+    const item = await schoolOnboardingService.getContractHtml(req.params.id);
     res.json({ status: 200, data: item });
   } catch (error) {
     next(error);

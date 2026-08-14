@@ -7,10 +7,12 @@ import {
   useDeleteOnboarding,
   useGenerateContract,
   useConfirmContract,
+  useActivateOnboarding,
   useCompleteOnboarding,
   useCancelOnboarding,
   useOnboardingStats,
 } from "@/lib/hooks/use-onboarding";
+import { getFile } from "@/lib/api/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +47,10 @@ import {
   Phone,
   Calendar,
   IndianRupee,
+  Download,
+  ShieldCheck,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -78,7 +84,6 @@ export function OnboardingManagement() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
-  const [showDetail, setShowDetail] = useState<string | null>(null);
   const [showContract, setShowContract] = useState<string | null>(null);
   const [contractHtml, setContractHtml] = useState("");
   const [form, setForm] = useState(defaultForm);
@@ -92,6 +97,7 @@ export function OnboardingManagement() {
   const deleteMutation = useDeleteOnboarding();
   const genContract = useGenerateContract();
   const confirmMutation = useConfirmContract();
+  const activateMutation = useActivateOnboarding();
   const completeMutation = useCompleteOnboarding();
   const cancelMutation = useCancelOnboarding();
 
@@ -123,6 +129,26 @@ export function OnboardingManagement() {
       toast.success("Contract generated");
     } catch (err: any) {
       toast.error(err.message || "Failed to generate");
+    }
+  };
+
+  const handleViewContract = async (id: string) => {
+    setShowContract(id);
+    setContractHtml("");
+    try {
+      const result = await fetch(`/api/v1/school-onboardings/${id}/contract`, {
+        headers: {
+          "x-platform": "web",
+          Authorization: `Bearer ${
+            typeof window !== "undefined"
+              ? window.sessionStorage.getItem("accessToken") || ""
+              : ""
+          }`,
+        },
+      }).then((r) => r.json());
+      setContractHtml(result?.data?.contractHtml || "");
+    } catch {
+      toast.error("Failed to load contract");
     }
   };
 
@@ -242,9 +268,17 @@ export function OnboardingManagement() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold truncate">{item.schoolName}</h3>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
                       <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{item.concernedEmail}</span>
                       <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{item.schoolContactNumber}</span>
+                      {item.contractAcceptedAt && (
+                        <span className="flex items-center gap-1 text-green-700">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Accepted {new Date(item.contractAcceptedAt).toLocaleDateString("en-IN")}
+                          {item.acceptedByEmail ? ` by ${item.acceptedByEmail}` : ""}
+                          {item.acceptedByIp ? ` (IP ${item.acceptedByIp})` : ""}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <Badge className={STATUS_COLORS[item.status]}>{item.status.replace("_", " ")}</Badge>
@@ -269,7 +303,30 @@ export function OnboardingManagement() {
                         <CheckCircle className="w-4 h-4 text-green-600" />
                       </Button>
                     )}
-                    <Button variant="ghost" size="sm" onClick={() => setShowDetail(item.id)}>
+                    {(item.status === "CONTRACT_CONFIRMED" ||
+                      (item.status === "COMPLETED" && item.school?.contractStatus !== "ACTIVE")) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => activateMutation.mutateAsync(item.id)}
+                        disabled={activateMutation.isPending}
+                        title="Activate school account"
+                      >
+                        {activateMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+                        ) : (
+                          <ShieldCheck className="w-4 h-4 text-green-600" />
+                        )}
+                      </Button>
+                    )}
+                    {item.contractFile?.id && (
+                      <Button variant="ghost" size="sm" asChild title="Download contract PDF">
+                        <a href={getFile(item.contractFile.id)} target="_blank" rel="noopener noreferrer">
+                          <Download className="w-4 h-4" />
+                        </a>
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" onClick={() => handleViewContract(item.id)} title="View contract">
                       <Eye className="w-4 h-4" />
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutateAsync(item.id)} className="text-red-600 hover:text-red-700">

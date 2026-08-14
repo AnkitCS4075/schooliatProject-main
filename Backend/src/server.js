@@ -77,6 +77,7 @@ import bonafideRouter from "./routers/bonafide.router.js";
 import otherIncomeRouter from "./routers/other-income.router.js";
 import accountingRouter from "./routers/accounting.router.js";
 import schoolOnboardingRouter from "./routers/school-onboarding.router.js";
+import publicRouter from "./routers/public.router.js";
 import platformFinanceRouter from "./routers/platform-finance.router.js";
 import feeDiscountRouter from "./routers/fee-discount.router.js";
 import quotationRouter from "./routers/quotation.router.js";
@@ -188,6 +189,9 @@ async function main() {
   // Auth router (no authorization required) - both legacy and v1 paths
   app.use("/auth", authRouter);
   app.use("/api/v1/auth", authRouter);
+
+  // Public router (no authorization required) — contract viewing/acceptance for schools
+  app.use("/api/v1/public", publicRouter);
 
   // General API rate limiting (applies to all routes below)
   app.use(apiRateLimit);

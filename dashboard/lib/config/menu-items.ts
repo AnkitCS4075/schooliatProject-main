@@ -250,6 +250,11 @@ export const SUPER_ADMIN_MENU_ITEMS: MenuItem[] = [
     route: "/super-admin/onboarding",
   },
   {
+    name: "Contracts",
+    icon: "FileSignature",
+    route: "/super-admin/contracts",
+  },
+  {
     name: "Quotations",
     icon: "FileText",
     route: "/super-admin/quotations",
@@ -382,6 +387,7 @@ export function getSuperAdminSearchItems(): { name: string; route: string }[] {
     { name: "Invoices", route: BILLING_ROUTES.invoicesTab },
     { name: "Receipts", route: BILLING_ROUTES.receiptsTab },
     { name: "Onboarding", route: "/super-admin/onboarding" },
+    { name: "Contracts", route: "/super-admin/contracts" },
     { name: "Platform Finance", route: "/super-admin/platform-finance" },
   );
   return out;
