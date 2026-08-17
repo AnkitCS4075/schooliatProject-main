@@ -1052,6 +1052,89 @@ router.patch(
 );
 
 // PATCH endpoint for editing class
+// POST /schools/:id/activate — Super Admin manually activates a school account.
+// Works for schools with or without an onboarding record (legacy seeded schools
+// predate the contract workflow). Flips the school to ACTIVE and sends the
+// "Welcome aboard" activation email + in-app notification to the school admin.
+router.post(
+  "/:id/activate",
+  withPermission(Permission.EDIT_SCHOOL),
+  async (req, res) => {
+    try {
+      const currentUser = req.context.user;
+      if (currentUser.role?.name !== RoleName.SUPER_ADMIN) {
+        return res.status(403).json({ message: "Only Super Admin can activate a school." });
+      }
+
+      const { id } = req.params;
+      const school = await prisma.school.findFirst({
+        where: { id, deletedAt: null, deletedBy: null },
+      });
+      if (!school) {
+        return res.status(404).json({ message: "School not found!" });
+      }
+
+      // Find (or create) a minimal onboarding record so the school appears in
+      // the Contracts module and the standard activation service can be reused.
+      let onboarding = await prisma.schoolOnboarding.findFirst({
+        where: { schoolId: id, deletedAt: null },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (!onboarding) {
+        onboarding = await prisma.schoolOnboarding.create({
+          data: {
+            schoolName: school.name,
+            schoolAddress: Array.isArray(school.address)
+              ? school.address.join(", ")
+              : (school.address || ""),
+            schoolContactNumber: school.phone || "",
+            concernedEmail: school.email || "",
+            pointOfContactName: school.principalName || null,
+            contractDurationYears: 1,
+            status: "COMPLETED",
+            schoolId: id,
+            createdBy: currentUser.id,
+          },
+        });
+      } else if (
+        onboarding.status !== "COMPLETED" &&
+        onboarding.status !== "CONTRACT_CONFIRMED"
+      ) {
+        // Super Admin is explicitly activating — treat the contract as accepted
+        // (manual activation is the intended flow for this school).
+        onboarding = await prisma.schoolOnboarding.update({
+          where: { id: onboarding.id },
+          data: {
+            status: "COMPLETED",
+            contractAcceptedAt: new Date(),
+            acceptedByEmail: currentUser.email,
+            acceptedByName: `${currentUser.firstName} ${currentUser.lastName || ""}`.trim() || "Super Admin",
+            updatedBy: currentUser.id,
+          },
+        });
+      }
+
+      await schoolOnboardingService.activateSchool(
+        onboarding.id,
+        currentUser.id,
+      );
+
+      const updatedSchool = await prisma.school.findUnique({
+        where: { id },
+        include: { region: { select: { id: true, name: true } } },
+      });
+
+      return res.json({
+        message: "School activated successfully!",
+        data: { school: updatedSchool, onboardingId: onboarding.id },
+      });
+    } catch (error) {
+      return res.status(400).json({ message: error.message || "Failed to activate school" });
+    }
+  },
+);
+
 router.patch(
   "/classes/:id",
   withPermission(Permission.EDIT_CLASSES),

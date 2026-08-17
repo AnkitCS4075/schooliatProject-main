@@ -155,6 +155,23 @@ export function useDeleteSchool() {
   });
 }
 
+/** Super Admin manually activates a school account (contract gate). */
+export function useActivateSchool() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => post(`/schools/${id}/activate`, {}),
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: ["schools"] });
+      queryClient.invalidateQueries({ queryKey: ["school", id] });
+      queryClient.invalidateQueries({ queryKey: ["schoolById", id] });
+      queryClient.invalidateQueries({ queryKey: ["schoolMasterOverview", id] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["schoolStatistics"] });
+      queryClient.invalidateQueries({ queryKey: ["onboardings"] });
+    },
+  });
+}
+
 // Employees
 export function useEmployees(search?: string) {
   return useQuery({

@@ -35,6 +35,7 @@ import {
   useSchoolById,
   useUpdateSchool,
   useDeleteSchool,
+  useActivateSchool,
   useRegions,
   useSchoolStatistics,
   type School,
@@ -57,6 +58,7 @@ export function SchoolDetailsView({ schoolId }: SchoolDetailsViewProps) {
   const { data, isLoading } = useSchoolById(schoolId);
   const updateSchool = useUpdateSchool();
   const deleteSchool = useDeleteSchool();
+  const activateSchool = useActivateSchool();
   const { data: regionsData } = useRegions();
   const { data: statisticsData } = useSchoolStatistics();
 
@@ -301,6 +303,31 @@ export function SchoolDetailsView({ schoolId }: SchoolDetailsViewProps) {
                   {format(new Date((school as any).contractAcceptedAt), "MMM dd, yyyy hh:mm a")}
                 </p>
               </div>
+            )}
+            {(school as any).contractStatus !== "ACTIVE" && (
+              <Button
+                variant="default"
+                size="sm"
+                className="w-full"
+                disabled={activateSchool.isPending}
+                onClick={() =>
+                  activateSchool.mutate(schoolId, {
+                    onSuccess: () =>
+                      toast({
+                        title: "Success",
+                        description: `${school.name} activated. Welcome email sent.`,
+                      }),
+                    onError: (err: any) =>
+                      toast({
+                        title: "Error",
+                        description: err?.message || "Failed to activate school",
+                        variant: "destructive",
+                      }),
+                  })
+                }
+              >
+                {activateSchool.isPending ? "Activating..." : "Activate School"}
+              </Button>
             )}
             <Button
               variant="outline"

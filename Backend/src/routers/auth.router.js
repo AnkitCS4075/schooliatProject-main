@@ -44,12 +44,12 @@ function toSafeUser(user, role, school) {
 
 const availablePlatformsForRoles = {
   [RoleName.SUPER_ADMIN]: [Platform.WEB],
-  [RoleName.EMPLOYEE]: [Platform.ANDROID, Platform.IOS],
+  [RoleName.EMPLOYEE]: [Platform.WEB, Platform.ANDROID, Platform.IOS],
 
   [RoleName.SCHOOL_ADMIN]: [Platform.WEB],
-  [RoleName.TEACHER]: [Platform.ANDROID, Platform.IOS],
-  [RoleName.STUDENT]: [Platform.ANDROID, Platform.IOS],
-  [RoleName.STAFF]: [Platform.ANDROID, Platform.IOS],
+  [RoleName.TEACHER]: [Platform.WEB, Platform.ANDROID, Platform.IOS],
+  [RoleName.STUDENT]: [Platform.WEB, Platform.ANDROID, Platform.IOS],
+  [RoleName.STAFF]: [Platform.WEB, Platform.ANDROID, Platform.IOS],
 };
 
 router.post(
