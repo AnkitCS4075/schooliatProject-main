@@ -155,6 +155,16 @@ const defaultRolePermissionsMap = {
     // Onboarding
     Permission.MANAGE_ONBOARDING,
     Permission.GET_ONBOARDING,
+    // Gate Entry & Visitor Management
+    Permission.CREATE_GATE_ENTRY,
+    Permission.GET_GATE_ENTRIES,
+    Permission.UPDATE_GATE_ENTRY,
+    Permission.DELETE_GATE_ENTRY,
+    // CRM Leads
+    Permission.CREATE_CRM_LEAD,
+    Permission.GET_CRM_LEADS,
+    Permission.UPDATE_CRM_LEAD,
+    Permission.DELETE_CRM_LEAD,
     // System
     Permission.MANAGE_DATABASE_BACKUP,
     Permission.MANAGE_SUBSCRIPTION,

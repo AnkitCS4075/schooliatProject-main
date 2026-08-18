@@ -15,6 +15,8 @@ interface CrmLead {
   followUpStatus: string;
   assignedToId?: string;
   nextFollowUpAt?: string;
+  schoolId?: string;
+  school?: { id: string; name: string; code: string };
   assignedTo?: { id: string; firstName: string; lastName?: string };
   _count?: { remarks: number };
   remarks?: LeadRemark[];
@@ -44,6 +46,7 @@ interface CrmFunnelStats {
 }
 
 interface CrmLeadFilters {
+  schoolId?: string;
   stage?: string;
   source?: string;
   followUpStatus?: string;
@@ -110,7 +113,7 @@ export function useCrmAssignableUsers() {
 export function useCreateCrmLead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name: string; phone: string; source: string; category?: string; classInterestedIn?: string; purposeOfVisit?: string; assignedToId?: string; remarks?: string }) =>
+    mutationFn: (data: { schoolId?: string; name: string; phone: string; source: string; category?: string; classInterestedIn?: string; purposeOfVisit?: string; assignedToId?: string; remarks?: string }) =>
       post("/crm", { request: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["crmLeads"] });

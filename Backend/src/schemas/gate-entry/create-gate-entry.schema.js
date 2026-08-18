@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const createGateEntrySchema = z.object({
   request: z.object({
+    schoolId: z.string().uuid().optional(),
     category: z.enum(["ADMISSION_ENQUIRY", "VISITOR", "PARENT", "VENDOR", "STAFF_IN_OUT", "OTHER"], {
       errorMap: () => ({ message: "Category must be one of: ADMISSION_ENQUIRY, VISITOR, PARENT, VENDOR, STAFF_IN_OUT, OTHER" }),
     }),

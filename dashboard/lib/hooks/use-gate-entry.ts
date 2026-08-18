@@ -16,6 +16,8 @@ interface GateEntry {
   inTime: string;
   outTime?: string;
   linkedLeadId?: string;
+  schoolId?: string;
+  school?: { id: string; name: string; code: string };
   linkedLead?: { id: string; name: string; stage: string; followUpStatus: string; source: string };
   creator?: { id: string; firstName: string; lastName?: string };
   createdAt: string;
@@ -37,6 +39,7 @@ interface GateEntryListResponse {
 }
 
 interface GateEntryFilters {
+  schoolId?: string;
   category?: string;
   search?: string;
   startDate?: string;
@@ -72,7 +75,7 @@ export function useGateEntry(id: string) {
 export function useCreateGateEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { category: string; name: string; phone: string; reason?: string; classInterestedIn?: string; personToMeet?: string }) =>
+    mutationFn: (data: { schoolId?: string; category: string; name: string; phone: string; reason?: string; classInterestedIn?: string; personToMeet?: string }) =>
       post("/gate-entries", { request: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["gateEntries"] });

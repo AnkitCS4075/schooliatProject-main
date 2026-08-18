@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const createLeadSchema = z.object({
   request: z.object({
+    schoolId: z.string().uuid().optional(),
     name: z.string().trim().min(1, "Name is required").max(200),
     phone: z.string().trim().min(1, "Phone number is required").max(20),
     source: z.enum(["STUDENT_REFERRAL", "PARENT_REFERRAL", "SALES_DEPARTMENT", "GATE_ENTRY", "GATE_WALK_IN"], {

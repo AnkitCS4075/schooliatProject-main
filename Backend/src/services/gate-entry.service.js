@@ -87,9 +87,12 @@ const create = async (data, schoolId, userId) => {
 };
 
 const getById = async (id, schoolId) => {
+  const where = { id, deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
   const entry = await prisma.gateEntry.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where,
     include: {
+      school: { select: { id: true, name: true, code: true } },
       linkedLead: {
         select: { id: true, name: true, stage: true, followUpStatus: true, source: true },
       },
@@ -105,7 +108,9 @@ const list = async (schoolId, filters = {}, options = {}) => {
   const limit = Math.min(100, Math.max(1, parseInt(options.limit, 10) || 20));
   const skip = (page - 1) * limit;
 
-  const where = { schoolId, deletedAt: null };
+  // `schoolId` undefined (Super Admin, no filter) => all schools; otherwise scoped.
+  const where = { deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
   if (filters.category) where.category = filters.category;
   if (filters.crmSynced !== undefined && filters.crmSynced !== null) {
     where.linkedLeadId = filters.crmSynced === "true" ? { not: null } : null;
@@ -129,6 +134,7 @@ const list = async (schoolId, filters = {}, options = {}) => {
       take: limit,
       orderBy: { inTime: "desc" },
       include: {
+        school: { select: { id: true, name: true, code: true } },
         linkedLead: {
           select: { id: true, name: true, stage: true, followUpStatus: true, source: true },
         },
@@ -142,7 +148,9 @@ const list = async (schoolId, filters = {}, options = {}) => {
 };
 
 const update = async (id, data, schoolId) => {
-  const existing = await prisma.gateEntry.findFirst({ where: { id, schoolId, deletedAt: null } });
+  const where = { id, deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
+  const existing = await prisma.gateEntry.findFirst({ where });
   if (!existing) throw new Error("Gate entry not found");
 
   const updateData = {};
@@ -156,7 +164,9 @@ const update = async (id, data, schoolId) => {
 };
 
 const remove = async (id, schoolId, userId) => {
-  const existing = await prisma.gateEntry.findFirst({ where: { id, schoolId, deletedAt: null } });
+  const where = { id, deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
+  const existing = await prisma.gateEntry.findFirst({ where });
   if (!existing) throw new Error("Gate entry not found");
   return prisma.gateEntry.update({ where: { id }, data: { deletedAt: new Date(), deletedBy: userId } });
 };
@@ -167,20 +177,23 @@ const getStats = async (schoolId) => {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
+  // `schoolId` undefined (Super Admin) => stats across all schools.
+  const scoped = (extra = {}) => ({ ...(schoolId ? { schoolId } : {}), deletedAt: null, ...extra });
+
   const [totalToday, byCategory, currentlyInside, crmLeadsToday] = await Promise.all([
     prisma.gateEntry.count({
-      where: { schoolId, deletedAt: null, inTime: { gte: today, lt: tomorrow } },
+      where: scoped({ inTime: { gte: today, lt: tomorrow } }),
     }),
     prisma.gateEntry.groupBy({
       by: ["category"],
-      where: { schoolId, deletedAt: null, inTime: { gte: today, lt: tomorrow } },
+      where: scoped({ inTime: { gte: today, lt: tomorrow } }),
       _count: true,
     }),
     prisma.gateEntry.count({
-      where: { schoolId, deletedAt: null, outTime: null, inTime: { gte: today } },
+      where: scoped({ outTime: null, inTime: { gte: today } }),
     }),
     prisma.gateEntry.count({
-      where: { schoolId, deletedAt: null, linkedLeadId: { not: null }, inTime: { gte: today, lt: tomorrow } },
+      where: scoped({ linkedLeadId: { not: null }, inTime: { gte: today, lt: tomorrow } }),
     }),
   ]);
 

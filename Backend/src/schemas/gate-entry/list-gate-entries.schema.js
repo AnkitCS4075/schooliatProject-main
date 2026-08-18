@@ -3,6 +3,7 @@ import { z } from "zod";
 const listGateEntriesSchema = z.object({
   request: z.object({}),
   query: z.object({
+    schoolId: z.string().uuid().optional(),
     category: z.enum(["ADMISSION_ENQUIRY", "VISITOR", "PARENT", "VENDOR", "STAFF_IN_OUT", "OTHER"]).optional(),
     crmSynced: z.enum(["true", "false"]).optional(),
     search: z.string().trim().optional(),

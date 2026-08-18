@@ -285,6 +285,16 @@ export const SUPER_ADMIN_MENU_ITEMS: MenuItem[] = [
     route: "/super-admin/gate-to-crm",
   },
   {
+    name: "Gate Entry",
+    icon: "ClipboardList",
+    route: "/super-admin/gate-entry",
+  },
+  {
+    name: "Leads",
+    icon: "Target",
+    route: "/super-admin/leads",
+  },
+  {
     name: "Employees",
     icon: "Users",
     route: "/super-admin/employees",

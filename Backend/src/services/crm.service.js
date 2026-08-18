@@ -31,9 +31,12 @@ const createLead = async (data, schoolId, userId) => {
 };
 
 const getLeadById = async (id, schoolId) => {
+  const where = { id, deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
   const lead = await prisma.crmLead.findFirst({
-    where: { id, schoolId, deletedAt: null },
+    where,
     include: {
+      school: { select: { id: true, name: true, code: true } },
       remarks: { orderBy: { createdAt: "desc" }, include: { author: { select: { id: true, firstName: true, lastName: true } } } },
       assignedTo: { select: { id: true, firstName: true, lastName: true } },
       gateEntries: { select: { id: true, serialNo: true, inTime: true } },
@@ -48,7 +51,9 @@ const listLeads = async (schoolId, filters = {}, options = {}) => {
   const limit = Math.min(100, Math.max(1, parseInt(options.limit, 10) || 20));
   const skip = (page - 1) * limit;
 
-  const where = { schoolId, deletedAt: null };
+  // `schoolId` undefined (Super Admin, no filter) => all schools; otherwise scoped.
+  const where = { deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
   if (filters.stage) where.stage = filters.stage;
   if (filters.source) where.source = filters.source;
   if (filters.followUpStatus) where.followUpStatus = filters.followUpStatus;
@@ -69,6 +74,7 @@ const listLeads = async (schoolId, filters = {}, options = {}) => {
       take: limit,
       orderBy,
       include: {
+        school: { select: { id: true, name: true, code: true } },
         assignedTo: { select: { id: true, firstName: true, lastName: true } },
         gateEntries: { select: { id: true, serialNo: true, inTime: true } },
         _count: { select: { remarks: true } },
@@ -98,7 +104,9 @@ const buildOrderBy = (sortBy, sortOrder = "desc") => {
 };
 
 const updateLead = async (id, data, schoolId) => {
-  const existing = await prisma.crmLead.findFirst({ where: { id, schoolId, deletedAt: null } });
+  const where = { id, deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
+  const existing = await prisma.crmLead.findFirst({ where });
   if (!existing) throw new Error("Lead not found");
 
   const updateData = {};
@@ -123,7 +131,9 @@ const updateLead = async (id, data, schoolId) => {
 };
 
 const addRemark = async (leadId, content, userId, schoolId) => {
-  const lead = await prisma.crmLead.findFirst({ where: { id: leadId, schoolId, deletedAt: null } });
+  const where = { id: leadId, deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
+  const lead = await prisma.crmLead.findFirst({ where });
   if (!lead) throw new Error("Lead not found");
 
   return prisma.leadRemark.create({
@@ -133,13 +143,17 @@ const addRemark = async (leadId, content, userId, schoolId) => {
 };
 
 const removeLead = async (id, schoolId, userId) => {
-  const existing = await prisma.crmLead.findFirst({ where: { id, schoolId, deletedAt: null } });
+  const where = { id, deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
+  const existing = await prisma.crmLead.findFirst({ where });
   if (!existing) throw new Error("Lead not found");
   return prisma.crmLead.update({ where: { id }, data: { deletedAt: new Date(), deletedBy: userId } });
 };
 
 const getFunnelStats = async (schoolId) => {
-  const where = { schoolId, deletedAt: null };
+  // `schoolId` undefined (Super Admin) => funnel across all schools.
+  const where = { deletedAt: null };
+  if (schoolId) where.schoolId = schoolId;
   const [total, byStage] = await Promise.all([
     prisma.crmLead.count({ where }),
     prisma.crmLead.groupBy({

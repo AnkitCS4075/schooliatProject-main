@@ -17,13 +17,26 @@ function requireSuperAdmin(req, res, next) {
   next();
 }
 
+const isSuperAdmin = (req) => req.context.user?.role?.name === RoleName.SUPER_ADMIN;
+
+// School users are always scoped to their own school.
+// Super Admin: list/stats across all schools (optionally filtered by ?schoolId); create/sync require an explicit schoolId.
+const resolveListSchoolId = (req) => (isSuperAdmin(req) ? req.query.schoolId || undefined : req.context.user.schoolId);
+
 router.post(
   "/",
   withPermission(Permission.CREATE_GATE_ENTRY),
   validateRequest(createGateEntrySchema),
   async (req, res) => {
     const currentUser = req.context.user;
-    const entry = await gateEntryService.create(req.body.request, currentUser.schoolId, currentUser.id);
+    let schoolId = currentUser.schoolId;
+    if (isSuperAdmin(req)) {
+      schoolId = req.body.request.schoolId;
+      if (!schoolId) {
+        return res.status(400).json({ message: "schoolId is required when creating a gate entry from Super Admin" });
+      }
+    }
+    const entry = await gateEntryService.create(req.body.request, schoolId, currentUser.id);
     res.status(201).json({ message: "Gate entry recorded successfully", data: entry });
   },
 );
@@ -34,7 +47,7 @@ router.get(
   validateRequest(listGateEntriesSchema),
   async (req, res) => {
     const currentUser = req.context.user;
-    const { entries, pagination } = await gateEntryService.list(currentUser.schoolId, req.query, req.query);
+    const { entries, pagination } = await gateEntryService.list(resolveListSchoolId(req), req.query, req.query);
     res.json({ message: "Gate entries retrieved", data: entries, ...pagination });
   },
 );
@@ -44,7 +57,7 @@ router.get(
   withPermission(Permission.GET_GATE_ENTRIES),
   async (req, res) => {
     const currentUser = req.context.user;
-    const stats = await gateEntryService.getStats(currentUser.schoolId);
+    const stats = await gateEntryService.getStats(resolveListSchoolId(req));
     res.json({ message: "Gate entry stats retrieved", data: stats });
   },
 );
@@ -54,7 +67,14 @@ router.post(
   withPermission(Permission.GET_GATE_ENTRIES),
   async (req, res) => {
     const currentUser = req.context.user;
-    const result = await gateEntryService.syncMissingLeads(currentUser.schoolId);
+    let schoolId = currentUser.schoolId;
+    if (isSuperAdmin(req)) {
+      schoolId = req.query.schoolId;
+      if (!schoolId) {
+        return res.status(400).json({ message: "schoolId is required when syncing CRM leads from Super Admin" });
+      }
+    }
+    const result = await gateEntryService.syncMissingLeads(schoolId);
     res.json({ message: "CRM sync completed", data: result });
   },
 );
@@ -75,7 +95,9 @@ router.get(
   withPermission(Permission.GET_GATE_ENTRIES),
   async (req, res) => {
     const currentUser = req.context.user;
-    const entry = await gateEntryService.getById(req.params.id, currentUser.schoolId);
+    // Super Admin sees any school's entry; school users are scoped to their own school.
+    const schoolId = isSuperAdmin(req) ? undefined : currentUser.schoolId;
+    const entry = await gateEntryService.getById(req.params.id, schoolId);
     res.json({ message: "Gate entry retrieved", data: entry });
   },
 );
@@ -86,7 +108,8 @@ router.patch(
   validateRequest(updateGateEntrySchema),
   async (req, res) => {
     const currentUser = req.context.user;
-    const entry = await gateEntryService.update(req.params.id, req.body.request, currentUser.schoolId);
+    const schoolId = isSuperAdmin(req) ? undefined : currentUser.schoolId;
+    const entry = await gateEntryService.update(req.params.id, req.body.request, schoolId);
     res.json({ message: "Gate entry updated", data: entry });
   },
 );
@@ -96,7 +119,8 @@ router.delete(
   withPermission(Permission.DELETE_GATE_ENTRY),
   async (req, res) => {
     const currentUser = req.context.user;
-    await gateEntryService.remove(req.params.id, currentUser.schoolId, currentUser.id);
+    const schoolId = isSuperAdmin(req) ? undefined : currentUser.schoolId;
+    await gateEntryService.remove(req.params.id, schoolId, currentUser.id);
     res.json({ message: "Gate entry deleted" });
   },
 );

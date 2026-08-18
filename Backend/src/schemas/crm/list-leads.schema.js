@@ -3,6 +3,7 @@ import { z } from "zod";
 const listLeadsSchema = z.object({
   request: z.object({}),
   query: z.object({
+    schoolId: z.string().uuid().optional(),
     stage: z.enum(["NEW", "CONTACTABLE", "CONTACTED", "CONNECTED", "FOLLOW_UP_SCHEDULED", "ADMISSION_DONE", "LOST"]).optional(),
     source: z.enum(["STUDENT_REFERRAL", "PARENT_REFERRAL", "SALES_DEPARTMENT", "GATE_ENTRY", "GATE_WALK_IN"]).optional(),
     followUpStatus: z.enum(["PENDING", "INTERESTED", "NOT_INTERESTED", "CONVERTED", "LOST"]).optional(),
